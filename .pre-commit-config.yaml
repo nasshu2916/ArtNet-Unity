@@ -1,0 +1,18 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.10.2
+    hooks:
+    -   id: typos
+        args: ["Assets/Scripts/**/*.cs"]
+-   repo: local
+    hooks:
+    -   id: format-dotnet
+        name: format-dotnet
+        language: script
+        types: [c#]
+        entry: format_dotnet.sh
