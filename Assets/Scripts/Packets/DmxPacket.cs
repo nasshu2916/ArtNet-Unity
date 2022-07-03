@@ -13,7 +13,7 @@ namespace ArtNet.Packets
         public byte Physical { get; private set; }
         public ushort Universe { get; private set; }
         public ushort Length { get; private set; }
-        public byte[] Dmx { get; private set; } = new byte[515];
+        public byte[] Dmx { get; private set; }
 
         protected override void ReadData(ArtReader reader)
         {
