@@ -11,8 +11,13 @@ namespace ArtNet
         [SerializeField] private string bindIpAddress = "0.0.0.0";
 
         private ArtClient _artClient;
-        private const byte MaxUniverse = 8;
+        public const byte MaxUniverse = 8;
         private byte[][] _dmx = new byte[MaxUniverse][];
+
+        public byte[] GetDmx(byte universe)
+        {
+            return universe < MaxUniverse ? _dmx[universe] : null;
+        }
 
         private void OnEnable()
         {
