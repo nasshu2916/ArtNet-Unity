@@ -27,4 +27,5 @@ artClient.ReceiveEvent += (sender, e) =>
 ```
 
 ### Support OpCode
+- OpPoll
 - OpDmx
