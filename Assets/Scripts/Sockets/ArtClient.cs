@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ArtNet.Packets;
-using UnityEngine;
 
 namespace ArtNet.Sockets
 {
@@ -51,14 +50,14 @@ namespace ArtNet.Sockets
                 receivedData.RemoteAddress = remoteEndPoint.Address;
                 if (receivedData.Validate)
                 {
-                    ReceiveNat(receivedData, remoteEndPoint);
+                    ReceiveArtNet(receivedData, remoteEndPoint);
                 }
             }
 
             StartReceive();
         }
 
-        private void ReceiveNat(ReceivedData receivedData, IPEndPoint sourceEndPoint)
+        private void ReceiveArtNet(ReceivedData receivedData, IPEndPoint sourceEndPoint)
         {
             LastReceiveAt = DateTime.Now;
             if (ReceiveEvent == null) return;

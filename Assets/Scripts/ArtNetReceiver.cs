@@ -37,15 +37,17 @@ namespace ArtNet
             switch (e.Packet.OpCode)
             {
                 case OpCode.Dmx:
-                    ReceiveDmxPacket(e.Packet as DmxPacket);
+                    ReceiveArtDmxPacket(e.Packet as ArtDmxPacket);
                     break;
+                case OpCode.Poll:
+                case OpCode.PollReply:
                 default:
                     Debug.Log("Not support OpCode: 0x" + e.Packet.OpCode.ToString("X"));
                     break;
             }
         }
 
-        private void ReceiveDmxPacket(DmxPacket packet)
+        private void ReceiveArtDmxPacket(ArtDmxPacket packet)
         {
             if (packet.Universe < MaxUniverse)
             {
