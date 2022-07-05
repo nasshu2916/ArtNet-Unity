@@ -3,9 +3,9 @@ using ArtNet.Sockets;
 
 namespace ArtNet.Packets
 {
-    public class DmxPacket : ArtPacket
+    public class ArtDmxPacket : ArtPacket
     {
-        public DmxPacket(ReceivedData data) : base(data)
+        public ArtDmxPacket(ReceivedData data) : base(data)
         {
         }
 

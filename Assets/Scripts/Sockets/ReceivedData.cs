@@ -18,7 +18,7 @@ namespace ArtNet.Sockets
         {
             return (Enums.OpCode)data.OpCode switch
             {
-                Enums.OpCode.Dmx => new DmxPacket(data),
+                Enums.OpCode.Dmx => new ArtDmxPacket(data),
                 _ => new UnSupportPacket(data)
             };
         }
