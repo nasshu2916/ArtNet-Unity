@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -19,6 +20,7 @@ namespace ArtNet.Sockets
             return (Enums.OpCode)data.OpCode switch
             {
                 Enums.OpCode.Poll => new ArtPollPacket(data),
+                Enums.OpCode.PollReply => new ArtPollReplyPacket(data),
                 Enums.OpCode.Dmx => new ArtDmxPacket(data),
                 _ => new UnSupportPacket(data)
             };
