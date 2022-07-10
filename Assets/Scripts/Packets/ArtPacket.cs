@@ -22,7 +22,7 @@ namespace ArtNet.Packets
         public IPAddress RemoteAddress { get; }
 
         public Enums.OpCode OpCode { get; }
-        public ushort ProtocolVersion { get; protected set; } = 0x14;
+        public ushort ProtocolVersion { get; protected set; } = 14;
 
         protected virtual void ReadData(ArtReader reader)
         {
