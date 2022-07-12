@@ -16,15 +16,12 @@ namespace ArtNet.Packets
 
         protected ArtPacket(ReceivedData data)
         {
-            RemoteAddress = data.RemoteAddress;
             OpCode = (Enums.OpCode)data.OpCode;
             using var memoryStream = new MemoryStream(data.Buffer);
             using var artReader = new ArtReader(memoryStream);
             memoryStream.Position = FixedArtNetPacketLength;
             ReadData(artReader);
         }
-
-        public IPAddress RemoteAddress { get; set; }
 
         public Enums.OpCode OpCode { get; }
         public ushort ProtocolVersion { get; protected set; } = 14;
