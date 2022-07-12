@@ -2,6 +2,8 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ArtNet.Packets;
+using UnityEngine;
+using System.Linq;
 
 namespace ArtNet.Sockets
 {
@@ -31,6 +33,13 @@ namespace ArtNet.Sockets
         public void Close()
         {
             _udpClient.Close();
+        }
+
+        public void Send(ArtPacket packet, IPAddress sendAddress)
+        {
+            var data = packet.ToByteArray();
+            var sendEndPoint = new IPEndPoint(sendAddress, ArtNetPort);
+            _udpClient.Send(data, data.Length, sendEndPoint);
         }
 
         private void StartReceive()

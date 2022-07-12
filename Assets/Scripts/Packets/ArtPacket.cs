@@ -9,6 +9,11 @@ namespace ArtNet.Packets
     {
         private const byte FixedArtNetPacketLength = 10;
 
+        protected ArtPacket(Enums.OpCode opCode)
+        {
+            OpCode = opCode;
+        }
+
         protected ArtPacket(ReceivedData data)
         {
             RemoteAddress = data.RemoteAddress;
@@ -19,13 +24,26 @@ namespace ArtNet.Packets
             ReadData(artReader);
         }
 
-        public IPAddress RemoteAddress { get; }
+        public IPAddress RemoteAddress { get; set; }
 
         public Enums.OpCode OpCode { get; }
         public ushort ProtocolVersion { get; protected set; } = 14;
 
+        public byte[] ToByteArray()
+        {
+            using var memoryStream = new MemoryStream();
+            WriteData(new ArtWriter(memoryStream));
+            return memoryStream.ToArray();
+        }
+
         protected virtual void ReadData(ArtReader reader)
         {
+        }
+
+        protected virtual void WriteData(ArtWriter writer)
+        {
+            writer.WriteNetwork("Art-Net\0", 8);
+            writer.Write((ushort)OpCode);
         }
     }
 }
