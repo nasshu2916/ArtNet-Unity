@@ -42,7 +42,6 @@ namespace ArtNet
                 case OpCode.Poll:
                 case OpCode.PollReply:
                 default:
-                    Debug.Log("Not support OpCode: 0x" + e.Packet.OpCode.ToString("X"));
                     break;
             }
         }

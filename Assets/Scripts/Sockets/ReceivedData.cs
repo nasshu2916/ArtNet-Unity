@@ -22,7 +22,7 @@ namespace ArtNet.Sockets
                 Enums.OpCode.Poll => new ArtPollPacket(data),
                 Enums.OpCode.PollReply => new ArtPollReplyPacket(data),
                 Enums.OpCode.Dmx => new ArtDmxPacket(data),
-                _ => new UnSupportPacket(data)
+                _ => null,
             };
         }
     }
