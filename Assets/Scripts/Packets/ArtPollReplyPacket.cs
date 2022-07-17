@@ -14,34 +14,34 @@ namespace ArtNet.Packets
         {
         }
 
-        public byte[] IpAddress { get; private set; } = new byte[4];
-        public ushort Port { get; private set; }
-        public ushort VersionInfo { get; private set; }
-        public byte NetSwitch { get; private set; }
-        public byte SubSwitch { get; private set; }
-        public ushort Oem { get; private set; }
-        public byte UbeaVersion { get; private set; }
-        public byte Status1 { get; private set; }
-        public ushort EstaCode { get; private set; }
-        public string ShortName { get; private set; } = string.Empty;
-        public string LongName { get; private set; } = string.Empty;
-        public string NodeReport { get; private set; } = string.Empty;
-        public ushort NumPorts { get; private set; }
-        public byte[] PortTypes { get; private set; } = new byte[4];
-        public byte[] InputStatus { get; private set; } = new byte[4];
-        public byte[] OutputStatus { get; private set; } = new byte[4];
-        public byte[] InputSubSwitch { get; private set; } = new byte[4];
-        public byte[] OutputSubSwitch { get; private set; } = new byte[4];
-        public byte SwVideo { get; private set; }
-        public byte SwMacro { get; private set; }
-        public byte SwRemote { get; private set; }
-        public byte[] Spares { get; private set; } = new byte[3];
-        public byte Style { get; private set; }
-        public byte[] MacAddress { get; private set; } = new byte[6];
-        public byte[] BindIpAddress { get; private set; } = new byte[4];
-        public byte BindIndex { get; private set; }
-        public byte Status2 { get; private set; }
-        public byte[] Filter { get; private set; } = new byte[26];
+        public byte[] IpAddress { get; set; } = new byte[4];
+        public ushort Port { get; set; }
+        public ushort VersionInfo { get; set; }
+        public byte NetSwitch { get; set; }
+        public byte SubSwitch { get; set; }
+        public ushort Oem { get; set; }
+        public byte UbeaVersion { get; set; }
+        public byte Status1 { get; set; }
+        public ushort EstaCode { get; set; }
+        public string ShortName { get; set; } = string.Empty;
+        public string LongName { get; set; } = string.Empty;
+        public string NodeReport { get; set; } = string.Empty;
+        public ushort NumPorts { get; set; }
+        public byte[] PortTypes { get; set; } = new byte[4];
+        public byte[] InputStatus { get; set; } = new byte[4];
+        public byte[] OutputStatus { get; set; } = new byte[4];
+        public byte[] InputSubSwitch { get; set; } = new byte[4];
+        public byte[] OutputSubSwitch { get; set; } = new byte[4];
+        public byte SwVideo { get; set; }
+        public byte SwMacro { get; set; }
+        public byte SwRemote { get; set; }
+        public byte[] Spares { get; set; } = new byte[3];
+        public byte Style { get; set; }
+        public byte[] MacAddress { get; set; } = new byte[6];
+        public byte[] BindIpAddress { get; set; } = new byte[4];
+        public byte BindIndex { get; set; }
+        public byte Status2 { get; set; }
+        public byte[] Filter { get; set; } = new byte[26];
 
         protected override void ReadData(ArtReader reader)
         {

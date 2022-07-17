@@ -14,11 +14,20 @@ namespace ArtNet.Packets
         {
         }
 
-        public byte Sequence { get; private set; }
-        public byte Physical { get; private set; }
-        public ushort Universe { get; private set; }
-        public ushort Length { get; private set; } = 512;
-        public byte[] Dmx { get; private set; } = new byte[512];
+        public byte Sequence { get; set; }
+        public byte Physical { get; set; }
+        public ushort Universe { get; set; }
+        public ushort Length { get; private set; }
+
+        public byte[] Dmx
+        {
+            get { return Dmx; }
+            set
+            {
+                Dmx = value;
+                Length = (ushort)value.Length;
+            }
+        }
 
         protected override void ReadData(ArtReader reader)
         {

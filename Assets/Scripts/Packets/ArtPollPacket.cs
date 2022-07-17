@@ -14,8 +14,8 @@ namespace ArtNet.Packets
         {
         }
 
-        public byte Flags { get; private set; }
-        public byte Priority { get; private set; }
+        public byte Flags { get; set; }
+        public byte Priority { get; set; }
 
 
         protected override void ReadData(ArtReader reader)
