@@ -2,8 +2,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ArtNet.Packets;
-using UnityEngine;
-using System.Linq;
 
 namespace ArtNet.Sockets
 {
@@ -71,7 +69,10 @@ namespace ArtNet.Sockets
             LastReceiveAt = DateTime.Now;
             if (ReceiveEvent == null) return;
             var packet = ReceivedData.CreatePacket(receivedData);
-            ReceiveEvent(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
+            if (packet != null)
+            {
+                ReceiveEvent(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
+            }
         }
     }
 }
