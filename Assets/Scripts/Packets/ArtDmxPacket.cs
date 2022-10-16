@@ -17,17 +17,10 @@ namespace ArtNet.Packets
         public byte Sequence { get; set; }
         public byte Physical { get; set; }
         public ushort Universe { get; set; }
-        public ushort Length { get; private set; }
 
-        public byte[] Dmx
-        {
-            get { return Dmx; }
-            set
-            {
-                Dmx = value;
-                Length = (ushort)value.Length;
-            }
-        }
+        public ushort Length => Dmx == null ? (ushort)0 : (ushort)Dmx.Length;
+
+        public byte[] Dmx { get; set; }
 
         protected override void ReadData(ArtReader reader)
         {
@@ -35,8 +28,8 @@ namespace ArtNet.Packets
             Sequence = reader.ReadByte();
             Physical = reader.ReadByte();
             Universe = reader.ReadUInt16();
-            Length = reader.ReadNetworkUInt16();
-            Dmx = reader.ReadBytes(Length);
+            int length = reader.ReadNetworkUInt16();
+            Dmx = reader.ReadBytes(length);
         }
 
         protected override void WriteData(ArtWriter writer)

@@ -42,25 +42,24 @@ namespace ArtNet.Sockets
 
         private void StartReceive()
         {
-            var receivedData = new ReceivedData();
-            _udpClient.BeginReceive(ReceiveCallback, receivedData);
+            _udpClient.BeginReceive(ReceiveCallback, new ReceivedData());
         }
 
         private void ReceiveCallback(IAsyncResult state)
         {
             var receivedData = (ReceivedData)(state.AsyncState);
 
-            if (receivedData != null)
-            {
-                var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                receivedData.Buffer = _udpClient.EndReceive(state, ref remoteEndPoint);
-                receivedData.RemoteAddress = remoteEndPoint.Address;
-                if (receivedData.Validate)
-                {
-                    ReceiveArtNet(receivedData, remoteEndPoint);
-                }
-            }
+            if (receivedData == null) return;
 
+            var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            receivedData.Buffer = _udpClient.EndReceive(state, ref remoteEndPoint);
+
+            if (!receivedData.Validate) return;
+
+            receivedData.RemoteAddress = remoteEndPoint.Address;
+            receivedData.ReceivedTime = DateTime.Now;
+
+            ReceiveArtNet(receivedData, remoteEndPoint);
             StartReceive();
         }
 
@@ -68,7 +67,7 @@ namespace ArtNet.Sockets
         {
             LastReceiveAt = DateTime.Now;
             if (ReceiveEvent == null) return;
-            var packet = ReceivedData.CreatePacket(receivedData);
+            var packet = ArtPacket.Create(receivedData);
             if (packet != null)
             {
                 ReceiveEvent(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
