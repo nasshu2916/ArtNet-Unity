@@ -9,7 +9,9 @@ namespace ArtNet.Sockets
     {
         private const int ArtNetPort = 6454;
         private readonly UdpClient _udpClient;
+        public IPAddress LocalAddress { get; }
         public DateTime LastReceiveAt { get; private set; }
+        public bool IsOpen { get; private set; }
         public event EventHandler<ReceiveEventArgs<ArtPacket>> ReceiveEvent;
 
         public ArtClient()
@@ -19,18 +21,21 @@ namespace ArtNet.Sockets
 
         public ArtClient(IPAddress address)
         {
-            var bindEndPoint = new IPEndPoint(address, ArtNetPort);
+            LocalAddress = address;
+            var bindEndPoint = new IPEndPoint(LocalAddress, ArtNetPort);
             _udpClient = new UdpClient(bindEndPoint);
         }
 
         public void Open()
         {
+            IsOpen = true;
             StartReceive();
         }
 
         public void Close()
         {
             _udpClient.Close();
+            IsOpen = false;
         }
 
         public void Send(ArtPacket packet, IPAddress sendAddress)
@@ -40,38 +45,45 @@ namespace ArtNet.Sockets
             _udpClient.Send(data, data.Length, sendEndPoint);
         }
 
-        private void StartReceive()
+        public void Dispose()
         {
-            _udpClient.BeginReceive(ReceiveCallback, new ReceivedData());
+            IsOpen = false;
+            _udpClient.Dispose();
         }
 
-        private void ReceiveCallback(IAsyncResult state)
+        private void StartReceive()
         {
-            var receivedData = (ReceivedData)(state.AsyncState);
+            _udpClient.BeginReceive(OnReceive, new ReceivedData());
+        }
 
-            if (receivedData == null) return;
-
+        private void OnReceive(IAsyncResult state)
+        {
             var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            receivedData.Buffer = _udpClient.EndReceive(state, ref remoteEndPoint);
 
-            if (!receivedData.Validate) return;
-
-            receivedData.RemoteAddress = remoteEndPoint.Address;
-            receivedData.ReceivedTime = DateTime.Now;
-
-            ReceiveArtNet(receivedData, remoteEndPoint);
-            StartReceive();
+            try
+            {
+                var message = _udpClient.EndReceive(state, ref remoteEndPoint);
+                var receivedData = new ReceivedData(message, remoteEndPoint.Address);
+                ReceiveArtNet(receivedData, remoteEndPoint);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                StartReceive();
+            }
         }
 
         private void ReceiveArtNet(ReceivedData receivedData, IPEndPoint sourceEndPoint)
         {
-            LastReceiveAt = DateTime.Now;
-            if (ReceiveEvent == null) return;
             var packet = ArtPacket.Create(receivedData);
-            if (packet != null)
-            {
-                ReceiveEvent(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
-            }
+
+            if (packet == null) return;
+            LastReceiveAt = DateTime.Now;
+
+            ReceiveEvent?.Invoke(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
         }
     }
 }

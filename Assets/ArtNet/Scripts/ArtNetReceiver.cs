@@ -29,7 +29,7 @@ namespace ArtNet
 
         private void OnDisable()
         {
-            _artClient?.Close();
+            _artClient?.Dispose();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)

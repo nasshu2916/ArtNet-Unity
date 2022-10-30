@@ -14,5 +14,22 @@ namespace ArtNet.Sockets
         public IPAddress RemoteAddress { get; set; }
 
         public DateTime ReceivedTime { get; set; }
+
+        public ReceivedData()
+        {
+            ReceivedTime = DateTime.Now;
+        }
+
+        public ReceivedData(byte[] buffer, IPAddress remoteAddress)
+        {
+            Buffer = buffer;
+            if (!Validate)
+            {
+                throw new ArgumentException("Invalid ArtNet packet");
+            }
+
+            RemoteAddress = remoteAddress;
+            ReceivedTime = DateTime.Now;
+        }
     }
 }

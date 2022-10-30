@@ -7,4 +7,4 @@ if ! which dotnet-format &>/dev/null; then
   exit -1
 fi
 
-dotnet-format --folder -v diagnostic "Assets/Scripts" 
+dotnet-format --folder -v diagnostic "Assets/ArtNet" 
