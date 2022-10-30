@@ -1,7 +1,7 @@
 using System.Net;
+using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
-using ArtNet.Enums;
 using UnityEngine;
 
 namespace ArtNet
