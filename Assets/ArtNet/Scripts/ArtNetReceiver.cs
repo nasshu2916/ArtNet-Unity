@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -11,12 +12,11 @@ namespace ArtNet
         [SerializeField] private string bindIpAddress = "0.0.0.0";
 
         private ArtClient _artClient;
-        public const byte MaxUniverse = 8;
-        private byte[][] _dmx = new byte[MaxUniverse][];
+        private Dictionary<int, byte[]> _dmxMap = new();
 
-        public byte[] GetDmx(byte universe)
+        public byte[] GetDmx(int universe)
         {
-            return universe < MaxUniverse ? _dmx[universe] : null;
+            return _dmxMap.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
         private void OnEnable()
@@ -48,9 +48,13 @@ namespace ArtNet
 
         private void ReceiveArtDmxPacket(ArtDmxPacket packet)
         {
-            if (packet.Universe < MaxUniverse)
+            if (_dmxMap.ContainsKey(packet.Universe))
             {
-                _dmx[packet.Universe] = packet.Dmx;
+                _dmxMap[packet.Universe] = packet.Dmx;
+            }
+            else
+            {
+                _dmxMap.Add(packet.Universe, packet.Dmx);
             }
         }
     }

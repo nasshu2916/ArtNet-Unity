@@ -11,7 +11,7 @@ namespace ArtNet.Editor
         private const int RowDisplayNumber = 20;
         private const int DisplayMaxHeight = 300;
         private ArtNetReceiver _receiver;
-        private byte _selectedUniverse;
+        private int _selectedUniverse = 1;
         private readonly GUILayoutOption _dmxLayoutOption = GUILayout.MaxWidth(25);
         private Vector2 _scrollPosition = Vector2.zero;
         private bool _autoRepaint;
@@ -23,12 +23,8 @@ namespace ArtNet.Editor
             EditorGUILayout.LabelField("ArtNet Receiver", EditorStyles.boldLabel);
             _autoRepaint = EditorGUILayout.Toggle("AutoRepaint", _autoRepaint);
 
-            var options = Enumerable.Range(1, ArtNetReceiver.MaxUniverse)
-                .Select(number => $"Universe {number}")
-                .ToArray();
-            _selectedUniverse = (byte)EditorGUILayout.Popup("Universe", _selectedUniverse, options);
-
-            var dmx = _receiver.GetDmx(_selectedUniverse) ?? new byte[512];
+            _selectedUniverse = EditorGUILayout.IntField("Universe", _selectedUniverse);
+            var dmx = _receiver.GetDmx(_selectedUniverse - 1);
             _scrollPosition =
                 EditorGUILayout.BeginScrollView(_scrollPosition, GUI.skin.box, GUILayout.MaxHeight(DisplayMaxHeight));
             {
