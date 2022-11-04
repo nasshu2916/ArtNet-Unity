@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -11,25 +12,26 @@ namespace ArtNet
     {
         [SerializeField] private string bindIpAddress = "0.0.0.0";
 
-        private ArtClient _artClient;
-        private Dictionary<int, byte[]> _dmxMap = new();
+        public ArtClient ArtClient { get; private set; }
+        public Dictionary<int, byte[]> DmxMap { get; } = new();
 
+        [return: NotNull]
         public byte[] GetDmx(int universe)
         {
-            return _dmxMap.TryGetValue(universe, out var data) ? data : new byte[512];
+            return DmxMap.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
         private void OnEnable()
         {
-            _artClient = new ArtClient(IPAddress.Parse(bindIpAddress));
-            _artClient.Open();
+            ArtClient = new ArtClient(IPAddress.Parse(bindIpAddress));
+            ArtClient.Open();
 
-            _artClient.ReceiveEvent += OnReceiveEvent;
+            ArtClient.ReceiveEvent += OnReceiveEvent;
         }
 
         private void OnDisable()
         {
-            _artClient?.Dispose();
+            ArtClient?.Dispose();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
@@ -48,13 +50,13 @@ namespace ArtNet
 
         private void ReceiveArtDmxPacket(ArtDmxPacket packet)
         {
-            if (_dmxMap.ContainsKey(packet.Universe))
+            if (DmxMap.ContainsKey(packet.Universe))
             {
-                _dmxMap[packet.Universe] = packet.Dmx;
+                DmxMap[packet.Universe] = packet.Dmx;
             }
             else
             {
-                _dmxMap.Add(packet.Universe, packet.Dmx);
+                DmxMap.Add(packet.Universe, packet.Dmx);
             }
         }
     }
