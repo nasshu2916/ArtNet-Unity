@@ -19,6 +19,8 @@ namespace ArtNet.devices
 
         public byte StartAddress => 0;
 
+        private const float MaxIntensity = 2f;
+
         private void Start()
         {
             _light = GetComponent<Light>();
@@ -29,7 +31,7 @@ namespace ArtNet.devices
             var r = dmx[(int)Fixture.Red] / 255f;
             var g = dmx[(int)Fixture.Green] / 255f;
             var b = dmx[(int)Fixture.Blue] / 255f;
-            var intensity = dmx[(int)Fixture.Dimmer] / 255f;
+            var intensity = dmx[(int)Fixture.Dimmer] / 255f * MaxIntensity;
 
             _light.color = new Color(r, g, b, 1f);
             _light.intensity = intensity;
