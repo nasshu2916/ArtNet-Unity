@@ -1,0 +1,14 @@
+{
+    "name": "ArtNetAssembly",
+    "rootNamespace": "ArtNet",
+    "references": ["GUID:e88422c88230bca4d8e836cfcef4dd58"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
