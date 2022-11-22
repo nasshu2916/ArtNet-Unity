@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ArtNet.devices
+namespace ArtNet.Samples.Devices
 {
     public class SimpleLight : MonoBehaviour, IDmxDevice
     {

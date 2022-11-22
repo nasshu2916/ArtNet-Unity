@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace ArtNet.devices
+namespace ArtNet.Samples.Devices
 {
     public interface IDmxDevice
     {

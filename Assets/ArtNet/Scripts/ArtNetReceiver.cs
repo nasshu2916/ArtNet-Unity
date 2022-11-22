@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
-using ArtNet.devices;
+using ArtNet.Samples.Devices;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
