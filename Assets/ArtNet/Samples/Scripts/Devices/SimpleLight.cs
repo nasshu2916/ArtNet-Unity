@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace ArtNet.Samples.Devices
 {
+    [RequireComponent(typeof(Light))]
     public class SimpleLight : MonoBehaviour, IDmxDevice
     {
 

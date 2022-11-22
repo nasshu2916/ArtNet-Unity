@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net;
-using ArtNet.Samples.Devices;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
@@ -16,7 +14,6 @@ namespace ArtNet
 
         public ArtClient ArtClient { get; private set; }
         public Dictionary<int, byte[]> DmxMap { get; } = new();
-        private IDmxDevice[] _dmxDevices;
 
         [return: NotNull]
         public byte[] GetDmx(int universe)
@@ -35,11 +32,6 @@ namespace ArtNet
         private void OnDisable()
         {
             ArtClient?.Dispose();
-        }
-
-        private void Start()
-        {
-            _dmxDevices = FindObjectsOfType<GameObject>().SelectMany(o => o.GetComponents<IDmxDevice>()).ToArray();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
@@ -65,14 +57,6 @@ namespace ArtNet
             else
             {
                 DmxMap.Add(packet.Universe, packet.Dmx);
-            }
-        }
-
-        private void Update()
-        {
-            foreach (var device in _dmxDevices)
-            {
-                device.DmxUpdate(GetDmx(device.Universe).Skip(device.StartAddress).Take(device.ChannelNumber).ToArray());
             }
         }
     }
