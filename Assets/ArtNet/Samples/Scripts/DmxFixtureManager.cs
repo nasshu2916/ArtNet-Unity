@@ -4,11 +4,10 @@ using UnityEngine;
 
 namespace ArtNet.Samples
 {
-    public class DmxManager : MonoBehaviour
+    public class DmxFixtureManager : MonoBehaviour
     {
         private IDmxDevice[] _dmxDevices;
-        [SerializeField]
-        private ArtNetReceiver _artNetReceiver;
+        [SerializeField] private DmxDataManager dmxDataManager;
 
         private void Start()
         {
@@ -19,7 +18,7 @@ namespace ArtNet.Samples
         {
             foreach (var device in _dmxDevices)
             {
-                device.DmxUpdate(_artNetReceiver.GetDmx(device.Universe).Skip(device.StartAddress).Take(device.ChannelNumber).ToArray());
+                device.DmxUpdate(dmxDataManager.GetDmx(device.Universe).Skip(device.StartAddress).Take(device.ChannelNumber).ToArray());
             }
         }
     }

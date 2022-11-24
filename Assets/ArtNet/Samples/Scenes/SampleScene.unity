@@ -516,6 +516,7 @@ GameObject:
   - component: {fileID: 1302849931}
   - component: {fileID: 1302849932}
   - component: {fileID: 1302849933}
+  - component: {fileID: 1302849934}
   m_Layer: 0
   m_Name: ArtNet
   m_TagString: Untagged
@@ -551,6 +552,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bindIpAddress: 0.0.0.0
+  dmxDataManager: {fileID: 1302849934}
 --- !u!114 &1302849933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -563,7 +565,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ecc7efcd1b4cf9ba8f5921cb165007, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _artNetReceiver: {fileID: 1302849932}
+  dmxDataManager: {fileID: 1302849934}
+--- !u!114 &1302849934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302849929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 377a5bae91b248b68fb15654d14e556e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2128396738
 GameObject:
   m_ObjectHideFlags: 0

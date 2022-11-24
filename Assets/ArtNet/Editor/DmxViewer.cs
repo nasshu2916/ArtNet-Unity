@@ -8,6 +8,7 @@ namespace ArtNet.Editor
         private const int MaxUniverses = 32768;
 
         private ArtNetReceiver _artNetReceiver;
+        private DmxDataManager _dmxDataManager;
         [Range(1, MaxUniverses)] private int _selectedUniverse;
         private Vector2 _scrollPosition;
         private const int RowDisplayNumber = 20;
@@ -24,32 +25,32 @@ namespace ArtNet.Editor
         private void OnEnable()
         {
             _artNetReceiver = FindObjectOfType<ArtNetReceiver>();
+            _dmxDataManager = _artNetReceiver.dmxDataManager;
         }
 
         private void OnGUI()
         {
             EditorGUILayout.LabelField("ArtNet Receiver", EditorStyles.boldLabel);
-            var artNetReceiver = _artNetReceiver;
 
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.ObjectField("ArtNet Receive Object", artNetReceiver, typeof(ArtNetReceiver), true);
+            EditorGUILayout.ObjectField("ArtNet Receive Object", _artNetReceiver, typeof(ArtNetReceiver), true);
             EditorGUI.EndDisabledGroup();
             GUILayout.Box("", GUILayout.Width(this.position.width), GUILayout.Height(1));
 
             EditorGUILayout.LabelField("ArtNet Client", EditorStyles.boldLabel);
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.TextField("LastReceiveAt", artNetReceiver.ArtClient?.LastReceiveAt.ToString("yyyy/MM/dd HH:mm:ss.fff"));
+            EditorGUILayout.TextField("LastReceiveAt", _artNetReceiver.ArtClient?.LastReceiveAt.ToString("yyyy/MM/dd HH:mm:ss.fff"));
             EditorGUI.EndDisabledGroup();
 
             _selectedUniverse = EditorGUILayout.IntField("Universe", _selectedUniverse);
             _selectedUniverse = Mathf.Clamp(_selectedUniverse, 1, MaxUniverses);
-            if (!_artNetReceiver.DmxMap.ContainsKey(_selectedUniverse - 1))
+            if (!_dmxDataManager.DmxMap.ContainsKey(_selectedUniverse - 1))
             {
                 EditorGUILayout.HelpBox("Universe not found", MessageType.Error);
                 return;
             }
 
-            var dmx = artNetReceiver.GetDmx(_selectedUniverse - 1);
+            var dmx = _dmxDataManager.GetDmx(_selectedUniverse - 1);
 
             _scrollPosition =
                 EditorGUILayout.BeginScrollView(_scrollPosition, GUI.skin.box, GUILayout.MaxHeight(DisplayMaxHeight));
