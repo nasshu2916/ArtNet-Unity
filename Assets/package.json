@@ -1,0 +1,15 @@
+{
+  "name": "net.naoyakohda.artnet-unity",
+  "author": "Naoya Kohda",
+  "version": "0.0.1",
+  "displayName": "ArtNet-Unity",
+  "description": "Art-Net library for Unity",
+  "dependencies": {},
+  "keywords": [
+    "unity",
+    "ArtNet",
+    "DMX"
+  ],
+  "license": "MIT License",
+  "unity": "2021.3"
+}
