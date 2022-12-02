@@ -22,4 +22,4 @@ done
 git mv Samples Samples~ &> /dev/null || echo Samples is not found
 git rm Samples.meta
 git commit -m "release $UPM_BRANCH"
-git push origin $UPM_BRANCH
+git push -f origin $UPM_BRANCH

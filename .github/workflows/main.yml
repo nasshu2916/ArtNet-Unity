@@ -17,3 +17,4 @@ jobs:
         env:
           UPM_BRANCH: upm
           ROOT_DIR_PATH: Assets/ArtNet
+          ROOT_FILES: README.md LICENSE.md
