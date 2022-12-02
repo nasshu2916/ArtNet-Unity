@@ -1,0 +1,19 @@
+name: Create UPM branches
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Create UPM branch
+        run: ./.github/workflows/scripts/create_upm_branch.sh
+        env:
+          UPM_BRANCH: upm
+          ROOT_DIR_PATH: Assets/ArtNet
