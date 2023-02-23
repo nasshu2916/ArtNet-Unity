@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -9,7 +10,9 @@ using UnityEngine.Events;
 namespace ArtNet
 {
     [Serializable]
-    public class ArtDmxReceivedEvent : UnityEvent<ArtDmxPacket> {}
+    public class ArtDmxReceivedEvent : UnityEvent<ArtDmxPacket>
+    {
+    }
 
     [RequireComponent(typeof(DmxDataManager))]
     public class ArtNetReceiver : MonoBehaviour
@@ -17,8 +20,9 @@ namespace ArtNet
         [SerializeField] private string bindIpAddress = "0.0.0.0";
         public DmxDataManager dmxDataManager;
         [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
-
         public ArtClient ArtClient { get; private set; }
+        public DateTime LastReceivedTime { get; private set; }
+        public bool IsConnected => LastReceivedTime.AddSeconds(1) > DateTime.Now;
 
         private void OnEnable()
         {
@@ -40,6 +44,7 @@ namespace ArtNet
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
         {
+            LastReceivedTime = DateTime.Now;
             switch (e.Packet.OpCode)
             {
                 case OpCode.Dmx:
