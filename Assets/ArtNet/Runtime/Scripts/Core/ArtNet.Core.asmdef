@@ -1,6 +1,5 @@
 {
     "name": "ArtNet.Core",
-    "rootNamespace": "ArtNet",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
