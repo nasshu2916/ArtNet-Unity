@@ -35,11 +35,12 @@ namespace ArtNet.Editor
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.ObjectField("ArtNet Receive Object", _artNetReceiver, typeof(ArtNetReceiver), true);
             EditorGUI.EndDisabledGroup();
-            GUILayout.Box("", GUILayout.Width(this.position.width), GUILayout.Height(1));
+            GUILayout.Box("", GUILayout.Width(position.width), GUILayout.Height(1));
 
             EditorGUILayout.LabelField("ArtNet Client", EditorStyles.boldLabel);
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.TextField("LastReceiveAt", _artNetReceiver.ArtClient?.LastReceiveAt.ToString("yyyy/MM/dd HH:mm:ss.fff"));
+            EditorGUILayout.TextField("LastReceiveAt",
+                _artNetReceiver.ArtClient?.LastReceiveAt.ToString("yyyy/MM/dd HH:mm:ss.fff"));
             EditorGUI.EndDisabledGroup();
 
             _selectedUniverse = EditorGUILayout.IntField("Universe", _selectedUniverse);

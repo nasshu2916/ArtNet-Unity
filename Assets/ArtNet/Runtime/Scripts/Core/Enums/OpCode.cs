@@ -4,6 +4,6 @@ namespace ArtNet.Enums
     {
         Poll = 0x2000,
         PollReply = 0x2100,
-        Dmx = 0x5000,
+        Dmx = 0x5000
     }
 }

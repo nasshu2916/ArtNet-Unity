@@ -22,10 +22,7 @@ namespace ArtNet.Sockets
         {
             Buffer = result.Buffer;
             RemoteEndPoint = result.RemoteEndPoint;
-            if (!Validate())
-            {
-                throw new ArgumentException("Invalid ArtNet packet");
-            }
+            if (!Validate()) throw new ArgumentException("Invalid ArtNet packet");
         }
 
         private bool Validate()

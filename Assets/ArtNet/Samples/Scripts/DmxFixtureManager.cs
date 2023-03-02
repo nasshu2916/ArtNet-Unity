@@ -18,7 +18,8 @@ namespace ArtNet.Samples
         {
             foreach (var device in _dmxDevices)
             {
-                device.DmxUpdate(dmxDataManager.GetDmx(device.Universe).Skip(device.StartAddress).Take(device.ChannelNumber).ToArray());
+                device.DmxUpdate(dmxDataManager.GetDmx(device.Universe).Skip(device.StartAddress)
+                    .Take(device.ChannelNumber).ToArray());
             }
         }
     }
