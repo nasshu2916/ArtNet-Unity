@@ -1,11 +1,12 @@
 {
     "name": "ArtNet.Editor",
-    "rootNamespace": "ArtNet",
     "references": [
         "GUID:e9f6949bca94a40469d608bd88b92ca2",
         "GUID:e88422c88230bca4d8e836cfcef4dd58"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
