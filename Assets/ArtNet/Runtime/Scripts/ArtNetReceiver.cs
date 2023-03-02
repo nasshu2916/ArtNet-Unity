@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
@@ -17,7 +15,6 @@ namespace ArtNet
     [RequireComponent(typeof(DmxDataManager))]
     public class ArtNetReceiver : MonoBehaviour
     {
-        [SerializeField] private string bindIpAddress = "0.0.0.0";
         public DmxDataManager dmxDataManager;
         [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
         public ArtClient ArtClient { get; private set; }
@@ -26,15 +23,15 @@ namespace ArtNet
 
         private void OnEnable()
         {
-            ArtClient = new ArtClient(IPAddress.Parse(bindIpAddress));
-            ArtClient.Open();
+            ArtClient = new ArtClient();
+            ArtClient.UdpStart();
 
             ArtClient.ReceiveEvent += OnReceiveEvent;
         }
 
         private void OnDisable()
         {
-            ArtClient?.Dispose();
+            ArtClient?.UdpStop();
         }
 
         private void Start()
