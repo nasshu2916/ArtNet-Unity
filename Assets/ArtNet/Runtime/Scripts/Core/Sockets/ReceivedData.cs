@@ -9,7 +9,6 @@ namespace ArtNet.Sockets
     public class ReceivedData
     {
         public byte[] Buffer { get; }
-        public Enums.OpCode OpCode => (Enums.OpCode)(Buffer[8] + (Buffer[9] << 8));
         public IPEndPoint RemoteEndPoint { get; }
         public DateTime ReceivedAt { get; }
 
@@ -25,9 +24,7 @@ namespace ArtNet.Sockets
             if (!Validate()) throw new ArgumentException("Invalid ArtNet packet");
         }
 
-        private bool Validate()
-        {
-            return Buffer.Take(8).SequenceEqual(ArtPacket.IdentificationIds);
-        }
+        public Enums.OpCode OpCode => (Enums.OpCode)(Buffer[8] + (Buffer[9] << 8));
+        private bool Validate() => Buffer.Take(8).SequenceEqual(ArtPacket.IdentificationIds);
     }
 }

@@ -17,16 +17,14 @@ namespace ArtNet
     {
         public DmxDataManager dmxDataManager;
         [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
+        [SerializeField] private bool autoStart = true;
         public ArtClient ArtClient { get; private set; }
         public DateTime LastReceivedTime { get; private set; }
         public bool IsConnected => LastReceivedTime.AddSeconds(1) > DateTime.Now;
 
         private void OnEnable()
         {
-            ArtClient = new ArtClient();
-            ArtClient.UdpStart();
-
-            ArtClient.ReceiveEvent += OnReceiveEvent;
+            if (autoStart) ArtClientStart();
         }
 
         private void OnDisable()
@@ -37,6 +35,13 @@ namespace ArtNet
         private void Start()
         {
             dmxDataManager = GetComponent<DmxDataManager>();
+        }
+
+        private void ArtClientStart()
+        {
+            ArtClient = new ArtClient();
+            ArtClient.ReceiveEvent += OnReceiveEvent;
+            ArtClient.UdpStart();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
