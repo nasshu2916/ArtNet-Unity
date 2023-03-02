@@ -74,12 +74,12 @@ namespace ArtNet.Sockets
             {
                 try
                 {
-                    var data = await _udpClient.ReceiveAsync();
+                    var result = await _udpClient.ReceiveAsync();
                     LastReceiveAt = DateTime.Now;
-                    var receivedData = new ReceivedData(data.Buffer, data.RemoteEndPoint.Address);
+                    var receivedData = new ReceivedData(result);
                     var packet = ArtPacket.Create(receivedData);
 
-                    ReceiveEvent?.Invoke(this, new ReceiveEventArgs<ArtPacket>(packet, data.RemoteEndPoint));
+                    ReceiveEvent?.Invoke(this, new ReceiveEventArgs<ArtPacket>(packet, receivedData.RemoteEndPoint));
                 }
                 catch (Exception e) when (e is SocketException or ObjectDisposedException)
                 {
