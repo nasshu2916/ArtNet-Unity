@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,7 +69,11 @@ namespace ArtNet.Sockets
         private async void UdpTaskAsync(CancellationToken cancellationToken)
         {
             Debug.Log("[ArtClient] Udp task start.");
-            _udpClient = new UdpClient(Port);
+            _udpClient = new UdpClient();
+            _udpClient.ExclusiveAddressUse = false;
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            var localEp = new IPEndPoint(IPAddress.Any, Port);
+            _udpClient.Client.Bind(localEp);
 
             while (!cancellationToken.IsCancellationRequested && _udpClient != null)
             {
