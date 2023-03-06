@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -5,10 +6,8 @@ namespace ArtNet.Editor
 {
     public class DmxViewer : EditorWindow
     {
-        private const int MaxUniverses = 32768;
-
         private DmxDataManager _dmxDataManager;
-        [Range(1, MaxUniverses)] private int _selectedUniverse;
+        private int _selectedUniverseIndex;
         private Vector2 _scrollPosition;
         private const int RowDisplayNumber = 20;
         private const int DisplayMaxHeight = 300;
@@ -39,23 +38,27 @@ namespace ArtNet.Editor
             EditorGUI.BeginDisabledGroup(true);
             EditorGUI.EndDisabledGroup();
 
-            _selectedUniverse = EditorGUILayout.IntField("Universe", _selectedUniverse);
-            _selectedUniverse = Mathf.Clamp(_selectedUniverse, 1, MaxUniverses);
-            if (!_dmxDataManager.DmxMap.ContainsKey(_selectedUniverse - 1))
+            var universes = _dmxDataManager.Universes();
+            var options = universes.Select(universe => $"Universe: {universe + 1}").ToArray();
+            _selectedUniverseIndex = EditorGUILayout.Popup("Universe", _selectedUniverseIndex, options);
+
+            if (universes.Length == 0) return;
+            var selectedUniverse = universes[_selectedUniverseIndex];
+            if (!universes.Contains(selectedUniverse))
             {
                 EditorGUILayout.HelpBox("Universe not found", MessageType.Error);
                 return;
             }
 
-            var dmx = _dmxDataManager.GetDmx(_selectedUniverse - 1);
+            var dmxValues = _dmxDataManager.DmxValues(selectedUniverse);
 
             _scrollPosition =
                 EditorGUILayout.BeginScrollView(_scrollPosition, GUI.skin.box, GUILayout.MaxHeight(DisplayMaxHeight));
             {
                 EditorGUILayout.BeginHorizontal();
-                for (var i = 0; i < dmx.Length; i++)
+                for (var i = 0; i < dmxValues.Length; i++)
                 {
-                    var dmxValue = dmx[i];
+                    var dmxValue = dmxValues[i];
                     GUI.backgroundColor = new Color(0, (float) dmxValue / 256 * 5, 0, 1);
                     EditorGUILayout.BeginVertical(GUI.skin.box, _dmxLayoutOption);
                     EditorGUILayout.LabelField((i + 1).ToString(), _dmxLayoutOption);

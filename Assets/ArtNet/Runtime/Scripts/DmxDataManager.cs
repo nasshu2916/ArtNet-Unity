@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using ArtNet.Packets;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace ArtNet
 {
     public class DmxDataManager : MonoBehaviour
     {
-        public Dictionary<int, byte[]> DmxMap { get; } = new();
+        private Dictionary<int, byte[]> DmxDictionary { get; } = new();
         [SerializeField] private ArtNetReceiver artNetReceiver;
 
         public void Start()
@@ -21,20 +22,25 @@ namespace ArtNet
             }
         }
 
-        public byte[] GetDmx(int universe)
+        public int[] Universes()
         {
-            return DmxMap.TryGetValue(universe, out var data) ? data : new byte[512];
+            return DmxDictionary.Keys.ToArray();
+        }
+
+        public byte[] DmxValues(int universe)
+        {
+            return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
         private void ReceiveArtDmxPacket(ArtDmxPacket packet)
         {
-            if (DmxMap.ContainsKey(packet.Universe))
+            if (DmxDictionary.ContainsKey(packet.Universe))
             {
-                DmxMap[packet.Universe] = packet.Dmx;
+                DmxDictionary[packet.Universe] = packet.Dmx;
             }
             else
             {
-                DmxMap.Add(packet.Universe, packet.Dmx);
+                DmxDictionary.Add(packet.Universe, packet.Dmx);
             }
         }
     }

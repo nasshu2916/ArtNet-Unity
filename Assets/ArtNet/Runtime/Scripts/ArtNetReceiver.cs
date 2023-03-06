@@ -3,7 +3,6 @@ using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ArtNet
 {
