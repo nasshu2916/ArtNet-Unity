@@ -17,7 +17,7 @@ namespace ArtNet.Sockets
         private Task _task;
         public int Port { get; }
         public DateTime LastReceiveAt { get; private set; }
-        public bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
+        public bool IsRunning => _task is {IsCanceled: false, IsCompleted: false};
 
         public event EventHandler<ReceiveEventArgs<ArtPacket>> ReceiveEvent;
         public ErrorOccuredEventHandler OnUdpStartFailed = _ => { };
@@ -80,11 +80,11 @@ namespace ArtNet.Sockets
                 try
                 {
                     var result = await _udpClient.ReceiveAsync();
-                    LastReceiveAt = DateTime.Now;
                     var receivedData = new ReceivedData(result);
                     var packet = ArtPacket.Create(receivedData);
 
-                    ReceiveEvent?.Invoke(this, new ReceiveEventArgs<ArtPacket>(packet, receivedData.RemoteEndPoint));
+                    ReceiveEvent?.Invoke(this,
+                        new ReceiveEventArgs<ArtPacket>(packet, receivedData.RemoteEndPoint, receivedData.ReceivedAt));
                 }
                 catch (Exception e) when (e is SocketException or ObjectDisposedException)
                 {

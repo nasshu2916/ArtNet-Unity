@@ -19,8 +19,8 @@ namespace ArtNet
         [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
         [SerializeField] private bool autoStart = true;
         public ArtClient ArtClient { get; private set; }
-        public DateTime LastReceivedTime { get; private set; }
-        public bool IsConnected => LastReceivedTime.AddSeconds(1) > DateTime.Now;
+        public DateTime LastReceivedAt { get; private set; }
+        public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
 
         private void OnEnable()
         {
@@ -46,7 +46,9 @@ namespace ArtNet
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
         {
-            LastReceivedTime = DateTime.Now;
+            var receivedAt = e.ReceivedAt;
+            if (LastReceivedAt < receivedAt) LastReceivedAt = receivedAt;
+            
             switch (e.Packet.OpCode)
             {
                 case OpCode.Dmx:

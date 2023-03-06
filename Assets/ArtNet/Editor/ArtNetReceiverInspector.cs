@@ -27,7 +27,7 @@ namespace ArtNet.Editor
 
                 GUILayout.Space(10);
                 EditorGUILayout.LabelField($"Connected : {artNetReceiver.IsConnected}");
-                EditorGUILayout.LabelField($"Last Received : {artNetReceiver.LastReceivedTime:MM/dd HH:mm:ss fff}",
+                EditorGUILayout.LabelField($"Last Received At : {artNetReceiver.LastReceivedAt:MM/dd HH:mm:ss fff}",
                     style);
             }
             EditorGUILayout.EndVertical();
