@@ -5,7 +5,6 @@ namespace ArtNet.Samples.Devices
     [RequireComponent(typeof(Light))]
     public class SimpleLight : MonoBehaviour, IDmxDevice
     {
-
         private enum Fixture
         {
             Red = 0,

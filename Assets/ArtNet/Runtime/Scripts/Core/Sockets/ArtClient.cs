@@ -1,89 +1,107 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using ArtNet.Packets;
+using UnityEngine;
 
 namespace ArtNet.Sockets
 {
     public class ArtClient
     {
         private const int ArtNetPort = 6454;
-        private readonly UdpClient _udpClient;
-        public IPAddress LocalAddress { get; }
+
+        private UdpClient _udpClient;
+        private CancellationTokenSource _cancellationTokenSource;
+        private Task _task;
+        public int Port { get; }
         public DateTime LastReceiveAt { get; private set; }
-        public bool IsOpen { get; private set; }
+        public bool IsRunning => _task is {IsCanceled: false, IsCompleted: false};
+
         public event EventHandler<ReceiveEventArgs<ArtPacket>> ReceiveEvent;
+        public ErrorOccuredEventHandler OnUdpStartFailed = _ => { };
+        public ErrorOccuredEventHandler OnUdpReceiveFailed = _ => { };
 
-        public ArtClient()
+        public delegate void ErrorOccuredEventHandler(Exception e);
+
+
+        public ArtClient(int port = ArtNetPort)
         {
-            _udpClient = new UdpClient(ArtNetPort);
+            Port = port;
         }
 
-        public ArtClient(IPAddress address)
+        ~ArtClient()
         {
-            LocalAddress = address;
-            var bindEndPoint = new IPEndPoint(LocalAddress, ArtNetPort);
-            _udpClient = new UdpClient(bindEndPoint);
+            UdpStop();
         }
 
-        public void Open()
+        public void UdpStart()
         {
-            IsOpen = true;
-            StartReceive();
-        }
-
-        public void Close()
-        {
-            _udpClient.Close();
-            IsOpen = false;
-        }
-
-        public void Send(ArtPacket packet, IPAddress sendAddress)
-        {
-            var data = packet.ToByteArray();
-            var sendEndPoint = new IPEndPoint(sendAddress, ArtNetPort);
-            _udpClient.Send(data, data.Length, sendEndPoint);
-        }
-
-        public void Dispose()
-        {
-            IsOpen = false;
-            _udpClient.Dispose();
-        }
-
-        private void StartReceive()
-        {
-            _udpClient.BeginReceive(OnReceive, new ReceivedData());
-        }
-
-        private void OnReceive(IAsyncResult state)
-        {
-            var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            UdpStop();
+            if (IsRunning) return;
 
             try
             {
-                var message = _udpClient.EndReceive(state, ref remoteEndPoint);
-                var receivedData = new ReceivedData(message, remoteEndPoint.Address);
-                ReceiveArtNet(receivedData, remoteEndPoint);
+                _cancellationTokenSource = new CancellationTokenSource();
+                _task = Task.Run(() => UdpTaskAsync(_cancellationTokenSource.Token));
             }
-            catch (ArgumentException e)
+            catch (Exception e)
             {
-                Console.WriteLine(e);
-            }
-            finally
-            {
-                StartReceive();
+                Debug.LogErrorFormat($"[ArtNetClient] Udp start failed. {e.GetType()} : {e.Message}");
+                OnUdpStartFailed?.Invoke(e);
             }
         }
 
-        private void ReceiveArtNet(ReceivedData receivedData, IPEndPoint sourceEndPoint)
+        public void UdpStop()
         {
-            var packet = ArtPacket.Create(receivedData);
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _task = null;
+            }
 
-            if (packet == null) return;
-            LastReceiveAt = DateTime.Now;
+            if (_udpClient == null) return;
+            _udpClient.Close();
+            _udpClient = null;
+        }
 
-            ReceiveEvent?.Invoke(this, new ReceiveEventArgs<ArtPacket>(packet, sourceEndPoint));
+        private async void UdpTaskAsync(CancellationToken cancellationToken)
+        {
+            Debug.Log("[ArtClient] Udp task start.");
+            _udpClient = new UdpClient();
+            _udpClient.ExclusiveAddressUse = false;
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            var localEp = new IPEndPoint(IPAddress.Any, Port);
+            _udpClient.Client.Bind(localEp);
+
+            while (!cancellationToken.IsCancellationRequested && _udpClient != null)
+            {
+                try
+                {
+                    var result = await _udpClient.ReceiveAsync();
+                    var receivedData = new ReceivedData(result);
+                    var packet = ArtPacket.Create(receivedData);
+
+                    ReceiveEvent?.Invoke(this,
+                        new ReceiveEventArgs<ArtPacket>(packet, receivedData.RemoteEndPoint, receivedData.ReceivedAt));
+                }
+                catch (Exception e) when (e is SocketException or ObjectDisposedException)
+                {
+                    Debug.Log($"[ArtClient] Udp task failed. {e.Message} : {e.GetType()}");
+                }
+                catch (ArgumentException e)
+                {
+                    Debug.Log($"[ArtClient] Udp task failed. {e.Message} : {e.GetType()}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogErrorFormat($"[ArtClient] Udp receive failed. {e.Message} : {e.GetType()}");
+                    UdpStop();
+                    OnUdpReceiveFailed?.Invoke(e);
+                    break;
+                }
+            }
         }
     }
 }

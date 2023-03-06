@@ -1,54 +1,62 @@
 using System;
-using System.Collections;
-using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using ArtNet.Sockets;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ArtNet
 {
-    [Serializable]
-    public class ArtDmxReceivedEvent : UnityEvent<ArtDmxPacket>
-    {
-    }
-
-    [RequireComponent(typeof(DmxDataManager))]
     public class ArtNetReceiver : MonoBehaviour
     {
-        [SerializeField] private string bindIpAddress = "0.0.0.0";
-        public DmxDataManager dmxDataManager;
-        [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
-        public ArtClient ArtClient { get; private set; }
-        public DateTime LastReceivedTime { get; private set; }
-        public bool IsConnected => LastReceivedTime.AddSeconds(1) > DateTime.Now;
+        public event Action<ArtDmxPacket> OnReceiveDmxPacket;
+
+        [SerializeField] private bool autoStart = true;
+
+        private ArtClient _artClient;
+
+        public DateTime LastReceivedAt { get; private set; }
+        public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
 
         private void OnEnable()
         {
-            ArtClient = new ArtClient(IPAddress.Parse(bindIpAddress));
-            ArtClient.Open();
-
-            ArtClient.ReceiveEvent += OnReceiveEvent;
+            ArtClientSetup();
         }
 
         private void OnDisable()
         {
-            ArtClient?.Dispose();
+            ArtClientStop();
         }
 
         private void Start()
         {
-            dmxDataManager = GetComponent<DmxDataManager>();
+            if (autoStart) ArtClientStart();
+        }
+
+        private void ArtClientSetup()
+        {
+            _artClient = new ArtClient();
+            _artClient.ReceiveEvent += OnReceiveEvent;
+        }
+
+        public void ArtClientStart()
+        {
+            _artClient?.UdpStart();
+        }
+
+        public void ArtClientStop()
+        {
+            _artClient?.UdpStop();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
         {
-            LastReceivedTime = DateTime.Now;
+            var receivedAt = e.ReceivedAt;
+            if (LastReceivedAt < receivedAt) LastReceivedAt = receivedAt;
+
             switch (e.Packet.OpCode)
             {
                 case OpCode.Dmx:
-                    onReceiveDmxPacket?.Invoke(e.Packet as ArtDmxPacket);
+                    OnReceiveDmxPacket?.Invoke(e.Packet as ArtDmxPacket);
                     break;
                 case OpCode.Poll:
                 case OpCode.PollReply:

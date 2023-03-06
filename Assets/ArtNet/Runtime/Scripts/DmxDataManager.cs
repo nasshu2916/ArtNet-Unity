@@ -1,29 +1,46 @@
 using System.Collections.Generic;
+using System.Linq;
 using ArtNet.Packets;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace ArtNet
 {
     public class DmxDataManager : MonoBehaviour
     {
-        public Dictionary<int, byte[]> DmxMap { get; } = new();
+        private Dictionary<int, byte[]> DmxDictionary { get; } = new();
+        [SerializeField] private ArtNetReceiver artNetReceiver;
 
-        public byte[] GetDmx(int universe)
+        public void Start()
         {
-            return DmxMap.TryGetValue(universe, out var data) ? data : new byte[512];
-        }
-
-        [UsedImplicitly]
-        public void ReceiveArtDmxPacket(ArtDmxPacket packet)
-        {
-            if (DmxMap.ContainsKey(packet.Universe))
+            if (artNetReceiver == null)
             {
-                DmxMap[packet.Universe] = packet.Dmx;
+                Debug.LogError("[DmxDataManager] Require ArtNetReceiver");
             }
             else
             {
-                DmxMap.Add(packet.Universe, packet.Dmx);
+                artNetReceiver.OnReceiveDmxPacket += ReceiveArtDmxPacket;
+            }
+        }
+
+        public int[] Universes()
+        {
+            return DmxDictionary.Keys.ToArray();
+        }
+
+        public byte[] DmxValues(int universe)
+        {
+            return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
+        }
+
+        private void ReceiveArtDmxPacket(ArtDmxPacket packet)
+        {
+            if (DmxDictionary.ContainsKey(packet.Universe))
+            {
+                DmxDictionary[packet.Universe] = packet.Dmx;
+            }
+            else
+            {
+                DmxDictionary.Add(packet.Universe, packet.Dmx);
             }
         }
     }
