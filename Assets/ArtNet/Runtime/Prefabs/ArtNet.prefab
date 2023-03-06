@@ -58,4 +58,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377a5bae91b248b68fb15654d14e556e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  artNetReceiver: {fileID: 0}
+  artNetReceiver: {fileID: 2204995358144401486}
