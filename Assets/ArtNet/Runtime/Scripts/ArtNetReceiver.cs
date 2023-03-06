@@ -7,52 +7,57 @@ using UnityEngine.Events;
 
 namespace ArtNet
 {
-    [Serializable]
-    public class ArtDmxReceivedEvent : UnityEvent<ArtDmxPacket>
-    {
-    }
-
-    [RequireComponent(typeof(DmxDataManager))]
     public class ArtNetReceiver : MonoBehaviour
     {
-        public DmxDataManager dmxDataManager;
-        [SerializeField] private ArtDmxReceivedEvent onReceiveDmxPacket;
+        public event Action<ArtDmxPacket> OnReceiveDmxPacket;
+
         [SerializeField] private bool autoStart = true;
-        public ArtClient ArtClient { get; private set; }
+
+        private ArtClient _artClient;
+
         public DateTime LastReceivedAt { get; private set; }
         public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
 
         private void OnEnable()
         {
-            if (autoStart) ArtClientStart();
+            ArtClientSetup();
         }
 
         private void OnDisable()
         {
-            ArtClient?.UdpStop();
+            ArtClientStop();
         }
 
         private void Start()
         {
-            dmxDataManager = GetComponent<DmxDataManager>();
+            if (autoStart) ArtClientStart();
         }
 
-        private void ArtClientStart()
+        private void ArtClientSetup()
         {
-            ArtClient = new ArtClient();
-            ArtClient.ReceiveEvent += OnReceiveEvent;
-            ArtClient.UdpStart();
+            _artClient = new ArtClient();
+            _artClient.ReceiveEvent += OnReceiveEvent;
+        }
+
+        public void ArtClientStart()
+        {
+            _artClient?.UdpStart();
+        }
+
+        public void ArtClientStop()
+        {
+            _artClient?.UdpStop();
         }
 
         private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
         {
             var receivedAt = e.ReceivedAt;
             if (LastReceivedAt < receivedAt) LastReceivedAt = receivedAt;
-            
+
             switch (e.Packet.OpCode)
             {
                 case OpCode.Dmx:
-                    onReceiveDmxPacket?.Invoke(e.Packet as ArtDmxPacket);
+                    OnReceiveDmxPacket?.Invoke(e.Packet as ArtDmxPacket);
                     break;
                 case OpCode.Poll:
                 case OpCode.PollReply:

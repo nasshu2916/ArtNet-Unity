@@ -7,7 +7,6 @@ namespace ArtNet.Editor
     {
         private const int MaxUniverses = 32768;
 
-        private ArtNetReceiver _artNetReceiver;
         private DmxDataManager _dmxDataManager;
         [Range(1, MaxUniverses)] private int _selectedUniverse;
         private Vector2 _scrollPosition;
@@ -24,8 +23,7 @@ namespace ArtNet.Editor
 
         private void OnEnable()
         {
-            _artNetReceiver = FindObjectOfType<ArtNetReceiver>();
-            _dmxDataManager = _artNetReceiver.dmxDataManager;
+            _dmxDataManager = FindObjectOfType<DmxDataManager>();
         }
 
         private void OnGUI()
@@ -33,14 +31,12 @@ namespace ArtNet.Editor
             EditorGUILayout.LabelField("ArtNet Receiver", EditorStyles.boldLabel);
 
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.ObjectField("ArtNet Receive Object", _artNetReceiver, typeof(ArtNetReceiver), true);
+            EditorGUILayout.ObjectField("Dmx Data Manager", _dmxDataManager, typeof(DmxDataManager), true);
             EditorGUI.EndDisabledGroup();
             GUILayout.Box("", GUILayout.Width(position.width), GUILayout.Height(1));
 
             EditorGUILayout.LabelField("ArtNet Client", EditorStyles.boldLabel);
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.TextField("LastReceiveAt",
-                _artNetReceiver.ArtClient?.LastReceiveAt.ToString("yyyy/MM/dd HH:mm:ss.fff"));
             EditorGUI.EndDisabledGroup();
 
             _selectedUniverse = EditorGUILayout.IntField("Universe", _selectedUniverse);
@@ -60,7 +56,7 @@ namespace ArtNet.Editor
                 for (var i = 0; i < dmx.Length; i++)
                 {
                     var dmxValue = dmx[i];
-                    GUI.backgroundColor = new Color(0, (float)dmxValue / 256 * 5, 0, 1);
+                    GUI.backgroundColor = new Color(0, (float) dmxValue / 256 * 5, 0, 1);
                     EditorGUILayout.BeginVertical(GUI.skin.box, _dmxLayoutOption);
                     EditorGUILayout.LabelField((i + 1).ToString(), _dmxLayoutOption);
                     EditorGUILayout.LabelField(dmxValue == 0 ? "" : dmxValue.ToString(), EditorStyles.boldLabel,
