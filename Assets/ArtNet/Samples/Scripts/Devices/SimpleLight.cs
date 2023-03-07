@@ -17,12 +17,12 @@ namespace ArtNet.Samples.Devices
 
         private Light _light;
 
-        [SerializeField, Range(0, 255)] private int universe;
-        [SerializeField, Range(0, 511)] private int startAddress;
+        [SerializeField, Range(0, 255)] private ushort universe;
+        [SerializeField, Range(0, 511)] private ushort startAddress;
 
         public byte ChannelNumber { get; } = (byte) Enum.GetNames(typeof(Fixture)).Length;
-        public int Universe => universe;
-        public int StartAddress => startAddress;
+        public ushort Universe => universe;
+        public ushort StartAddress => startAddress;
 
         private const float MaxIntensity = 2f;
 

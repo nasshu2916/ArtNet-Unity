@@ -11,11 +11,11 @@ namespace ArtNet
     {
         [SerializeField] private ArtNetReceiver artNetReceiver;
 
-        private Dictionary<int, byte[]> DmxDictionary { get; } = new();
+        private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         private readonly Queue<ushort> _updatedUniverses = new();
-        public Dictionary<int, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
+        public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
 
-        private static Dictionary<int, IEnumerable<IDmxDevice>> FindDmxDevices()
+        private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
         {
             return FindObjectsOfType<GameObject>().SelectMany(o => o.GetComponents<IDmxDevice>())
                 .GroupBy(device => device.Universe).ToDictionary(g => g.Key, g => g as IEnumerable<IDmxDevice>);
@@ -58,12 +58,12 @@ namespace ArtNet
             }
         }
 
-        public int[] Universes()
+        public ushort[] Universes()
         {
             return DmxDictionary.Keys.ToArray();
         }
 
-        public byte[] DmxValues(int universe)
+        public byte[] DmxValues(ushort universe)
         {
             return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
         }
