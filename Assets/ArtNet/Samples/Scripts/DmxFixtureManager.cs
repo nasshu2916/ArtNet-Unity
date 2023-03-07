@@ -1,5 +1,5 @@
 using System.Linq;
-using ArtNet.Samples.Devices;
+using ArtNet.Devices;
 using UnityEngine;
 
 namespace ArtNet.Samples
@@ -9,7 +9,7 @@ namespace ArtNet.Samples
         private IDmxDevice[] _dmxDevices;
         [SerializeField] private DmxDataManager dmxDataManager;
 
-        private void Start()
+        private void OnEnable()
         {
             _dmxDevices = FindObjectsOfType<GameObject>().SelectMany(o => o.GetComponents<IDmxDevice>()).ToArray();
         }

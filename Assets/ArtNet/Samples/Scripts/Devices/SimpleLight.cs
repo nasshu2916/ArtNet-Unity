@@ -1,3 +1,5 @@
+using System;
+using ArtNet.Devices;
 using UnityEngine;
 
 namespace ArtNet.Samples.Devices
@@ -14,10 +16,13 @@ namespace ArtNet.Samples.Devices
         }
 
         private Light _light;
-        public byte ChannelNumber => 4;
-        public byte Universe => 0;
 
-        public byte StartAddress => 0;
+        [SerializeField, Range(0, 255)] private int universe;
+        [SerializeField, Range(0, 511)] private int startAddress;
+
+        public byte ChannelNumber { get; } = (byte) Enum.GetNames(typeof(Fixture)).Length;
+        public int Universe => universe;
+        public int StartAddress => startAddress;
 
         private const float MaxIntensity = 2f;
 
@@ -28,10 +33,10 @@ namespace ArtNet.Samples.Devices
 
         public void DmxUpdate(byte[] dmx)
         {
-            var r = dmx[(int)Fixture.Red] / 255f;
-            var g = dmx[(int)Fixture.Green] / 255f;
-            var b = dmx[(int)Fixture.Blue] / 255f;
-            var intensity = dmx[(int)Fixture.Dimmer] / 255f * MaxIntensity;
+            var r = dmx[(int) Fixture.Red] / 255f;
+            var g = dmx[(int) Fixture.Green] / 255f;
+            var b = dmx[(int) Fixture.Blue] / 255f;
+            var intensity = dmx[(int) Fixture.Dimmer] / 255f * MaxIntensity;
 
             _light.color = new Color(r, g, b, 1f);
             _light.intensity = intensity;
