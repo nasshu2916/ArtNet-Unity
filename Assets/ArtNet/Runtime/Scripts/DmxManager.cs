@@ -9,8 +9,6 @@ namespace ArtNet
 {
     public class DmxManager : MonoBehaviour
     {
-        [SerializeField] private ArtNetReceiver artNetReceiver;
-
         private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         private readonly Queue<ushort> _updatedUniverses = new();
         public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
@@ -24,18 +22,6 @@ namespace ArtNet
         public void OnEnable()
         {
             DmxDevices = FindDmxDevices();
-        }
-
-        public void Start()
-        {
-            if (artNetReceiver == null)
-            {
-                Debug.LogError("[DmxDataManager] Require ArtNetReceiver");
-            }
-            else
-            {
-                artNetReceiver.OnReceiveDmxPacket += ReceiveArtDmxPacket;
-            }
         }
 
         public void Update()
@@ -68,7 +54,7 @@ namespace ArtNet
             return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
-        private void ReceiveArtDmxPacket(ArtDmxPacket packet)
+        public void ReceivedArtDmxPacket(ArtDmxPacket packet)
         {
             var universe = packet.Universe;
             if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, new byte[512]);
