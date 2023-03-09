@@ -1,6 +1,5 @@
 ﻿using ArtNet.Enums;
 using ArtNet.IO;
-using ArtNet.Sockets;
 
 namespace ArtNet.Packets
 {
@@ -10,7 +9,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public ArtPollReplyPacket(ReceivedData data) : base(data)
+        public ArtPollReplyPacket(byte[] buffer) : base(buffer, OpCode.PollReply)
         {
         }
 

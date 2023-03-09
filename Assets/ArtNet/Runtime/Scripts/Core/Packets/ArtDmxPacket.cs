@@ -1,6 +1,5 @@
 using ArtNet.Enums;
 using ArtNet.IO;
-using ArtNet.Sockets;
 
 namespace ArtNet.Packets
 {
@@ -10,7 +9,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public ArtDmxPacket(ReceivedData data) : base(data)
+        public ArtDmxPacket(byte[] buffer) : base(buffer, OpCode.Dmx)
         {
         }
 
@@ -18,7 +17,7 @@ namespace ArtNet.Packets
         public byte Physical { get; set; }
         public ushort Universe { get; set; }
 
-        public ushort Length => Dmx == null ? (ushort)0 : (ushort)Dmx.Length;
+        public ushort Length => Dmx == null ? (ushort) 0 : (ushort) Dmx.Length;
 
         public byte[] Dmx { get; set; }
 

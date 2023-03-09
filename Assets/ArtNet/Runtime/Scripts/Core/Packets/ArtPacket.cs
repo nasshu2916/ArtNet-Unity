@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ArtNet.IO;
-using ArtNet.Sockets;
 using JetBrains.Annotations;
 
 namespace ArtNet.Packets
@@ -19,10 +18,9 @@ namespace ArtNet.Packets
             OpCode = opCode;
         }
 
-        protected ArtPacket(ReceivedData data)
+        protected ArtPacket(byte[] buffer, Enums.OpCode opCode) : this(opCode)
         {
-            OpCode = data.OpCode;
-            using var memoryStream = new MemoryStream(data.Buffer);
+            using var memoryStream = new MemoryStream(buffer);
             using var artReader = new ArtReader(memoryStream);
             memoryStream.Position = FixedArtNetPacketLength;
             ReadData(artReader);
@@ -49,15 +47,15 @@ namespace ArtNet.Packets
         }
 
         [CanBeNull]
-        public static ArtPacket Create(ReceivedData data)
+        public static ArtPacket Create(byte[] buffer)
         {
-            if (!Validate(data.Buffer)) return null;
+            if (!Validate(buffer)) return null;
 
-            return data.OpCode switch
+            return GetOpCode(buffer) switch
             {
-                Enums.OpCode.Poll => new ArtPollPacket(data),
-                Enums.OpCode.PollReply => new ArtPollReplyPacket(data),
-                Enums.OpCode.Dmx => new ArtDmxPacket(data),
+                Enums.OpCode.Poll => new ArtPollPacket(buffer),
+                Enums.OpCode.PollReply => new ArtPollReplyPacket(buffer),
+                Enums.OpCode.Dmx => new ArtDmxPacket(buffer),
                 _ => null
             };
         }
@@ -67,5 +65,8 @@ namespace ArtNet.Packets
             if (buffer.Count < FixedArtNetPacketLength) return false;
             return !IdentificationIds.Where((t, i) => buffer[i] != t).Any();
         }
+
+        private static Enums.OpCode GetOpCode(IReadOnlyList<byte> buffer) =>
+            (Enums.OpCode) (buffer[8] + (buffer[9] << 8));
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
-using ArtNet.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -52,10 +51,9 @@ namespace ArtNet
 
         protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
-            var receivedData = new ReceivedData(receiveBuffer, length, (IPEndPoint) remoteEp);
-            LastReceivedAt = receivedData.ReceivedAt;
-            var packet = ArtPacket.Create(receivedData);
+            var packet = ArtPacket.Create(receiveBuffer);
             if (packet == null) return;
+            LastReceivedAt = DateTime.Now;
 
             switch (packet.OpCode)
             {
@@ -69,7 +67,7 @@ namespace ArtNet
                     onReceivedPollReplyEvent.Invoke(packet as ArtPollReplyPacket);
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
