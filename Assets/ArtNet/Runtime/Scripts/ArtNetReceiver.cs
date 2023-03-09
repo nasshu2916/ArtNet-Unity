@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
+using ArtNet.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -51,31 +52,24 @@ namespace ArtNet
 
         protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
-            try
-            {
-                var receivedData = new Sockets.ReceivedData(receiveBuffer, length, (IPEndPoint) remoteEp);
-                LastReceivedAt = receivedData.ReceivedAt;
-                var packet = ArtPacket.Create(receivedData);
-                if (packet == null) return;
+            var receivedData = new ReceivedData(receiveBuffer, length, (IPEndPoint) remoteEp);
+            LastReceivedAt = receivedData.ReceivedAt;
+            var packet = ArtPacket.Create(receivedData);
+            if (packet == null) return;
 
-                switch (packet.OpCode)
-                {
-                    case OpCode.Dmx:
-                        onReceivedDmxEvent?.Invoke(packet as ArtDmxPacket);
-                        break;
-                    case OpCode.Poll:
-                        onReceivedPollEvent.Invoke(packet as ArtPollPacket);
-                        break;
-                    case OpCode.PollReply:
-                        onReceivedPollReplyEvent.Invoke(packet as ArtPollReplyPacket);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            catch (ArgumentException e)
+            switch (packet.OpCode)
             {
-                Debug.Log($"[ArtReceiver] Invalid ArtNet packet: {e.Message}");
+                case OpCode.Dmx:
+                    onReceivedDmxEvent?.Invoke(packet as ArtDmxPacket);
+                    break;
+                case OpCode.Poll:
+                    onReceivedPollEvent.Invoke(packet as ArtPollPacket);
+                    break;
+                case OpCode.PollReply:
+                    onReceivedPollReplyEvent.Invoke(packet as ArtPollReplyPacket);
+                    break;
+                default:
+                    break;
             }
         }
     }

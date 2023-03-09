@@ -1,8 +1,5 @@
 using System;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using ArtNet.Packets;
 
 namespace ArtNet.Sockets
 {
@@ -23,10 +20,8 @@ namespace ArtNet.Sockets
             Buffer = buffer;
             Length = length;
             RemoteEndPoint = remoteEndPoint;
-            if (!Validate()) throw new ArgumentException("Invalid ArtNet packet");
         }
 
         public Enums.OpCode OpCode => (Enums.OpCode) (Buffer[8] + (Buffer[9] << 8));
-        private bool Validate() => Buffer.Take(8).SequenceEqual(ArtPacket.IdentificationIds);
     }
 }
