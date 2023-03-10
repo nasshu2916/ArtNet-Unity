@@ -4,7 +4,7 @@ using ArtNet.Packets;
 
 namespace ArtNet
 {
-    public class ReceivedData<TPacket> where TPacket : ArtPacket
+    public class ReceivedData<TPacket> where TPacket : ArtNetPacket
     {
         public TPacket Packet { get; }
         public EndPoint RemoteEp { get; }

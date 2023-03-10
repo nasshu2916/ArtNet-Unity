@@ -54,7 +54,7 @@ namespace ArtNet
             return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
-        public void ReceivedArtDmxPacket(ReceivedData<ArtDmxPacket> receivedData)
+        public void ReceivedDmxPacket(ReceivedData<DmxPacket> receivedData)
         {
             var packet = receivedData.Packet;
             var universe = packet.Universe;

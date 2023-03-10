@@ -8,17 +8,17 @@ using UnityEngine.Events;
 namespace ArtNet
 {
     [Serializable]
-    public class OnReceivedArtDmxEvent : UnityEvent<ReceivedData<ArtDmxPacket>>
+    public class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedArtPollEvent : UnityEvent<ReceivedData<ArtPollPacket>>
+    public class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedArtPollReplyEvent : UnityEvent<ReceivedData<ArtPollReplyPacket>>
+    public class OnReceivedPollReplyEvent : UnityEvent<ReceivedData<PollReplyPacket>>
     {
     }
 
@@ -27,9 +27,9 @@ namespace ArtNet
         private const int ArtNetPort = 6454;
 
         [SerializeField] private bool autoStart = true;
-        [SerializeField] private OnReceivedArtDmxEvent onReceivedDmxEvent;
-        [SerializeField] private OnReceivedArtPollEvent onReceivedPollEvent;
-        [SerializeField] private OnReceivedArtPollReplyEvent onReceivedPollReplyEvent;
+        [SerializeField] private OnReceivedDmxEvent onReceivedDmxEvent;
+        [SerializeField] private OnReceivedPollEvent onReceivedPollEvent;
+        [SerializeField] private OnReceivedPollReplyEvent onReceivedPollReplyEvent;
 
         public DateTime LastReceivedAt { get; private set; }
         public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
@@ -51,30 +51,30 @@ namespace ArtNet
 
         protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
-            var packet = ArtPacket.Create(receiveBuffer);
+            var packet = ArtNetPacket.Create(receiveBuffer);
             if (packet == null) return;
             LastReceivedAt = DateTime.Now;
 
             switch (packet.OpCode)
             {
                 case OpCode.Dmx:
-                    onReceivedDmxEvent?.Invoke(ReceivedData<ArtDmxPacket>(packet, remoteEp));
+                    onReceivedDmxEvent?.Invoke(ReceivedData<DmxPacket>(packet, remoteEp));
                     break;
                 case OpCode.Poll:
-                    onReceivedPollEvent.Invoke(ReceivedData<ArtPollPacket>(packet, remoteEp));
+                    onReceivedPollEvent.Invoke(ReceivedData<PollPacket>(packet, remoteEp));
                     break;
                 case OpCode.PollReply:
-                    onReceivedPollReplyEvent.Invoke(ReceivedData<ArtPollReplyPacket>(packet, remoteEp));
+                    onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static ReceivedData<TPacket> ReceivedData<TPacket>(ArtPacket packet, EndPoint endPoint)
-            where TPacket : ArtPacket
+        private static ReceivedData<TPacket> ReceivedData<TPacket>(ArtNetPacket netPacket, EndPoint endPoint)
+            where TPacket : ArtNetPacket
         {
-            return new ReceivedData<TPacket>(packet as TPacket, endPoint);
+            return new ReceivedData<TPacket>(netPacket as TPacket, endPoint);
         }
     }
 }

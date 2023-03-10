@@ -50,7 +50,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2204995358144401484}
         m_TargetAssemblyTypeName: ArtNet.DmxManager, ArtNet
-        m_MethodName: ReceivedArtDmxPacket
+        m_MethodName: ReceivedDmxPacket
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
