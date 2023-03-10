@@ -8,17 +8,17 @@ using UnityEngine.Events;
 namespace ArtNet
 {
     [Serializable]
-    public class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
+    internal class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
+    internal class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedPollReplyEvent : UnityEvent<ReceivedData<PollReplyPacket>>
+    internal class OnReceivedPollReplyEvent : UnityEvent<ReceivedData<PollReplyPacket>>
     {
     }
 
@@ -41,12 +41,12 @@ namespace ArtNet
 
         private void OnEnable()
         {
-            if (autoStart) UdpStart();
+            if (autoStart) StartReceive();
         }
 
         private void OnDisable()
         {
-            UdpStop();
+            StopReceive();
         }
 
         protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)

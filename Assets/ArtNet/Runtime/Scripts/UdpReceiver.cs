@@ -24,12 +24,12 @@ namespace ArtNet
 
         private void OnApplicationQuit()
         {
-            UdpStop();
+            StopReceive();
         }
 
-        public void UdpStart()
+        public void StartReceive()
         {
-            UdpStop();
+            StopReceive();
             if (IsRunning) return;
 
             if (Port == 0) Debug.LogWarning("[UdpReceiver] Port is not set.");
@@ -79,7 +79,7 @@ namespace ArtNet
             }
         }
 
-        public void UdpStop()
+        public void StopReceive()
         {
             if (_cancellationTokenSource != null)
             {
@@ -94,7 +94,7 @@ namespace ArtNet
 
         protected virtual void OnRaiseError(Exception e)
         {
-            UdpStop();
+            StopReceive();
             OnUdpReceiveFailed?.Invoke(e);
         }
 
