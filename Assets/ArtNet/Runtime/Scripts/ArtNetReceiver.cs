@@ -8,17 +8,17 @@ using UnityEngine.Events;
 namespace ArtNet
 {
     [Serializable]
-    public class OnReceivedArtDmxEvent : UnityEvent<ArtDmxPacket>
+    public class OnReceivedArtDmxEvent : UnityEvent<ReceivedData<ArtDmxPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedArtPollEvent : UnityEvent<ArtPollPacket>
+    public class OnReceivedArtPollEvent : UnityEvent<ReceivedData<ArtPollPacket>>
     {
     }
 
     [Serializable]
-    public class OnReceivedArtPollReplyEvent : UnityEvent<ArtPollReplyPacket>
+    public class OnReceivedArtPollReplyEvent : UnityEvent<ReceivedData<ArtPollReplyPacket>>
     {
     }
 
@@ -58,17 +58,23 @@ namespace ArtNet
             switch (packet.OpCode)
             {
                 case OpCode.Dmx:
-                    onReceivedDmxEvent?.Invoke(packet as ArtDmxPacket);
+                    onReceivedDmxEvent?.Invoke(ReceivedData<ArtDmxPacket>(packet, remoteEp));
                     break;
                 case OpCode.Poll:
-                    onReceivedPollEvent.Invoke(packet as ArtPollPacket);
+                    onReceivedPollEvent.Invoke(ReceivedData<ArtPollPacket>(packet, remoteEp));
                     break;
                 case OpCode.PollReply:
-                    onReceivedPollReplyEvent.Invoke(packet as ArtPollReplyPacket);
+                    onReceivedPollReplyEvent.Invoke(ReceivedData<ArtPollReplyPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private static ReceivedData<TPacket> ReceivedData<TPacket>(ArtPacket packet, EndPoint endPoint)
+            where TPacket : ArtPacket
+        {
+            return new ReceivedData<TPacket>(packet as TPacket, endPoint);
         }
     }
 }

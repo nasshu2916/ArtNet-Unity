@@ -54,8 +54,9 @@ namespace ArtNet
             return DmxDictionary.TryGetValue(universe, out var data) ? data : new byte[512];
         }
 
-        public void ReceivedArtDmxPacket(ArtDmxPacket packet)
+        public void ReceivedArtDmxPacket(ReceivedData<ArtDmxPacket> receivedData)
         {
+            var packet = receivedData.Packet;
             var universe = packet.Universe;
             if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, new byte[512]);
             Buffer.BlockCopy(packet.Dmx, 0, DmxDictionary[universe], 0, 512);
