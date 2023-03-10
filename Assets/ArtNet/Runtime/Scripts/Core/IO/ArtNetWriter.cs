@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ArtNet.IO
 {
-    public class ArtWriter : BinaryWriter
+    public class ArtNetWriter : BinaryWriter
     {
-        public ArtWriter(Stream output) : base(output)
+        public ArtNetWriter(Stream output) : base(output)
         {
         }
 

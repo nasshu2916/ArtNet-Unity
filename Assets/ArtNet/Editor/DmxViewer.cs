@@ -6,7 +6,7 @@ namespace ArtNet.Editor
 {
     public class DmxViewer : EditorWindow
     {
-        private DmxDataManager _dmxDataManager;
+        private DmxManager _dmxManager;
         private int _selectedUniverseIndex;
         private Vector2 _scrollPosition;
         private const int RowDisplayNumber = 20;
@@ -22,7 +22,7 @@ namespace ArtNet.Editor
 
         private void OnEnable()
         {
-            _dmxDataManager = FindObjectOfType<DmxDataManager>();
+            _dmxManager = FindObjectOfType<DmxManager>();
         }
 
         private void OnGUI()
@@ -30,7 +30,7 @@ namespace ArtNet.Editor
             EditorGUILayout.LabelField("ArtNet Receiver", EditorStyles.boldLabel);
 
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.ObjectField("Dmx Data Manager", _dmxDataManager, typeof(DmxDataManager), true);
+            EditorGUILayout.ObjectField("Dmx Data Manager", _dmxManager, typeof(DmxManager), true);
             EditorGUI.EndDisabledGroup();
             GUILayout.Box("", GUILayout.Width(position.width), GUILayout.Height(1));
 
@@ -38,7 +38,7 @@ namespace ArtNet.Editor
             EditorGUI.BeginDisabledGroup(true);
             EditorGUI.EndDisabledGroup();
 
-            var universes = _dmxDataManager.Universes();
+            var universes = _dmxManager.Universes();
             var options = universes.Select(universe => $"Universe: {universe + 1}").ToArray();
             _selectedUniverseIndex = EditorGUILayout.Popup("Universe", _selectedUniverseIndex, options);
 
@@ -50,7 +50,7 @@ namespace ArtNet.Editor
                 return;
             }
 
-            var dmxValues = _dmxDataManager.DmxValues(selectedUniverse);
+            var dmxValues = _dmxManager.DmxValues(selectedUniverse);
 
             _scrollPosition =
                 EditorGUILayout.BeginScrollView(_scrollPosition, GUI.skin.box, GUILayout.MaxHeight(DisplayMaxHeight));

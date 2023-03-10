@@ -1,68 +1,80 @@
 using System;
+using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
-using ArtNet.Sockets;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ArtNet
 {
-    public class ArtNetReceiver : MonoBehaviour
+    [Serializable]
+    internal class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
     {
-        public event Action<ArtDmxPacket> OnReceiveDmxPacket;
+    }
+
+    [Serializable]
+    internal class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedPollReplyEvent : UnityEvent<ReceivedData<PollReplyPacket>>
+    {
+    }
+
+    public class ArtNetReceiver : UdpReceiver
+    {
+        private const int ArtNetPort = 6454;
 
         [SerializeField] private bool autoStart = true;
-
-        private ArtClient _artClient;
+        [SerializeField] private OnReceivedDmxEvent onReceivedDmxEvent;
+        [SerializeField] private OnReceivedPollEvent onReceivedPollEvent;
+        [SerializeField] private OnReceivedPollReplyEvent onReceivedPollReplyEvent;
 
         public DateTime LastReceivedAt { get; private set; }
         public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
 
+        private void Awake()
+        {
+            Port = ArtNetPort;
+        }
+
         private void OnEnable()
         {
-            ArtClientSetup();
+            if (autoStart) StartReceive();
         }
 
         private void OnDisable()
         {
-            ArtClientStop();
+            StopReceive();
         }
 
-        private void Start()
+        protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
-            if (autoStart) ArtClientStart();
-        }
+            var packet = ArtNetPacket.Create(receiveBuffer);
+            if (packet == null) return;
+            LastReceivedAt = DateTime.Now;
 
-        private void ArtClientSetup()
-        {
-            _artClient = new ArtClient();
-            _artClient.ReceiveEvent += OnReceiveEvent;
-        }
-
-        public void ArtClientStart()
-        {
-            _artClient?.UdpStart();
-        }
-
-        public void ArtClientStop()
-        {
-            _artClient?.UdpStop();
-        }
-
-        private void OnReceiveEvent(object sender, ReceiveEventArgs<ArtPacket> e)
-        {
-            var receivedAt = e.ReceivedAt;
-            if (LastReceivedAt < receivedAt) LastReceivedAt = receivedAt;
-
-            switch (e.Packet.OpCode)
+            switch (packet.OpCode)
             {
                 case OpCode.Dmx:
-                    OnReceiveDmxPacket?.Invoke(e.Packet as ArtDmxPacket);
+                    onReceivedDmxEvent?.Invoke(ReceivedData<DmxPacket>(packet, remoteEp));
                     break;
                 case OpCode.Poll:
-                case OpCode.PollReply:
-                default:
+                    onReceivedPollEvent.Invoke(ReceivedData<PollPacket>(packet, remoteEp));
                     break;
+                case OpCode.PollReply:
+                    onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private static ReceivedData<TPacket> ReceivedData<TPacket>(ArtNetPacket netPacket, EndPoint endPoint)
+            where TPacket : ArtNetPacket
+        {
+            return new ReceivedData<TPacket>(netPacket as TPacket, endPoint);
         }
     }
 }
