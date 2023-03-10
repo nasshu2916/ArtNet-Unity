@@ -60,9 +60,10 @@ namespace ArtNet
             var universe = packet.Universe;
             if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, new byte[512]);
             Buffer.BlockCopy(packet.Dmx, 0, DmxDictionary[universe], 0, 512);
-            if (!_updatedUniverses.Contains(universe))
+            lock (_updatedUniverses)
             {
-                lock (_updatedUniverses) _updatedUniverses.Enqueue(universe);
+                if (_updatedUniverses.Contains(universe)) return;
+                _updatedUniverses.Enqueue(universe);
             }
         }
     }
