@@ -7,7 +7,7 @@ namespace ArtNet.Samples.Devices
     [RequireComponent(typeof(Light))]
     public class SimpleDmxLight : DmxDeviceBase
     {
-        private enum Fixtures
+        private enum Properties
         {
             Red,
             Green,
@@ -15,22 +15,22 @@ namespace ArtNet.Samples.Devices
             Dimmer
         }
 
-        public override byte ChannelNumber { get; } = (byte) Enum.GetNames(typeof(Fixtures)).Length;
+        public override byte ChannelNumber { get; } = (byte) Enum.GetNames(typeof(Properties)).Length;
 
         private Light _light;
         private const float MaxIntensity = 2f;
 
-        private void Start()
+        protected override void InitFixture()
         {
             _light = GetComponent<Light>();
         }
 
-        public override void DmxUpdate(byte[] dmx)
+        protected override void UpdateProperties()
         {
-            var r = dmx[(int) Fixtures.Red] / 255f;
-            var g = dmx[(int) Fixtures.Green] / 255f;
-            var b = dmx[(int) Fixtures.Blue] / 255f;
-            var intensity = dmx[(int) Fixtures.Dimmer] / 255f * MaxIntensity;
+            var r = DmxData[(int) Properties.Red] / 255f;
+            var g = DmxData[(int) Properties.Green] / 255f;
+            var b = DmxData[(int) Properties.Blue] / 255f;
+            var intensity = DmxData[(int) Properties.Dimmer] / 255f * MaxIntensity;
 
             _light.color = new Color(r, g, b, 1f);
             _light.intensity = intensity;
