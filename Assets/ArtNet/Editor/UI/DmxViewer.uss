@@ -1,0 +1,12 @@
+DmxAddressViewer {
+    width: 5%;
+    background-color: var(--unity-colors-default-background);
+    border-width: 1;
+    border-color: var(--unity-colors-default-border);
+}
+
+:root {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 1000px;
+}
