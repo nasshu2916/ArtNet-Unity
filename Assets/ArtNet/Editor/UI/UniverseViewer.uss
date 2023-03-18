@@ -1,0 +1,14 @@
+:root {
+    flex-direction: row;
+}
+
+#UniverseSelector {
+    width: 150px
+}
+
+UniverseInfo {
+    height: 50px;
+    margin: 3px;
+    padding: 5px;
+    align-items: flex-start;
+}
