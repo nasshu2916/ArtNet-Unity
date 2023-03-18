@@ -8,19 +8,7 @@ namespace ArtNet.Editor.UI
         private readonly VisualElement _bar;
         private readonly Label _addressLabel;
         private readonly Label _addressValue;
-
-        private int _dmxAddress;
         private int _dmxValue;
-
-        public int DmxAddress
-        {
-            get => _dmxAddress;
-            set
-            {
-                _dmxAddress = value;
-                _addressLabel.text = $"{_dmxAddress}";
-            }
-        }
 
         public int DmxValue
         {
@@ -34,7 +22,13 @@ namespace ArtNet.Editor.UI
             }
         }
 
-        public DmxAddressViewer()
+        public DmxAddressViewer(int address, int value) : this()
+        {
+            _addressLabel.text = $"{address}";
+            DmxValue = value;
+        }
+
+        private DmxAddressViewer()
         {
             _bar = new VisualElement
             {
@@ -48,16 +42,12 @@ namespace ArtNet.Editor.UI
             };
             Add(addressTextPanel);
 
-            _addressLabel = new Label
-            {
-                name = "AddressLabel",
-                text = $"{_dmxAddress}"
-            };
+            _addressLabel = new Label();
             addressTextPanel.Add(_addressLabel);
             _addressValue = new Label
             {
                 name = "AddressValue",
-                text = $"{_dmxValue}"
+                text = $"{DmxValue}"
             };
             addressTextPanel.Add(_addressValue);
 

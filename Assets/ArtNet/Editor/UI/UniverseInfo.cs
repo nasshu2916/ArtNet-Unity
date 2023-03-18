@@ -2,13 +2,13 @@ using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
 {
-    public class UniverseInfo : VisualElement
+    public class UniverseInfo : Button
     {
         private readonly Label _universeNumberLabel;
 
-        private int _universeNumber;
+        private ushort _universeNumber;
 
-        public int UniverseNumber
+        private ushort UniverseNumber
         {
             get => _universeNumber;
             set
@@ -18,14 +18,18 @@ namespace ArtNet.Editor.UI
             }
         }
 
-        public UniverseInfo()
+        public UniverseInfo(ushort number) : this()
+        {
+            UniverseNumber = number;
+        }
+
+        private UniverseInfo()
         {
             _universeNumberLabel = new Label();
-            UpdateUniverseLabel(_universeNumber);
             Add(_universeNumberLabel);
         }
 
-        private void UpdateUniverseLabel(int number)
+        private void UpdateUniverseLabel(ushort number)
         {
             _universeNumberLabel.text = $"Universe: {number}";
         }
