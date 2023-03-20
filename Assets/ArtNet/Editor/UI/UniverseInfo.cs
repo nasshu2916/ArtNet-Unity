@@ -31,7 +31,7 @@ namespace ArtNet.Editor.UI
 
         private void UpdateUniverseLabel(ushort number)
         {
-            _universeNumberLabel.text = $"Universe: {number}";
+            _universeNumberLabel.text = $"Universe: {number + 1}";
         }
     }
 }

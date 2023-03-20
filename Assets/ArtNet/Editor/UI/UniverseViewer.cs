@@ -9,6 +9,22 @@ namespace ArtNet.Editor.UI
 
         private readonly DmxViewer _dmxViewer;
         private ushort _selectedUniverseNumber;
+        private DmxManager _dmxManager;
+
+        public DmxManager DmxManager
+        {
+            get => _dmxManager;
+            set
+            {
+                _dmxManager = value;
+                _dmxViewer.DmxValues = _dmxManager.DmxValues(_selectedUniverseNumber);
+            }
+        }
+
+        public void UpdateDmxViewer()
+        {
+            _dmxViewer.DmxValues = DmxManager.DmxValues(_selectedUniverseNumber);
+        }
 
         public UniverseViewer()
         {
@@ -17,11 +33,13 @@ namespace ArtNet.Editor.UI
                 name = "UniverseSelector"
             };
             Add(universeSelector);
+
             for (ushort i = 0; i < SelectableUniverseCount; i++)
             {
                 var number = i;
                 var universeInfo = new UniverseInfo(number);
                 universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(number, evt);
+                if (number == _selectedUniverseNumber) universeInfo.AddToClassList("selected");
 
                 universeSelector.Add(universeInfo);
             }
@@ -38,20 +56,12 @@ namespace ArtNet.Editor.UI
 
         private void OnUniverseSelected(ushort universeNumber, EventBase evt)
         {
-            if (evt.target is not UniverseInfo button) return;
+            if (evt.target is not UniverseInfo universeInfo) return;
             this.Q<UniverseInfo>(null, "selected")?.RemoveFromClassList("selected");
-            button.AddToClassList("selected");
+            universeInfo.AddToClassList("selected");
             _selectedUniverseNumber = universeNumber;
-
-            // FIXME: This is just for testing
-            var dmx = new byte[512];
-            for (var i = 0; i < 512; i++)
-            {
-                dmx[i] = (byte)(universeNumber * 10);
-            }
-            _dmxViewer.DmxValues = dmx;
+            _dmxViewer.DmxValues = DmxManager.DmxValues(_selectedUniverseNumber);
         }
-
 
         public new class UxmlFactory : UxmlFactory<UniverseViewer, UxmlTraits>
         {
