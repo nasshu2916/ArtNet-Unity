@@ -1,4 +1,4 @@
-using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
@@ -52,7 +52,7 @@ namespace ArtNet.Editor.UI
             addressTextPanel.Add(_addressValue);
 
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/ArtNet/Editor/UI/DmxAddressViewer.uss");
+            var styleSheet = Resources.Load<StyleSheet>("DmxAddressViewer");
             styleSheets.Add(styleSheet);
             style.minHeight = 50;
             style.minWidth = 50;

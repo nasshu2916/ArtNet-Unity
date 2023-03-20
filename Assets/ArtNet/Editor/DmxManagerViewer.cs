@@ -25,8 +25,7 @@ namespace ArtNet.Editor
             if (_dmxManager == null) return;
 
             var root = rootVisualElement;
-            var visualTree =
-                AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/ArtNet/Editor/DmxManagerViewer.uxml");
+            var visualTree = Resources.Load<VisualTreeAsset>("DmxManagerViewer");
             root.Add(visualTree.Instantiate());
 
             var dmxManagerObjectField = root.Q<ObjectField>("DmxManagerObjectField");
@@ -34,7 +33,7 @@ namespace ArtNet.Editor
             _universeViewer = root.Q<UniverseViewer>();
             _universeViewer.DmxManager = _dmxManager;
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/ArtNet/Editor/DmxManagerViewer.uss");
+            var styleSheet = Resources.Load<StyleSheet>("DmxManagerViewer");
             root.styleSheets.Add(styleSheet);
         }
 

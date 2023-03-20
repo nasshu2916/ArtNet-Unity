@@ -1,4 +1,4 @@
-using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
@@ -30,7 +30,7 @@ namespace ArtNet.Editor.UI
                 Add(_dmxAddressViewers[i]);
             }
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/ArtNet/Editor/UI/DmxViewer.uss");
+            var styleSheet = Resources.Load<StyleSheet>("DmxViewer");
             styleSheets.Add(styleSheet);
         }
     }

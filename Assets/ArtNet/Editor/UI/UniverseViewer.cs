@@ -1,4 +1,4 @@
-using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
@@ -50,7 +50,7 @@ namespace ArtNet.Editor.UI
             _dmxViewer = new DmxViewer();
             dmxScrollView.Add(_dmxViewer);
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/ArtNet/Editor/UI/UniverseViewer.uss");
+            var styleSheet = Resources.Load<StyleSheet>("UniverseViewer");
             styleSheets.Add(styleSheet);
         }
 
