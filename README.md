@@ -8,11 +8,18 @@ Receive DMX512 via ArtNet.
 ## Install
 
 Install via Unity Package Manager.
-```
-https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#v0.1.0
-```
 
 ※ Required Unity version is 2020 or later.
+
+```
+https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#v0.1.1
+```
+
+or develop branch
+
+```
+https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#develop
+```
 
 ## Usage
 
