@@ -30,32 +30,25 @@ namespace ArtNet.Editor.UI
 
         private DmxAddressViewer()
         {
-            _bar = new VisualElement
-            {
-                name = "AddressBar"
-            };
+            _bar = new VisualElement();
+            _bar.AddToClassList("address-bar");
             Add(_bar);
 
-            var addressTextPanel = new VisualElement
-            {
-                name = "AddressTextPanel"
-            };
+            var addressTextPanel = new VisualElement();
+            addressTextPanel.AddToClassList("address-text-panel");
             Add(addressTextPanel);
 
             _addressLabel = new Label();
             addressTextPanel.Add(_addressLabel);
             _addressValue = new Label
             {
-                name = "AddressValue",
                 text = $"{DmxValue}"
             };
+            _addressValue.AddToClassList("address-value");
             addressTextPanel.Add(_addressValue);
-
 
             var styleSheet = Resources.Load<StyleSheet>("DmxAddressViewer");
             styleSheets.Add(styleSheet);
-            style.minHeight = 50;
-            style.minWidth = 50;
         }
     }
 }

@@ -32,9 +32,6 @@ namespace ArtNet.Editor
             dmxManagerObjectField.value = _dmxManager;
             _universeViewer = root.Q<UniverseViewer>();
             _universeViewer.DmxManager = _dmxManager;
-
-            var styleSheet = Resources.Load<StyleSheet>("DmxManagerViewer");
-            root.styleSheets.Add(styleSheet);
         }
 
         public void OnGUI()
