@@ -7,22 +7,29 @@ using UnityEngine;
 
 namespace ArtNet
 {
-    public abstract class UdpReceiver : MonoBehaviour
+    public sealed class UdpReceiver
     {
         private Socket _socket;
         private CancellationTokenSource _cancellationTokenSource;
         private Task _task;
         private byte[] _receiveBuffer = new byte[1500];
 
-        public int Port { get; protected set; }
+        public int Port { get; }
         public bool IsRunning => _task is {IsCanceled: false, IsCompleted: false};
 
+        public ReceivedPacketEventHandler OnReceivedPacket = (_, _, _) => { };
         public ErrorOccuredEventHandler OnUdpStartFailed = _ => { };
         public ErrorOccuredEventHandler OnUdpReceiveFailed = _ => { };
+        public ErrorOccuredEventHandler OnUdpReceiveRaiseException = _ => { };
 
+        public delegate void ReceivedPacketEventHandler(byte[] receiveBuffer, int length, EndPoint remoteEp);
         public delegate void ErrorOccuredEventHandler(Exception e);
+        public UdpReceiver(int port)
+        {
+            Port = port;
+        }
 
-        private void OnApplicationQuit()
+        ~UdpReceiver()
         {
             StopReceive();
         }
@@ -63,7 +70,7 @@ namespace ArtNet
 
                     if (result.ReceivedBytes != 0)
                     {
-                        OnReceivedPacket(_receiveBuffer, result.ReceivedBytes, result.RemoteEndPoint);
+                        OnReceivedPacket?.Invoke(_receiveBuffer, result.ReceivedBytes, result.RemoteEndPoint);
                     }
                 }
                 catch (Exception e) when (e is SocketException or ObjectDisposedException)
@@ -74,7 +81,7 @@ namespace ArtNet
                 catch (Exception e)
                 {
                     Debug.LogErrorFormat($"[UdpReceiver] Udp receive failed. {e.Message} : {e.GetType()}");
-                    OnRaiseError(e);
+                    OnUdpReceiveRaiseException?.Invoke(e);
                 }
             }
         }
@@ -91,13 +98,5 @@ namespace ArtNet
             _socket.Close();
             _socket = null;
         }
-
-        protected virtual void OnRaiseError(Exception e)
-        {
-            StopReceive();
-            OnUdpReceiveFailed?.Invoke(e);
-        }
-
-        protected abstract void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp);
     }
 }
