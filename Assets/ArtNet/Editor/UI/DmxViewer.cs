@@ -1,7 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ArtNet.Editor.UI
@@ -20,7 +18,7 @@ namespace ArtNet.Editor.UI
                 _dmxValues = value;
                 for (var i = 0; i < DmxLength; i++)
                 {
-                    _dmxAddressViewers[i].DmxValue = DmxValues[i];
+                    _dmxAddressViewers[i].value = DmxValues[i];
                 }
             }
         }
@@ -38,6 +36,7 @@ namespace ArtNet.Editor.UI
                     _dmxAddressViewers[item.i] = new DmxAddressViewer(item.i + 1, item.v);
                     element.Add(_dmxAddressViewers[item.i]);
                 }
+
                 element.AddToClassList("dmx-viewer-row");
                 Add(element);
             }
