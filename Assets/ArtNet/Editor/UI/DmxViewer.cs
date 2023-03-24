@@ -1,31 +1,45 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
 
 namespace ArtNet.Editor.UI
 {
-    public class DmxViewer : VisualElement
+    public class DmxViewer : VisualElement, INotifyValueChanged<byte[]>
     {
         private const int DmxLength = 512;
         private byte[] _dmxValues = new byte[DmxLength];
         private readonly DmxAddressViewer[] _dmxAddressViewers = new DmxAddressViewer[DmxLength];
 
-        public byte[] DmxValues
+        public byte[] value
         {
-            private get => _dmxValues;
+            get => _dmxValues;
             set
             {
-                _dmxValues = value;
-                for (var i = 0; i < DmxLength; i++)
+                if (value.SequenceEqual(_dmxValues)) return;
+
+                using (var pooled = ChangeEvent<byte[]>.GetPooled(_dmxValues, value))
                 {
-                    _dmxAddressViewers[i].value = DmxValues[i];
+                    pooled.target = this;
+                    SetValueWithoutNotify(value);
+                    SendEvent(pooled);
                 }
+            }
+        }
+
+        public void SetValueWithoutNotify(byte[] newValues)
+        {
+            var dmxLength = newValues.Length;
+            Buffer.BlockCopy(newValues, 0, _dmxValues, 0, dmxLength);
+            for (var i = 0; i < dmxLength; i++)
+            {
+                _dmxAddressViewers[i].value = newValues[i];
             }
         }
 
         public DmxViewer()
         {
-            var chunks = DmxValues.Select((v, i) => new { v, i })
+            var chunks = value.Select((v, i) => new { v, i })
                 .GroupBy(x => x.i / 20);
 
             foreach (var chunk in chunks)

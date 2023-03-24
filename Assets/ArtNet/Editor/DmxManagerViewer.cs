@@ -1,3 +1,4 @@
+using System;
 using ArtNet.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -18,7 +19,7 @@ namespace ArtNet.Editor
             wnd.titleContent = new GUIContent("DmxManagerViewer");
         }
 
-        public void CreateGUI()
+        private void CreateGUI()
         {
             minSize = new Vector2(1200, 500);
             if (_dmxManager == null) _dmxManager = FindObjectOfType<DmxManager>();
@@ -34,7 +35,7 @@ namespace ArtNet.Editor
             _universeViewer.DmxManager = _dmxManager;
         }
 
-        public void OnGUI()
+        private void Update()
         {
             _universeViewer?.UpdateDmxViewer();
         }
