@@ -16,7 +16,7 @@ namespace ArtNet.Editor.UI
             get => _dmxValues;
             set
             {
-                if (value.SequenceEqual(_dmxValues)) return;
+                if (_dmxValues.SequenceEqual(value)) return;
 
                 using (var pooled = ChangeEvent<byte[]>.GetPooled(_dmxValues, value))
                 {
@@ -57,6 +57,14 @@ namespace ArtNet.Editor.UI
 
             var styleSheet = Resources.Load<StyleSheet>("DmxViewer");
             styleSheets.Add(styleSheet);
+        }
+
+        public new class UxmlFactory : UxmlFactory<DmxViewer, UxmlTraits>
+        {
+        }
+
+        public new class UxmlTraits : VisualElement.UxmlTraits
+        {
         }
     }
 }

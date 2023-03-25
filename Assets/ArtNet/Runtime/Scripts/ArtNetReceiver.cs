@@ -24,7 +24,7 @@ namespace ArtNet
 
     public class ArtNetReceiver : MonoBehaviour
     {
-        private const int ArtNetPort = 6454;
+        public const int ArtNetPort = 6454;
 
         [SerializeField] private bool _autoStart = true;
         [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
