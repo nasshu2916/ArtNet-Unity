@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
@@ -5,8 +6,13 @@ namespace ArtNet.Editor.UI
     public class UniverseInfo : Button
     {
         private readonly Label _universeNumberLabel;
-
+        private readonly Label _receivedAtLabel;
         private ushort _universeNumber;
+
+        public DateTime ReceivedAt
+        {
+            set => _receivedAtLabel.text = $"Received at: {value:HH:mm:ss.fff}";
+        }
 
         private ushort UniverseNumber
         {
@@ -14,7 +20,7 @@ namespace ArtNet.Editor.UI
             set
             {
                 _universeNumber = value;
-                UpdateUniverseLabel(value);
+                _universeNumberLabel.text = $"Universe: {_universeNumber + 1}";
             }
         }
 
@@ -26,12 +32,11 @@ namespace ArtNet.Editor.UI
         private UniverseInfo()
         {
             _universeNumberLabel = new Label();
+            _universeNumberLabel.AddToClassList("universe-number-label");
             Add(_universeNumberLabel);
-        }
-
-        private void UpdateUniverseLabel(ushort number)
-        {
-            _universeNumberLabel.text = $"Universe: {number + 1}";
+            _receivedAtLabel = new Label();
+            _receivedAtLabel.AddToClassList("received-at-label");
+            Add(_receivedAtLabel);
         }
     }
 }

@@ -1,0 +1,80 @@
+:root {
+    padding: 5px;
+}
+
+#UniverseSelector {
+    width: 175px;
+    background-color: var(--unity-colors-default-background);
+    margin-top: 3px;
+}
+
+#NonReceivedPacketText {
+    position: absolute;
+    -unity-font-style: bold;
+    white-space: normal;
+    padding: 10px;
+}
+
+.panel {
+    flex-shrink: 0;
+    background-color: var(--unity-colors-box-background);
+    padding: 10;
+}
+
+.panel-title {
+    color: cyan;
+    -unity-font-style: bold;
+}
+
+.row-panel {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.status-panel {
+    width: 80%;
+}
+
+.receive-start-button {
+    width: 20%;
+    padding: 3px;
+}
+
+.receive-start-button Button {
+    width: 100%;
+    height: 100%;
+    white-space: normal;
+}
+
+.receive-start-button Button.selected {
+    background-color: var(--unity-colors-button-background-pressed);
+}
+
+UniverseInfo .universe-number-label {
+    -unity-font-style: bold;
+    font-size: 12px;
+    padding-bottom: 5px;
+}
+
+UniverseInfo .received-at-label {
+    -unity-text-align: middle-left;
+    font-size: 10px;
+}
+
+DmxViewer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 750px;
+    padding: 5px;
+}
+
+UniverseInfo {
+    height: 50px;
+    margin: 2px;
+    padding: 5px;
+    align-items: flex-start;
+}
+
+UniverseInfo.selected {
+    background-color: var(--unity-colors-highlight-background);
+}

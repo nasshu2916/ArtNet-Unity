@@ -1,6 +1,6 @@
 DmxAddressViewer {
-    min-width: 50px;
-    min-height: 50px;
+    min-width: 30px;
+    min-height: 30px;
     width: 5%;
     background-color: var(--unity-colors-default-background);
     border-width: 1;
