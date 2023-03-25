@@ -11,10 +11,10 @@ namespace ArtNet.Editor.UI
 
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
-            private UxmlIntAttributeDescription _addressNumAttr = new UxmlIntAttributeDescription()
+            private UxmlIntAttributeDescription _addressNumAttr = new()
                 { name = "address-num" };
 
-            private UxmlIntAttributeDescription _addressValueAttr = new UxmlIntAttributeDescription()
+            private UxmlIntAttributeDescription _addressValueAttr = new()
                 { name = "address-value" };
 
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)

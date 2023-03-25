@@ -1,10 +1,14 @@
+:root {
+    --dmx-address-bar-color: darkgreen;
+}
+
 .dmx-address-bar {
     position: absolute;
     bottom: 0;
     min-height: 0;
     max-height: 100%;
     width: 100%;
-    background-color: darkgreen;
+    background-color: var(--dmx-address-bar-color);
 }
 
 .dmx-address-panel {

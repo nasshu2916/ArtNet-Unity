@@ -44,7 +44,7 @@ namespace ArtNet.Editor.UI
 
         public void UpdateDmxViewer()
         {
-            _dmxViewer.value = _dmxManager.DmxValues(_selectedUniverseNum);
+            _dmxViewer.value = _dmxManager == null ? new byte[512] : _dmxManager.DmxValues(_selectedUniverseNum);
         }
 
         public UniverseViewer()
