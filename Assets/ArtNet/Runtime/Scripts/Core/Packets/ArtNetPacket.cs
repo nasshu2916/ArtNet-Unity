@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ArtNet.IO;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -37,14 +36,14 @@ namespace ArtNet.Packets
             return memoryStream.ToArray();
         }
 
-        protected virtual void ReadData(ArtNetReader netReader)
+        protected virtual void ReadData(ArtNetReader artNetReader)
         {
         }
 
-        protected virtual void WriteData(ArtNetWriter netWriter)
+        protected virtual void WriteData(ArtNetWriter artNetWriter)
         {
-            netWriter.WriteNetwork(ArtNetId, 8);
-            netWriter.Write((ushort)OpCode);
+            artNetWriter.WriteNetwork(ArtNetId, 8);
+            artNetWriter.Write((ushort)OpCode);
         }
 
         [CanBeNull]

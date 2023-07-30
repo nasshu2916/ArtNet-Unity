@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text;
 
-namespace ArtNet.IO
+namespace ArtNet.Packets
 {
     public class ArtNetWriter : BinaryWriter
     {

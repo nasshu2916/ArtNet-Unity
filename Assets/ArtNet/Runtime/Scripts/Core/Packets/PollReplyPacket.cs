@@ -1,6 +1,5 @@
 ﻿using System;
 using ArtNet.Enums;
-using ArtNet.IO;
 
 namespace ArtNet.Packets
 {
@@ -75,37 +74,37 @@ namespace ArtNet.Packets
             Filter = artNetReader.ReadBytes(26);
         }
 
-        protected override void WriteData(ArtNetWriter netWriter)
+        protected override void WriteData(ArtNetWriter artNetWriter)
         {
-            base.WriteData(netWriter);
-            netWriter.Write(IpAddress);
-            netWriter.Write(Port);
-            netWriter.WriteNetwork(VersionInfo);
-            netWriter.Write(NetSwitch);
-            netWriter.Write(SubSwitch);
-            netWriter.WriteNetwork(Oem);
-            netWriter.Write(UbeaVersion);
-            netWriter.Write(Status1);
-            netWriter.Write(EstaCode);
-            netWriter.WriteNetwork(ShortName, 18);
-            netWriter.WriteNetwork(LongName, 64);
-            netWriter.WriteNetwork(NodeReport, 64);
-            netWriter.Write(NumPorts);
-            netWriter.Write(PortTypes);
-            netWriter.Write(InputStatus);
-            netWriter.Write(OutputStatus);
-            netWriter.Write(InputSubSwitch);
-            netWriter.Write(OutputSubSwitch);
-            netWriter.Write(SwVideo);
-            netWriter.Write(SwMacro);
-            netWriter.Write(SwRemote);
-            netWriter.Write(Spares);
-            netWriter.Write(Style);
-            netWriter.Write(MacAddress);
-            netWriter.Write(BindIpAddress);
-            netWriter.Write(BindIndex);
-            netWriter.Write(Status2);
-            netWriter.Write(Filter);
+            base.WriteData(artNetWriter);
+            artNetWriter.Write(IpAddress);
+            artNetWriter.Write(Port);
+            artNetWriter.WriteNetwork(VersionInfo);
+            artNetWriter.Write(NetSwitch);
+            artNetWriter.Write(SubSwitch);
+            artNetWriter.WriteNetwork(Oem);
+            artNetWriter.Write(UbeaVersion);
+            artNetWriter.Write(Status1);
+            artNetWriter.Write(EstaCode);
+            artNetWriter.WriteNetwork(ShortName, 18);
+            artNetWriter.WriteNetwork(LongName, 64);
+            artNetWriter.WriteNetwork(NodeReport, 64);
+            artNetWriter.Write(NumPorts);
+            artNetWriter.Write(PortTypes);
+            artNetWriter.Write(InputStatus);
+            artNetWriter.Write(OutputStatus);
+            artNetWriter.Write(InputSubSwitch);
+            artNetWriter.Write(OutputSubSwitch);
+            artNetWriter.Write(SwVideo);
+            artNetWriter.Write(SwMacro);
+            artNetWriter.Write(SwRemote);
+            artNetWriter.Write(Spares);
+            artNetWriter.Write(Style);
+            artNetWriter.Write(MacAddress);
+            artNetWriter.Write(BindIpAddress);
+            artNetWriter.Write(BindIndex);
+            artNetWriter.Write(Status2);
+            artNetWriter.Write(Filter);
         }
     }
 }

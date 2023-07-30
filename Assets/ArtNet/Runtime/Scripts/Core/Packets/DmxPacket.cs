@@ -1,6 +1,5 @@
 using System;
 using ArtNet.Enums;
-using ArtNet.IO;
 
 namespace ArtNet.Packets
 {
@@ -32,15 +31,15 @@ namespace ArtNet.Packets
             Dmx = artNetReader.ReadBytes(length);
         }
 
-        protected override void WriteData(ArtNetWriter netWriter)
+        protected override void WriteData(ArtNetWriter artNetWriter)
         {
-            base.WriteData(netWriter);
-            netWriter.WriteNetwork(ProtocolVersion);
-            netWriter.Write(Sequence);
-            netWriter.Write(Physical);
-            netWriter.Write(Universe);
-            netWriter.WriteNetwork(Length);
-            netWriter.Write(Dmx);
+            base.WriteData(artNetWriter);
+            artNetWriter.WriteNetwork(ProtocolVersion);
+            artNetWriter.Write(Sequence);
+            artNetWriter.Write(Physical);
+            artNetWriter.Write(Universe);
+            artNetWriter.WriteNetwork(Length);
+            artNetWriter.Write(Dmx);
         }
     }
 }
