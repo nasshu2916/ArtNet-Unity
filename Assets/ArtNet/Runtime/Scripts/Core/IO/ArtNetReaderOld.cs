@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ArtNet.IO
 {
-    public class ArtNetReader : BinaryReader
+    public class ArtNetReaderOld : BinaryReader
     {
-        public ArtNetReader(Stream input) : base(input)
+        public ArtNetReaderOld(Stream input) : base(input)
         {
         }
 

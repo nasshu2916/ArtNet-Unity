@@ -21,7 +21,7 @@ namespace ArtNet.Packets
 
         public byte[] Dmx { get; set; }
 
-        protected override void ReadData(ArtNetReader netReader)
+        protected override void ReadData(ArtNetReaderOld netReader)
         {
             ProtocolVersion = netReader.ReadNetworkUInt16();
             Sequence = netReader.ReadByte();

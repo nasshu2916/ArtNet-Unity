@@ -21,7 +21,7 @@ namespace ArtNet.Packets
         protected ArtNetPacket(byte[] buffer, Enums.OpCode opCode) : this(opCode)
         {
             using var memoryStream = new MemoryStream(buffer);
-            using var artReader = new ArtNetReader(memoryStream);
+            using var artReader = new ArtNetReaderOld(memoryStream);
             memoryStream.Position = FixedArtNetPacketLength;
             ReadData(artReader);
         }
@@ -36,7 +36,7 @@ namespace ArtNet.Packets
             return memoryStream.ToArray();
         }
 
-        protected virtual void ReadData(ArtNetReader netReader)
+        protected virtual void ReadData(ArtNetReaderOld netReader)
         {
         }
 

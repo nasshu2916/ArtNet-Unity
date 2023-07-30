@@ -17,7 +17,7 @@ namespace ArtNet.Packets
         public byte Priority { get; set; }
 
 
-        protected override void ReadData(ArtNetReader netReader)
+        protected override void ReadData(ArtNetReaderOld netReader)
         {
             ProtocolVersion = netReader.ReadNetworkUInt16();
             Flags = netReader.ReadByte();

@@ -42,36 +42,36 @@ namespace ArtNet.Packets
         public byte Status2 { get; set; }
         public byte[] Filter { get; set; } = new byte[26];
 
-        protected override void ReadData(ArtNetReader netReader)
+        protected override void ReadData(ArtNetReaderOld artNetReader)
         {
-            IpAddress = netReader.ReadBytes(4);
-            Port = netReader.ReadUInt16();
-            VersionInfo = netReader.ReadNetworkUInt16();
-            NetSwitch = netReader.ReadByte();
-            SubSwitch = netReader.ReadByte();
-            Oem = netReader.ReadNetworkUInt16();
-            UbeaVersion = netReader.ReadByte();
-            Status1 = netReader.ReadByte();
-            EstaCode = netReader.ReadNetworkUInt16();
-            ShortName = netReader.ReadNetworkString(18);
-            LongName = netReader.ReadNetworkString(64);
-            NodeReport = netReader.ReadNetworkString(64);
-            NumPorts = netReader.ReadNetworkUInt16();
-            PortTypes = netReader.ReadBytes(4);
-            InputStatus = netReader.ReadBytes(4);
-            OutputStatus = netReader.ReadBytes(4);
-            InputSubSwitch = netReader.ReadBytes(4);
-            OutputSubSwitch = netReader.ReadBytes(4);
-            SwVideo = netReader.ReadByte();
-            SwMacro = netReader.ReadByte();
-            SwRemote = netReader.ReadByte();
-            Spares = netReader.ReadBytes(3);
-            Style = netReader.ReadByte();
-            MacAddress = netReader.ReadBytes(6);
-            BindIpAddress = netReader.ReadBytes(4);
-            BindIndex = netReader.ReadByte();
-            Status2 = netReader.ReadByte();
-            Filter = netReader.ReadBytes(26);
+            IpAddress = artNetReader.ReadBytes(4);
+            Port = artNetReader.ReadUInt16();
+            VersionInfo = artNetReader.ReadNetworkUInt16();
+            NetSwitch = artNetReader.ReadByte();
+            SubSwitch = artNetReader.ReadByte();
+            Oem = artNetReader.ReadNetworkUInt16();
+            UbeaVersion = artNetReader.ReadByte();
+            Status1 = artNetReader.ReadByte();
+            EstaCode = artNetReader.ReadNetworkUInt16();
+            ShortName = artNetReader.ReadNetworkString(18);
+            LongName = artNetReader.ReadNetworkString(64);
+            NodeReport = artNetReader.ReadNetworkString(64);
+            NumPorts = artNetReader.ReadNetworkUInt16();
+            PortTypes = artNetReader.ReadBytes(4);
+            InputStatus = artNetReader.ReadBytes(4);
+            OutputStatus = artNetReader.ReadBytes(4);
+            InputSubSwitch = artNetReader.ReadBytes(4);
+            OutputSubSwitch = artNetReader.ReadBytes(4);
+            SwVideo = artNetReader.ReadByte();
+            SwMacro = artNetReader.ReadByte();
+            SwRemote = artNetReader.ReadByte();
+            Spares = artNetReader.ReadBytes(3);
+            Style = artNetReader.ReadByte();
+            MacAddress = artNetReader.ReadBytes(6);
+            BindIpAddress = artNetReader.ReadBytes(4);
+            BindIndex = artNetReader.ReadByte();
+            Status2 = artNetReader.ReadByte();
+            Filter = artNetReader.ReadBytes(26);
         }
 
         protected override void WriteData(ArtNetWriter netWriter)
