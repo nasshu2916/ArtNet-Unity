@@ -1,4 +1,5 @@
-﻿using ArtNet.Enums;
+﻿using System;
+using ArtNet.Enums;
 using ArtNet.IO;
 
 namespace ArtNet.Packets
@@ -9,7 +10,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public PollReplyPacket(byte[] buffer) : base(buffer, OpCode.PollReply)
+        public PollReplyPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.PollReply)
         {
         }
 
@@ -42,7 +43,7 @@ namespace ArtNet.Packets
         public byte Status2 { get; set; }
         public byte[] Filter { get; set; } = new byte[26];
 
-        protected override void ReadData(ArtNetReaderOld artNetReader)
+        protected override void ReadData(ArtNetReader artNetReader)
         {
             IpAddress = artNetReader.ReadBytes(4);
             Port = artNetReader.ReadUInt16();
@@ -53,9 +54,9 @@ namespace ArtNet.Packets
             UbeaVersion = artNetReader.ReadByte();
             Status1 = artNetReader.ReadByte();
             EstaCode = artNetReader.ReadNetworkUInt16();
-            ShortName = artNetReader.ReadNetworkString(18);
-            LongName = artNetReader.ReadNetworkString(64);
-            NodeReport = artNetReader.ReadNetworkString(64);
+            ShortName = artNetReader.ReadString(18);
+            LongName = artNetReader.ReadString(64);
+            NodeReport = artNetReader.ReadString(64);
             NumPorts = artNetReader.ReadNetworkUInt16();
             PortTypes = artNetReader.ReadBytes(4);
             InputStatus = artNetReader.ReadBytes(4);

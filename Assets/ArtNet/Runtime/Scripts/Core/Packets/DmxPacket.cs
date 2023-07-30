@@ -1,3 +1,4 @@
+using System;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -9,7 +10,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public DmxPacket(byte[] buffer) : base(buffer, OpCode.Dmx)
+        public DmxPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Dmx)
         {
         }
 
@@ -21,14 +22,14 @@ namespace ArtNet.Packets
 
         public byte[] Dmx { get; set; }
 
-        protected override void ReadData(ArtNetReaderOld netReader)
+        protected override void ReadData(ArtNetReader artNetReader)
         {
-            ProtocolVersion = netReader.ReadNetworkUInt16();
-            Sequence = netReader.ReadByte();
-            Physical = netReader.ReadByte();
-            Universe = netReader.ReadUInt16();
-            int length = netReader.ReadNetworkUInt16();
-            Dmx = netReader.ReadBytes(length);
+            ProtocolVersion = artNetReader.ReadNetworkUInt16();
+            Sequence = artNetReader.ReadByte();
+            Physical = artNetReader.ReadByte();
+            Universe = artNetReader.ReadUInt16();
+            int length = artNetReader.ReadNetworkUInt16();
+            Dmx = artNetReader.ReadBytes(length);
         }
 
         protected override void WriteData(ArtNetWriter netWriter)

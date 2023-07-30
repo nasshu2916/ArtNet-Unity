@@ -1,4 +1,5 @@
-﻿using ArtNet.Enums;
+﻿using System;
+using ArtNet.Enums;
 using ArtNet.IO;
 
 namespace ArtNet.Packets
@@ -9,7 +10,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public PollPacket(byte[] buffer) : base(buffer, OpCode.Poll)
+        public PollPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Poll)
         {
         }
 
@@ -17,7 +18,7 @@ namespace ArtNet.Packets
         public byte Priority { get; set; }
 
 
-        protected override void ReadData(ArtNetReaderOld netReader)
+        protected override void ReadData(ArtNetReader netReader)
         {
             ProtocolVersion = netReader.ReadNetworkUInt16();
             Flags = netReader.ReadByte();
