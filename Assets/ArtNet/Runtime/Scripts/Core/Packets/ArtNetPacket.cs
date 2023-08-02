@@ -20,7 +20,7 @@ namespace ArtNet.Packets
         protected ArtNetPacket(ReadOnlySpan<byte> buffer, Enums.OpCode opCode) : this(opCode)
         {
             var artReader = new ArtNetReader(buffer[FixedArtNetPacketLength..]);
-            ReadData(artReader);
+            Deserialize(artReader);
         }
 
         public Enums.OpCode OpCode { get; }
@@ -29,15 +29,15 @@ namespace ArtNet.Packets
         public byte[] ToByteArray()
         {
             using var memoryStream = new MemoryStream();
-            WriteData(new ArtNetWriter(memoryStream));
+            Serialize(new ArtNetWriter(memoryStream));
             return memoryStream.ToArray();
         }
 
-        protected virtual void ReadData(ArtNetReader artNetReader)
+        protected virtual void Deserialize(ArtNetReader artNetReader)
         {
         }
 
-        protected virtual void WriteData(ArtNetWriter artNetWriter)
+        protected virtual void Serialize(ArtNetWriter artNetWriter)
         {
             artNetWriter.WriteNetwork(ArtNetId, 8);
             artNetWriter.Write((ushort)OpCode);
