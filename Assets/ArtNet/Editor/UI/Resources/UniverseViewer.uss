@@ -18,5 +18,8 @@ UniverseInfo.selected {
 }
 
 DmxViewer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 1000px;
     margin: 5px;
 }

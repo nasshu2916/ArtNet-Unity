@@ -12,7 +12,7 @@ Install via Unity Package Manager.
 ※ Required Unity version is 2021.3.1 or later.
 
 ```
-https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#v0.1.1
+https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#v0.1.2
 ```
 
 or develop branch

@@ -1,0 +1,17 @@
+:root {
+    padding: 3px;
+}
+
+#DmxManagerObjectFieldInfo {
+    width: 30%;
+    padding-left: 10px;
+    color: var(--unity-colors-warning-text);
+}
+
+.info-panel {
+    flex-shrink: 0;
+    background-color: var(--unity-colors-box-background);
+    margin: 5px;
+    padding: 10px;
+    border-radius: 3px;
+}

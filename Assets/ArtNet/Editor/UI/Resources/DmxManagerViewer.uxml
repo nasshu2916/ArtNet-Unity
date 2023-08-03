@@ -1,4 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <uie:ObjectField label="Dmx Manager" name="DmxManagerObjectField" type="ArtNet.DmxManager, ArtNet" />
-    <ArtNet.Editor.UI.UniverseViewer />
+    <ui:VisualElement class="info-panel">
+        <uie:ObjectField label="Dmx Manager" name="DmxManagerObjectField" type="ArtNet.DmxManager, ArtNet">
+            <ui:Label display-tooltip-when-elided="true" name="DmxManagerObjectFieldInfo"/>
+        </uie:ObjectField>
+        <ui:Toggle label="Update Dmx Values" name="UpdateDmxToggle"/>
+    </ui:VisualElement>
+    <ArtNet.Editor.UI.UniverseViewer/>
 </ui:UXML>

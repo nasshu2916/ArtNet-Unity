@@ -3,59 +3,88 @@ using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.UI
 {
-    public class DmxAddressViewer : VisualElement
+    public class DmxAddressViewer : VisualElement, INotifyValueChanged<byte>
     {
-        private readonly VisualElement _bar;
-        private readonly Label _addressLabel;
-        private readonly Label _addressValue;
-        private int _dmxValue;
-
-        public int DmxValue
+        public new class UxmlFactory : UxmlFactory<DmxAddressViewer, UxmlTraits>
         {
-            get => _dmxValue;
-            set
+        }
+
+        public new class UxmlTraits : VisualElement.UxmlTraits
+        {
+            private UxmlIntAttributeDescription _addressNumAttr = new()
+                { name = "address-num" };
+
+            private UxmlIntAttributeDescription _addressValueAttr = new()
+                { name = "address-value" };
+
+            public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
             {
-                _dmxValue = value;
-                _addressValue.text = $"{_dmxValue}";
-                var percent = _dmxValue * 100f / 255f;
-                _bar.style.height = new StyleLength(new Length(percent, LengthUnit.Percent));
+                base.Init(ve, bag, cc);
+                var testElement = (DmxAddressViewer)ve;
+                testElement._addressNumLabel.text = _addressNumAttr.GetValueFromBag(bag, cc).ToString();
+                testElement.value = (byte)_addressValueAttr.GetValueFromBag(bag, cc);
             }
         }
 
-        public DmxAddressViewer(int address, int value) : this()
+        private readonly VisualElement _bar;
+        private readonly Label _addressNumLabel;
+        private readonly Label _addressValueLabel;
+        private byte _addressValue;
+
+        private int addressNum => int.Parse(_addressNumLabel.text);
+        private int addressValue => int.Parse(_addressValueLabel.text);
+
+        public byte value
         {
-            _addressLabel.text = $"{address}";
-            DmxValue = value;
+            get => _addressValue;
+            set
+            {
+                if (_addressValue == value) return;
+
+                using (var pooled = ChangeEvent<byte>.GetPooled(_addressValue, value))
+                {
+                    pooled.target = this;
+                    SetValueWithoutNotify(value);
+                    SendEvent(pooled);
+                }
+            }
         }
 
-        private DmxAddressViewer()
+        public void SetValueWithoutNotify(byte newValue)
         {
-            _bar = new VisualElement
-            {
-                name = "AddressBar"
-            };
+            _addressValue = newValue;
+            _addressValueLabel.text = newValue.ToString();
+            var percent = newValue * 100f / 255f;
+            _bar.style.height = new StyleLength(new Length(percent, LengthUnit.Percent));
+        }
+
+        public DmxAddressViewer(int address, byte value) : this()
+        {
+            _addressNumLabel.text = $"{address}";
+            this.value = value;
+        }
+
+        public DmxAddressViewer()
+        {
+            _bar = new VisualElement();
+            _bar.AddToClassList("dmx-address-bar");
             Add(_bar);
 
-            var addressTextPanel = new VisualElement
-            {
-                name = "AddressTextPanel"
-            };
+            var addressTextPanel = new VisualElement();
+            addressTextPanel.AddToClassList("dmx-address-panel");
             Add(addressTextPanel);
 
-            _addressLabel = new Label();
-            addressTextPanel.Add(_addressLabel);
-            _addressValue = new Label
+            _addressNumLabel = new Label();
+            addressTextPanel.Add(_addressNumLabel);
+            _addressValueLabel = new Label
             {
-                name = "AddressValue",
-                text = $"{DmxValue}"
+                text = value.ToString()
             };
-            addressTextPanel.Add(_addressValue);
-
+            _addressValueLabel.AddToClassList("dmx-address-value");
+            addressTextPanel.Add(_addressValueLabel);
 
             var styleSheet = Resources.Load<StyleSheet>("DmxAddressViewer");
             styleSheets.Add(styleSheet);
-            style.minHeight = 50;
-            style.minWidth = 50;
         }
     }
 }

@@ -58,7 +58,7 @@ namespace ArtNet
         {
             var packet = receivedData.Packet;
             var universe = packet.Universe;
-            if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, new byte[512]);
+            if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, packet.Dmx);
             Buffer.BlockCopy(packet.Dmx, 0, DmxDictionary[universe], 0, 512);
             lock (_updatedUniverses)
             {

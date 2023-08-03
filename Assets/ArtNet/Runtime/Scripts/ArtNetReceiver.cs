@@ -22,34 +22,35 @@ namespace ArtNet
     {
     }
 
-    public class ArtNetReceiver : UdpReceiver
+    public class ArtNetReceiver : MonoBehaviour
     {
-        private const int ArtNetPort = 6454;
+        public const int ArtNetPort = 6454;
 
-        [SerializeField] private bool autoStart = true;
-        [SerializeField] private OnReceivedDmxEvent onReceivedDmxEvent;
-        [SerializeField] private OnReceivedPollEvent onReceivedPollEvent;
-        [SerializeField] private OnReceivedPollReplyEvent onReceivedPollReplyEvent;
+        [SerializeField] private bool _autoStart = true;
+        [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
+        [SerializeField] private OnReceivedPollEvent _onReceivedPollEvent;
+        [SerializeField] private OnReceivedPollReplyEvent _onReceivedPollReplyEvent;
 
+        private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
         public bool IsConnected => LastReceivedAt.AddSeconds(1) > DateTime.Now;
 
         private void Awake()
         {
-            Port = ArtNetPort;
+            UdpReceiver.OnReceivedPacket = OnReceivedPacket;
         }
 
         private void OnEnable()
         {
-            if (autoStart) StartReceive();
+            if (_autoStart) UdpReceiver.StartReceive();
         }
 
         private void OnDisable()
         {
-            StopReceive();
+            UdpReceiver.StopReceive();
         }
 
-        protected override void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
+        private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
             var packet = ArtNetPacket.Create(receiveBuffer);
             if (packet == null) return;
@@ -58,13 +59,13 @@ namespace ArtNet
             switch (packet.OpCode)
             {
                 case OpCode.Dmx:
-                    onReceivedDmxEvent?.Invoke(ReceivedData<DmxPacket>(packet, remoteEp));
+                    _onReceivedDmxEvent?.Invoke(ReceivedData<DmxPacket>(packet, remoteEp));
                     break;
                 case OpCode.Poll:
-                    onReceivedPollEvent.Invoke(ReceivedData<PollPacket>(packet, remoteEp));
+                    _onReceivedPollEvent.Invoke(ReceivedData<PollPacket>(packet, remoteEp));
                     break;
                 case OpCode.PollReply:
-                    onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
+                    _onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

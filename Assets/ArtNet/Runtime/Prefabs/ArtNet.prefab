@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0dff173f61007e4ca57e8303fa9e17d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onReceivedDmxEvent:
+  _autoStart: 1
+  _onReceivedDmxEvent:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2204995358144401484}
@@ -60,13 +61,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
-  onReceivedPollEvent:
+  _onReceivedPollEvent:
     m_PersistentCalls:
       m_Calls: []
-  onReceivedPollReplyEvent:
+  _onReceivedPollReplyEvent:
     m_PersistentCalls:
       m_Calls: []
-  autoStart: 1
 --- !u!114 &2204995358144401484
 MonoBehaviour:
   m_ObjectHideFlags: 0

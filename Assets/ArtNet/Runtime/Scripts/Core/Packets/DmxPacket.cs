@@ -1,5 +1,5 @@
+using System;
 using ArtNet.Enums;
-using ArtNet.IO;
 
 namespace ArtNet.Packets
 {
@@ -9,7 +9,7 @@ namespace ArtNet.Packets
         {
         }
 
-        public DmxPacket(byte[] buffer) : base(buffer, OpCode.Dmx)
+        public DmxPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Dmx)
         {
         }
 
@@ -21,25 +21,25 @@ namespace ArtNet.Packets
 
         public byte[] Dmx { get; set; }
 
-        protected override void ReadData(ArtNetReader netReader)
+        protected override void Deserialize(ArtNetReader artNetReader)
         {
-            ProtocolVersion = netReader.ReadNetworkUInt16();
-            Sequence = netReader.ReadByte();
-            Physical = netReader.ReadByte();
-            Universe = netReader.ReadUInt16();
-            int length = netReader.ReadNetworkUInt16();
-            Dmx = netReader.ReadBytes(length);
+            ProtocolVersion = artNetReader.ReadNetworkUInt16();
+            Sequence = artNetReader.ReadByte();
+            Physical = artNetReader.ReadByte();
+            Universe = artNetReader.ReadUInt16();
+            int length = artNetReader.ReadNetworkUInt16();
+            Dmx = artNetReader.ReadBytes(length);
         }
 
-        protected override void WriteData(ArtNetWriter netWriter)
+        protected override void Serialize(ArtNetWriter artNetWriter)
         {
-            base.WriteData(netWriter);
-            netWriter.WriteNetwork(ProtocolVersion);
-            netWriter.Write(Sequence);
-            netWriter.Write(Physical);
-            netWriter.Write(Universe);
-            netWriter.WriteNetwork(Length);
-            netWriter.Write(Dmx);
+            base.Serialize(artNetWriter);
+            artNetWriter.WriteNetwork(ProtocolVersion);
+            artNetWriter.Write(Sequence);
+            artNetWriter.Write(Physical);
+            artNetWriter.Write(Universe);
+            artNetWriter.WriteNetwork(Length);
+            artNetWriter.Write(Dmx);
         }
     }
 }

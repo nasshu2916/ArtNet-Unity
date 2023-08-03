@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Label text="ArtNet Dmx Viewer" name="Title"/>
+    <ui:VisualElement class="panel">
+        <ui:Label text="Receiver Info" class="panel-title"/>
+        <ui:VisualElement class="row-panel">
+            <ui:VisualElement class="status-panel">
+                <ui:TextField label="Receiver Status" readonly="true" focusable="false" binding-path="_receiverStatus"/>
+                <ui:TextField label="Last Received At" readonly="true" focusable="false" binding-path="_lastReceived"/>
+                <ui:TextField label="Last OP Code" readonly="true" focusable="false" binding-path="_lastOpCode"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="receive-start-button">
+                <ui:Button binding-path="_receiverStartButtonText" name="ReceiveStartButton"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement class="row-panel">
+        <ui:ScrollView name="UniverseSelector" horizontal-scroller-visibility="Hidden">
+            <ui:Label text="Received dmx packet does not exist." name="NonReceivedPacketText"/>
+        </ui:ScrollView>
+        <ui:ScrollView>
+            <ArtNet.Editor.UI.DmxViewer name="DmxViewer"/>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

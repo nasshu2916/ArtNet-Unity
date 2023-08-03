@@ -1,3 +1,4 @@
+using System;
 using ArtNet.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -10,36 +11,64 @@ namespace ArtNet.Editor
     {
         private DmxManager _dmxManager;
         private UniverseViewer _universeViewer;
+        private bool _updateDmx = true;
+        private Label _infoLabel;
 
         [MenuItem("ArtNet/DmxManagerViewer")]
-        public static void ShowExample()
+        public static void ShowWindow()
         {
             var wnd = GetWindow<DmxManagerViewer>();
             wnd.titleContent = new GUIContent("DmxManagerViewer");
         }
 
-        public void CreateGUI()
+        private void CreateGUI()
         {
             minSize = new Vector2(1200, 500);
             if (_dmxManager == null) _dmxManager = FindObjectOfType<DmxManager>();
-            if (_dmxManager == null) return;
 
             var root = rootVisualElement;
             var visualTree = Resources.Load<VisualTreeAsset>("DmxManagerViewer");
-            root.Add(visualTree.Instantiate());
+            var visualElement = visualTree.Instantiate();
 
-            var dmxManagerObjectField = root.Q<ObjectField>("DmxManagerObjectField");
+            var dmxManagerObjectField = visualElement.Q<ObjectField>("DmxManagerObjectField");
+            dmxManagerObjectField.objectType = typeof(DmxManager);
             dmxManagerObjectField.value = _dmxManager;
-            _universeViewer = root.Q<UniverseViewer>();
+            dmxManagerObjectField.RegisterValueChangedCallback(evt =>
+            {
+                _dmxManager = (DmxManager)evt.newValue;
+                _universeViewer.DmxManager = _dmxManager;
+            });
+            _infoLabel = visualElement.Q<Label>("DmxManagerObjectFieldInfo");
+            var updateDmxToggle = visualElement.Q<Toggle>("UpdateDmxToggle");
+            updateDmxToggle.value = _updateDmx;
+            updateDmxToggle.RegisterValueChangedCallback(evt =>
+            {
+                _updateDmx = evt.newValue;
+                UpdateInfoText();
+            });
+
+            _universeViewer = visualElement.Q<UniverseViewer>();
             _universeViewer.DmxManager = _dmxManager;
 
+            root.Add(visualElement);
             var styleSheet = Resources.Load<StyleSheet>("DmxManagerViewer");
             root.styleSheets.Add(styleSheet);
         }
 
-        public void OnGUI()
+        private void Update()
         {
-            _universeViewer?.UpdateDmxViewer();
+            UpdateInfoText();
+            if (_updateDmx) _universeViewer.UpdateDmxViewer();
+        }
+
+        private void UpdateInfoText()
+        {
+            _infoLabel.text = (_dmxManager, _updateDmx) switch
+            {
+                (null, _) => "DmxManager UnSelected",
+                (_, false) => "Update Dmx Values is false",
+                _ => ""
+            };
         }
     }
 }
