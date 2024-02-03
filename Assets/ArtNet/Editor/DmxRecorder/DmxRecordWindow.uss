@@ -1,0 +1,43 @@
+#title {
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+#time-code {
+    margin: 6 6 0 0;
+    background-color: var(--unity-colors-default-background);
+}
+
+#time-code-container {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 6px;
+}
+
+#time-code-container > Label {
+    font-size: 58px;
+    -unity-text-align: middle-center;
+}
+
+#time-code-container > Label.time-text {
+    -unity-font-style: bold;
+    width: 72px;
+}
+
+#ControlPanel > Button {
+    width: 54px;
+    height: 54px;
+    padding: 4px;
+    margin: 6px;
+}
+
+#ControlPanel > Button.selected {
+    background-color: var(--unity-colors-button-background-pressed);
+}
+
+#ControlPanel > Button > Image {
+    width: 100%;
+    height: 100%;
+}
