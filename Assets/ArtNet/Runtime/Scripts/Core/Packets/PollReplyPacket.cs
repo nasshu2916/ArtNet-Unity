@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ArtNet.Enums;
 
 namespace ArtNet.Packets

@@ -35,7 +35,7 @@ namespace ArtNet.Editor
             dmxManagerObjectField.value = _dmxManager;
             dmxManagerObjectField.RegisterValueChangedCallback(evt =>
             {
-                _dmxManager = (DmxManager)evt.newValue;
+                _dmxManager = (DmxManager) evt.newValue;
                 _universeViewer.DmxManager = _dmxManager;
             });
             _infoLabel = visualElement.Q<Label>("DmxManagerObjectFieldInfo");

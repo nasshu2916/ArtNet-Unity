@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers.Binary;
 
 namespace ArtNet.Packets
@@ -41,7 +41,7 @@ namespace ArtNet.Packets
             _position += length;
             return value;
         }
-        
+
         internal string ReadString(int length)
         {
             var value = System.Text.Encoding.ASCII.GetString(_data.Slice(_position, length));

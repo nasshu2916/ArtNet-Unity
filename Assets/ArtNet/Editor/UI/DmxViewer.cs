@@ -1,7 +1,7 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.Linq;
 
 namespace ArtNet.Editor.UI
 {
