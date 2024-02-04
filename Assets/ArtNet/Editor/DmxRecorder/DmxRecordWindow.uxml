@@ -10,7 +10,7 @@
             <ui:Label text="00" name="tc-minute" class="time-text" />
             <ui:Label text=":" />
             <ui:Label text="00" name="tc-second" class="time-text" />
-            <ui:Label text="." />
+            <ui:Label text=";" />
             <ui:Label text="00" name="tc-millisecond" class="time-text" />
         </ui:VisualElement>
     </ui:VisualElement>

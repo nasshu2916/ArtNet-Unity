@@ -13,12 +13,11 @@ namespace ArtNet.Editor.DmxRecorder
         private Button _playButton, _pauseButton;
         private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
         private VisualElement _timeCodeContainer;
-        private bool _isRecording, _isPaused;
-        private float _recordStartTime;
-        private float _alreadyRecordedTime;
 
-        private static readonly Color RecordingColor = new Color(0.78f, 0f, 0f, 1f);
-        private static readonly Color PausedColor = new Color(0.78f, 0.5f, 0f, 1f);
+        private static readonly Color RecordingColor = new(0.78f, 0f, 0f, 1f);
+        private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
+
+        private readonly DmxRecorder _recorder = new();
 
         [MenuItem("ArtNet/DmxRecorder")]
         public static void ShowDmxRecorder()
@@ -48,90 +47,54 @@ namespace ArtNet.Editor.DmxRecorder
 
             _playButton.clicked += () =>
             {
-                _isRecording = !_isRecording;
-                if (_isRecording)
+                if (_recorder.Status == RecordingStatus.None)
                 {
-                    Debug.Log("DMX Recording started");
+                    _recorder.StartRecording();
+
                     startButtonImage.style.display = DisplayStyle.None;
                     stopButtonImage.style.display = DisplayStyle.Flex;
 
-                    OnRecordStart();
+                    _timeCodeContainer.style.backgroundColor = RecordingColor;
+                    _pauseButton.SetEnabled(true);
                 }
                 else
                 {
-                    Debug.Log("DMX Recording stopped");
+                    _recorder.StopRecording();
+
                     startButtonImage.style.display = DisplayStyle.Flex;
                     stopButtonImage.style.display = DisplayStyle.None;
 
-                    OnRecordStop();
+                    _timeCodeContainer.style.backgroundColor = default;
+                    _pauseButton.RemoveFromClassList("selected");
+                    _pauseButton.SetEnabled(false);
                 }
             };
 
             _pauseButton.SetEnabled(false);
             _pauseButton.clicked += () =>
             {
-                if (!_isRecording) return;
+                switch (_recorder.Status)
+                {
+                    case RecordingStatus.Recording:
+                        _recorder.PauseRecording();
 
-                _isPaused = !_isPaused;
-                if (_isPaused)
-                {
-                    Debug.Log("DMX Recording paused");
-                    _pauseButton.AddToClassList("selected");
-                    OnRecordPause();
-                }
-                else
-                {
-                    Debug.Log("DMX Recording resumed");
-                    _pauseButton.RemoveFromClassList("selected");
-                    OnRecordResume();
+                        _pauseButton.AddToClassList("selected");
+                        _timeCodeContainer.style.backgroundColor = PausedColor;
+                        break;
+                    case RecordingStatus.Paused:
+                        _recorder.ResumeRecording();
+
+                        _pauseButton.RemoveFromClassList("selected");
+                        _timeCodeContainer.style.backgroundColor = RecordingColor;
+                        break;
                 }
             };
         }
 
-        private void OnRecordStart()
-        {
-            _recordStartTime = Time.realtimeSinceStartup;
-            _timeCodeContainer.style.backgroundColor = RecordingColor;
-            _pauseButton.SetEnabled(true);
-        }
-
-        private void OnRecordStop()
-        {
-            _recordStartTime = 0;
-            _alreadyRecordedTime = 0;
-            _isPaused = false;
-
-            _timeCodeContainer.style.backgroundColor = default;
-            _pauseButton.RemoveFromClassList("selected");
-            _pauseButton.SetEnabled(false);
-        }
-
-        private void OnRecordPause()
-        {
-            var recordedTime = Time.realtimeSinceStartup - _recordStartTime;
-            _alreadyRecordedTime += recordedTime;
-            _recordStartTime = 0;
-            _timeCodeContainer.style.backgroundColor = PausedColor;
-        }
-
-        private void OnRecordResume()
-        {
-            _recordStartTime = Time.realtimeSinceStartup;
-            _timeCodeContainer.style.backgroundColor = RecordingColor;
-        }
-
         private void Update()
         {
-            float timeCode;
-            if (_isRecording && !_isPaused)
-            {
-                timeCode = Time.realtimeSinceStartup - _recordStartTime + _alreadyRecordedTime;
-            }
-            else
-            {
-                timeCode = _alreadyRecordedTime;
-            }
-            var timeCodeSpan = TimeSpan.FromSeconds(timeCode);
+            var timeCode = _recorder.GetRecordingTime();
+            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
             _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
             _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
             _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
