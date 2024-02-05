@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -115,16 +114,9 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreDmxPacket()
         {
-            // TODO: 保存処理を追加する
-            var recordedLength = _recordedDmx.Count;
-
-            var recordedTimes = _recordedDmx.Select(x => x.Item1).OrderBy(x => x).ToArray();
-            var startTime = recordedTimes.First();
-            var endTime = recordedTimes.Last();
-            var time = endTime - startTime;
-
-            var dmxPacketPerSecond = recordedLength / (time / 1000f);
-            Debug.Log($"DMX Packet per second: {dmxPacketPerSecond:f2}");
+            var storeData = RecordData.Serialize(_recordedDmx);
+            var path = $"Assets/ArtNet/RecordedData/{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.dmx";
+            System.IO.File.WriteAllBytes(path, storeData);
         }
     }
 }
