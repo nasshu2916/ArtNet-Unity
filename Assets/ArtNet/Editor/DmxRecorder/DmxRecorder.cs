@@ -114,6 +114,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreDmxPacket()
         {
+            if (_recordedDmx.Count == 0) return;
             var storeData = RecordData.Serialize(_recordedDmx);
             var path = $"Assets/ArtNet/RecordedData/{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.dmx";
             System.IO.File.WriteAllBytes(path, storeData);
