@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +11,6 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private VisualTreeAsset visualTree;
         [SerializeField] private StyleSheet styleSheet;
 
-        private Button _playButton, _pauseButton;
         private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
         private VisualElement _timeCodeContainer;
 
@@ -18,6 +18,9 @@ namespace ArtNet.Editor.DmxRecorder
         private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
 
         private readonly DmxRecorder _recorder = new();
+        private string _outputDirectory, _outputFileName;
+
+        private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
 
         [MenuItem("ArtNet/DmxRecorder")]
         public static void ShowDmxRecorder()
@@ -28,9 +31,14 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void CreateGUI()
         {
+            _outputDirectory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
+                               Application.dataPath;
+            _outputFileName = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFileName")) ?? "dmx-record";
+
             var root = rootVisualElement;
 
             VisualElement recorderVisualElement = visualTree.Instantiate();
+            recorderVisualElement.AddToClassList("root");
             root.Add(recorderVisualElement);
             root.styleSheets.Add(styleSheet);
 
@@ -40,12 +48,33 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCodeSecondLabel = root.Q<Label>("tc-second");
             _timeCodeMillisecondLabel = root.Q<Label>("tc-millisecond");
 
-            _playButton = root.Q<Button>("play-button");
-            _pauseButton = root.Q<Button>("pause-button");
-            var startButtonImage = root.Q<Image>("start-button-image");
-            var stopButtonImage = root.Q<Image>("stop-button-image");
+            Initialize(root);
+        }
 
-            _playButton.clicked += () =>
+        private void Initialize(VisualElement root)
+        {
+            InitializeControlPanel(root);
+            InitializeRecordingConfig(root);
+        }
+
+        private void InitializeControlPanel(VisualElement root)
+        {
+            var startButtonImage = new Image
+                { image = EditorGUIUtility.IconContent("PlayButton@2x").image };
+            var stopButtonImage = new Image
+            {
+                image = EditorGUIUtility.IconContent("PreMatQuad@2x").image,
+                style =
+                {
+                    display = DisplayStyle.None
+                }
+            };
+            var playButton = root.Q<Button>("play-button");
+            var pauseButton = root.Q<Button>("pause-button");
+
+            playButton.Add(startButtonImage);
+            playButton.Add(stopButtonImage);
+            playButton.clicked += () =>
             {
                 if (_recorder.Status == RecordingStatus.None)
                 {
@@ -55,7 +84,7 @@ namespace ArtNet.Editor.DmxRecorder
                     stopButtonImage.style.display = DisplayStyle.Flex;
 
                     _timeCodeContainer.style.backgroundColor = RecordingColor;
-                    _pauseButton.SetEnabled(true);
+                    pauseButton.SetEnabled(true);
                 }
                 else
                 {
@@ -65,30 +94,93 @@ namespace ArtNet.Editor.DmxRecorder
                     stopButtonImage.style.display = DisplayStyle.None;
 
                     _timeCodeContainer.style.backgroundColor = default;
-                    _pauseButton.RemoveFromClassList("selected");
-                    _pauseButton.SetEnabled(false);
+                    pauseButton.RemoveFromClassList("selected");
+                    pauseButton.SetEnabled(false);
                 }
             };
 
-            _pauseButton.SetEnabled(false);
-            _pauseButton.clicked += () =>
+            pauseButton.SetEnabled(false);
+            pauseButton.Add(new Image()
+            {
+                image = EditorGUIUtility.IconContent("PauseButton@2x").image
+            });
+            pauseButton.clicked += () =>
             {
                 switch (_recorder.Status)
                 {
                     case RecordingStatus.Recording:
                         _recorder.PauseRecording();
 
-                        _pauseButton.AddToClassList("selected");
+                        pauseButton.AddToClassList("selected");
                         _timeCodeContainer.style.backgroundColor = PausedColor;
                         break;
                     case RecordingStatus.Paused:
                         _recorder.ResumeRecording();
 
-                        _pauseButton.RemoveFromClassList("selected");
+                        pauseButton.RemoveFromClassList("selected");
                         _timeCodeContainer.style.backgroundColor = RecordingColor;
                         break;
                 }
             };
+        }
+
+        private void InitializeRecordingConfig(VisualElement root)
+        {
+            var outputFileNameLabel = root.Q<Label>("output-file-name");
+
+            // 出力ファイル名の設定
+            var outputFileNameField = root.Q<TextField>("output-file-name-field");
+            outputFileNameField.value = _outputFileName;
+            outputFileNameField.RegisterValueChangedCallback(evt =>
+            {
+                _outputFileName = evt.newValue;
+                outputFileNameLabel.text = GetOutputFilePath();
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), _outputFileName);
+            });
+
+            // 出力ディレクトリの設定
+            var outputDirectoryField = root.Q<TextField>("output-directory-field");
+            outputDirectoryField.value = _outputDirectory;
+            outputDirectoryField.RegisterValueChangedCallback(evt =>
+            {
+                _outputDirectory = evt.newValue;
+                outputFileNameLabel.text = GetOutputFilePath();
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
+            });
+            var selectDirectoryButton = root.Q<Button>("select-folder-button");
+            selectDirectoryButton.Add(new Image()
+                {
+                    image = EditorGUIUtility.IconContent("Folder Icon").image
+                }
+            );
+            selectDirectoryButton.clicked += () =>
+            {
+                var selectedDirectory =
+                    EditorUtility.OpenFolderPanel(title: "Output Folder",
+                        folder: _outputDirectory,
+                        defaultName: "");
+
+                if (string.IsNullOrEmpty(selectedDirectory)) return;
+
+                _outputDirectory = selectedDirectory;
+                outputDirectoryField.value = _outputDirectory;
+                outputFileNameLabel.text = GetOutputFilePath();
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
+            };
+
+
+            var openOutputFolderButton = root.Q<Button>("open-output-folder-button");
+            openOutputFolderButton.Add(new Image()
+                {
+                    image = EditorGUIUtility.IconContent("FolderOpened Icon").image
+                }
+            );
+            openOutputFolderButton.clicked += () =>
+            {
+                Process.Start(_outputDirectory);
+            };
+
+            outputFileNameLabel.text = GetOutputFilePath();
         }
 
         private void Update()
@@ -100,5 +192,8 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
             _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
         }
+
+        private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}.{key}";
+        private string GetOutputFilePath() => $"{_outputDirectory}/{_outputFileName}.dmx";
     }
 }

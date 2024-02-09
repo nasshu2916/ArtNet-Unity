@@ -3,26 +3,53 @@
     <ui:VisualElement>
         <ui:Label text="DMX Recorder" name="title" />
     </ui:VisualElement>
-    <ui:VisualElement name="time-code">
-        <ui:VisualElement name="time-code-container">
-            <ui:Label text="00" name="tc-hour" class="time-text" />
-            <ui:Label text=":" style="-unity-text-align: upper-center;" />
-            <ui:Label text="00" name="tc-minute" class="time-text" />
-            <ui:Label text=":" />
-            <ui:Label text="00" name="tc-second" class="time-text" />
-            <ui:Label text=";" />
-            <ui:Label text="00" name="tc-millisecond" class="time-text" />
+    <ui:VisualElement>
+        <ui:VisualElement name="time-code">
+            <ui:VisualElement name="time-code-container">
+                <ui:Label text="00" name="tc-hour" class="time-text" />
+                <ui:Label text=":" />
+                <ui:Label text="00" name="tc-minute" class="time-text" />
+                <ui:Label text=":" />
+                <ui:Label text="00" name="tc-second" class="time-text" />
+                <ui:Label text=";" />
+                <ui:Label text="00" name="tc-millisecond" class="time-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement>
+            <ui:VisualElement name="ControlPanel">
+                <ui:Button name="play-button" focusable="false">
+                    <ui:Image name="start-button-image" />
+                    <ui:Image name="stop-button-image" />
+                </ui:Button>
+                <ui:Button name="pause-button" focusable="false" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement>
-        <ui:VisualElement name="ControlPanel" style="flex-direction: row; justify-content: center;">
-            <ui:Button name="play-button" focusable="false">
-                <ui:Image name="start-button-image" style="background-image: url(&apos;project://database/Assets/ArtNet/Editor/DmxRecorder/Start.png?fileID=2800000&amp;guid=ed8ebaa01b140d343a2680209e4f8931&amp;type=3#Start&apos;);" />
-                <ui:Image name="stop-button-image" style="background-image: url(&apos;project://database/Assets/ArtNet/Editor/DmxRecorder/Stop.png?fileID=2800000&amp;guid=81cfdea64bc4b9645afdcf6180b7b25e&amp;type=3#Stop&apos;); display: none;" />
-            </ui:Button>
-            <ui:Button name="pause-button" focusable="false">
-                <ui:Image name="pause-button-image" style="background-image: url(&apos;project://database/Assets/ArtNet/Editor/DmxRecorder/Pause.png?fileID=2800000&amp;guid=302ba1251d27cc847ba98067fd9e459b&amp;type=3#Pause&apos;);" />
-            </ui:Button>
+    <ui:VisualElement name="recordingConfig">
+        <ui:VisualElement>
+            <ui:Label text="Output File" display-tooltip-when-elided="true" class="section-title" />
+            <ui:VisualElement class="section-content">
+                <ui:VisualElement>
+                    <ui:VisualElement style="width: 100%;">
+                        <ui:TextField name="output-file-name-field" label="File Name" text="output_file_name" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:VisualElement style="width: 100%;">
+                        <ui:TextField name="output-directory-field" label="Folder" text="output directory" />
+                    </ui:VisualElement>
+                    <ui:Button name="select-folder-button" />
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:VisualElement style="margin-left: 150px;">
+                        <ui:Label name="output-file-name" text="output_file" />
+                    </ui:VisualElement>
+                    <ui:Button name="open-output-folder-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="footer">
+        <ui:Label text="Status" name="footer-status" />
     </ui:VisualElement>
 </ui:UXML>
