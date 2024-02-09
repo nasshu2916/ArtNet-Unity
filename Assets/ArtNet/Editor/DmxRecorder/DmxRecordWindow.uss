@@ -68,6 +68,13 @@
     margin: 1px;
 }
 
+#output-warning-icon {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin: 0;
+    display: none;
+}
 #output-file-name {
     white-space: normal;
 }

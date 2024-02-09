@@ -20,6 +20,9 @@ namespace ArtNet.Editor.DmxRecorder
         private readonly DmxRecorder _recorder = new();
         private string _outputDirectory, _outputFileName;
 
+        private Label _outputFilePathLabel;
+        private Image _outputWarningIcon;
+
         private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
 
         [MenuItem("ArtNet/DmxRecorder")]
@@ -126,7 +129,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeRecordingConfig(VisualElement root)
         {
-            var outputFileNameLabel = root.Q<Label>("output-file-name");
+            _outputFilePathLabel = root.Q<Label>("output-file-name");
+            _outputWarningIcon = root.Q<Image>("output-warning-icon");
 
             // 出力ファイル名の設定
             var outputFileNameField = root.Q<TextField>("output-file-name-field");
@@ -134,7 +138,7 @@ namespace ArtNet.Editor.DmxRecorder
             outputFileNameField.RegisterValueChangedCallback(evt =>
             {
                 _outputFileName = evt.newValue;
-                outputFileNameLabel.text = GetOutputFilePath();
+                UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), _outputFileName);
             });
 
@@ -144,7 +148,7 @@ namespace ArtNet.Editor.DmxRecorder
             outputDirectoryField.RegisterValueChangedCallback(evt =>
             {
                 _outputDirectory = evt.newValue;
-                outputFileNameLabel.text = GetOutputFilePath();
+                UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
             });
             var selectDirectoryButton = root.Q<Button>("select-folder-button");
@@ -164,11 +168,13 @@ namespace ArtNet.Editor.DmxRecorder
 
                 _outputDirectory = selectedDirectory;
                 outputDirectoryField.value = _outputDirectory;
-                outputFileNameLabel.text = GetOutputFilePath();
+                UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
             };
 
 
+            var outputWarningIcon = root.Q<Image>("output-warning-icon");
+            outputWarningIcon.image = EditorGUIUtility.IconContent("Warning@2x").image;
             var openOutputFolderButton = root.Q<Button>("open-output-folder-button");
             openOutputFolderButton.Add(new Image()
                 {
@@ -180,7 +186,14 @@ namespace ArtNet.Editor.DmxRecorder
                 Process.Start(_outputDirectory);
             };
 
-            outputFileNameLabel.text = GetOutputFilePath();
+            UpdateOutputFilePath();
+        }
+
+        private void UpdateOutputFilePath()
+        {
+            var path = GetOutputFilePath();
+            _outputFilePathLabel.text = path;
+            _outputWarningIcon.style.display = System.IO.File.Exists(path) ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private void Update()

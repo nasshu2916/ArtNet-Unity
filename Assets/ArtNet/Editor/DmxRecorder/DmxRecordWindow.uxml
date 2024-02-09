@@ -17,10 +17,7 @@
         </ui:VisualElement>
         <ui:VisualElement>
             <ui:VisualElement name="ControlPanel">
-                <ui:Button name="play-button" focusable="false">
-                    <ui:Image name="start-button-image" />
-                    <ui:Image name="stop-button-image" />
-                </ui:Button>
+                <ui:Button name="play-button" focusable="false" />
                 <ui:Button name="pause-button" focusable="false" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -41,7 +38,10 @@
                     <ui:Button name="select-folder-button" />
                 </ui:VisualElement>
                 <ui:VisualElement>
-                    <ui:VisualElement style="margin-left: 150px;">
+                    <ui:VisualElement style="width: 250px; align-items: flex-end;">
+                        <ui:Image name="output-warning-icon" tooltip="File already exists. Save the existing file by overwrite." />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="width: 100%;">
                         <ui:Label name="output-file-name" text="output_file" />
                     </ui:VisualElement>
                     <ui:Button name="open-output-folder-button" />
