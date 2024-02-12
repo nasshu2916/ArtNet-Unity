@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ArtNet.Packets;
+using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
     public static class RecordData
     {
-        private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
         private const byte IdentifierLength = 4;
+        private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
+        private static byte Version = 0x01;
 
         public static byte[] Serialize(List<(int, DmxPacket)> dmxPackets)
         {
             var startTime = dmxPackets.Select(x => x.Item1).OrderBy(x => x).First();
             using var memoryStream = new MemoryStream();
             memoryStream.Write(Identifiers);
+            memoryStream.WriteByte(Version);
 
             foreach (var (time, dmxPacket) in dmxPackets)
             {
@@ -33,7 +36,11 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var dataLength = data.Length;
             if (dataLength < Identifiers.Length || !data[..Identifiers.Length].SequenceEqual(Identifiers))
+                return null;
+            byte dataVersion = data[IdentifierLength];
+            if (dataVersion == Version)
             {
+                Debug.LogError($"ArtNet Recorder: Version mismatch. Required: {Version}, Found: {dataVersion}");
                 return null;
             }
 

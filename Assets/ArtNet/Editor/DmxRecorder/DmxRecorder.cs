@@ -17,17 +17,18 @@ namespace ArtNet.Editor.DmxRecorder
     public class DmxRecorder
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        public RecordingStatus Status { get; private set; } = RecordingStatus.None;
+        private int _alreadyRecordedTime;
 
         private List<(int, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
-        private int _alreadyRecordedTime;
 
         public DmxRecorder()
         {
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
+        public RecordingStatus Status { get; private set; } = RecordingStatus.None;
+        public RecordConfig Config { get; set; }
 
         public void StartRecording()
         {
@@ -114,10 +115,24 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreDmxPacket()
         {
-            if (_recordedDmx.Count == 0) return;
+            if (_recordedDmx.Count == 0)
+            {
+                Debug.Log("ArtNet Recorder: No data to store");
+                return;
+            }
+
             var storeData = RecordData.Serialize(_recordedDmx);
-            var path = $"Assets/ArtNet/RecordedData/{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.dmx";
+
+            if (!System.IO.Directory.Exists(Config.Directory))
+            {
+                System.IO.Directory.CreateDirectory(Config.Directory);
+            }
+
+            var path = Config.OutputPath;
+            var exists = System.IO.File.Exists(path);
             System.IO.File.WriteAllBytes(path, storeData);
+            var message = exists ? "Data updated" : "Data stored";
+            Debug.Log($"ArtNet Recorder: {message} at {path}");
         }
     }
 }

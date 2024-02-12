@@ -8,36 +8,33 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public class DmxRecordWindow : EditorWindow
     {
-        [SerializeField] private VisualTreeAsset visualTree;
-        [SerializeField] private StyleSheet styleSheet;
-
-        private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
-        private VisualElement _timeCodeContainer;
+        private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
 
         private static readonly Color RecordingColor = new(0.78f, 0f, 0f, 1f);
         private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
+        [SerializeField] private VisualTreeAsset visualTree;
+        [SerializeField] private StyleSheet styleSheet;
 
         private readonly DmxRecorder _recorder = new();
-        private string _outputDirectory, _outputFileName;
 
         private Label _outputFilePathLabel;
         private Image _outputWarningIcon;
+        private VisualElement _timeCodeContainer;
 
-        private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
+        private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
 
-        [MenuItem("ArtNet/DmxRecorder")]
-        public static void ShowDmxRecorder()
+        private void Update()
         {
-            var window = GetWindow<DmxRecordWindow>();
-            window.titleContent = new GUIContent("DmxRecorder");
+            var timeCode = _recorder.GetRecordingTime();
+            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
+            _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
+            _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
+            _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
+            _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
         }
 
         public void CreateGUI()
         {
-            _outputDirectory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
-                               Application.dataPath;
-            _outputFileName = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFileName")) ?? "dmx-record";
-
             var root = rootVisualElement;
 
             VisualElement recorderVisualElement = visualTree.Instantiate();
@@ -54,8 +51,24 @@ namespace ArtNet.Editor.DmxRecorder
             Initialize(root);
         }
 
+        [MenuItem("ArtNet/DmxRecorder")]
+        public static void ShowDmxRecorder()
+        {
+            var window = GetWindow<DmxRecordWindow>();
+            window.titleContent = new GUIContent("DmxRecorder");
+        }
+
         private void Initialize(VisualElement root)
         {
+            var config = new RecordConfig
+            {
+                Directory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
+                            Application.dataPath,
+                FileName = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFileName")) ??
+                           "dmx-record"
+            };
+            _recorder.Config = config;
+
             InitializeControlPanel(root);
             InitializeRecordingConfig(root);
         }
@@ -134,22 +147,24 @@ namespace ArtNet.Editor.DmxRecorder
 
             // 出力ファイル名の設定
             var outputFileNameField = root.Q<TextField>("output-file-name-field");
-            outputFileNameField.value = _outputFileName;
+            outputFileNameField.value = _recorder.Config.FileName;
             outputFileNameField.RegisterValueChangedCallback(evt =>
             {
-                _outputFileName = evt.newValue;
+                var fileName = evt.newValue;
+                _recorder.Config.FileName = fileName;
                 UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), _outputFileName);
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), fileName);
             });
 
             // 出力ディレクトリの設定
             var outputDirectoryField = root.Q<TextField>("output-directory-field");
-            outputDirectoryField.value = _outputDirectory;
+            outputDirectoryField.value = _recorder.Config.Directory;
             outputDirectoryField.RegisterValueChangedCallback(evt =>
             {
-                _outputDirectory = evt.newValue;
+                var directory = evt.newValue;
+                _recorder.Config.Directory = directory;
                 UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), directory);
             });
             var selectDirectoryButton = root.Q<Button>("select-folder-button");
             selectDirectoryButton.Add(new Image()
@@ -161,15 +176,15 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 var selectedDirectory =
                     EditorUtility.OpenFolderPanel(title: "Output Folder",
-                        folder: _outputDirectory,
+                        folder: _recorder.Config.Directory,
                         defaultName: "");
 
                 if (string.IsNullOrEmpty(selectedDirectory)) return;
 
-                _outputDirectory = selectedDirectory;
-                outputDirectoryField.value = _outputDirectory;
+                _recorder.Config.Directory = selectedDirectory;
+                outputDirectoryField.value = selectedDirectory;
                 UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), _outputDirectory);
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), selectedDirectory);
             };
 
 
@@ -183,7 +198,7 @@ namespace ArtNet.Editor.DmxRecorder
             );
             openOutputFolderButton.clicked += () =>
             {
-                Process.Start(_outputDirectory);
+                Process.Start(_recorder.Config.Directory);
             };
 
             UpdateOutputFilePath();
@@ -191,22 +206,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void UpdateOutputFilePath()
         {
-            var path = GetOutputFilePath();
+            var path = _recorder.Config.OutputPath;
             _outputFilePathLabel.text = path;
             _outputWarningIcon.style.display = System.IO.File.Exists(path) ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        private void Update()
-        {
-            var timeCode = _recorder.GetRecordingTime();
-            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
-            _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
-            _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
-            _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
-            _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
-        }
-
-        private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}.{key}";
-        private string GetOutputFilePath() => $"{_outputDirectory}/{_outputFileName}.dmx";
+        private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}{key}";
     }
 }
