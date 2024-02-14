@@ -16,10 +16,11 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private StyleSheet styleSheet;
 
         private readonly DmxRecorder _recorder = new();
+        private Label _errorMessageLabel;
 
         private Label _outputFilePathLabel;
         private Image _outputWarningIcon;
-        private VisualElement _timeCodeContainer;
+        private VisualElement _timeCodeContainer, _errorMessageArea;
 
         private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
 
@@ -92,6 +93,7 @@ namespace ArtNet.Editor.DmxRecorder
             playButton.Add(stopButtonImage);
             playButton.clicked += () =>
             {
+                if (!_recorder.Config.Validate()) return;
                 if (_recorder.Status == RecordingStatus.None)
                 {
                     _recorder.StartRecording();
@@ -201,6 +203,15 @@ namespace ArtNet.Editor.DmxRecorder
                 Process.Start(_recorder.Config.Directory);
             };
 
+            _errorMessageArea = root.Q<VisualElement>("errorMessageArea");
+            _errorMessageArea.Add(new Image()
+                {
+                    image = EditorGUIUtility.IconContent("console.erroricon@2x").image
+                }
+            );
+            _errorMessageLabel = new Label();
+            _errorMessageArea.Add(_errorMessageLabel);
+
             UpdateOutputFilePath();
         }
 
@@ -209,6 +220,21 @@ namespace ArtNet.Editor.DmxRecorder
             var path = _recorder.Config.OutputPath;
             _outputFilePathLabel.text = path;
             _outputWarningIcon.style.display = System.IO.File.Exists(path) ? DisplayStyle.Flex : DisplayStyle.None;
+            UpdateErrorMessage();
+        }
+
+        private void UpdateErrorMessage()
+        {
+            var errors = _recorder.Config.ValidateErrors();
+            if (errors.Count > 0)
+            {
+                _errorMessageLabel.text = string.Join("\n", errors);
+                _errorMessageArea.style.visibility = Visibility.Visible;
+            }
+            else
+            {
+                _errorMessageArea.style.visibility = Visibility.Hidden;
+            }
         }
 
         private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}{key}";
