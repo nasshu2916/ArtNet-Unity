@@ -17,9 +17,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         private readonly DmxRecorder _recorder = new();
         private Label _errorMessageLabel;
+        private TextField _outputFileNameField, _outputDirectoryField;
 
         private Label _outputFilePathLabel;
         private Image _outputWarningIcon;
+        private Button _selectDirectoryButton;
         private VisualElement _timeCodeContainer, _errorMessageArea;
 
         private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
@@ -96,6 +98,7 @@ namespace ArtNet.Editor.DmxRecorder
                 if (!_recorder.Config.Validate()) return;
                 if (_recorder.Status == RecordingStatus.None)
                 {
+                    SetEnabledTextField(false);
                     _recorder.StartRecording();
 
                     startButtonImage.style.display = DisplayStyle.None;
@@ -114,6 +117,7 @@ namespace ArtNet.Editor.DmxRecorder
                     _timeCodeContainer.style.backgroundColor = default;
                     pauseButton.RemoveFromClassList("selected");
                     pauseButton.SetEnabled(false);
+                    SetEnabledTextField(true);
                 }
             };
 
@@ -148,9 +152,9 @@ namespace ArtNet.Editor.DmxRecorder
             _outputWarningIcon = root.Q<Image>("output-warning-icon");
 
             // 出力ファイル名の設定
-            var outputFileNameField = root.Q<TextField>("output-file-name-field");
-            outputFileNameField.value = _recorder.Config.FileName;
-            outputFileNameField.RegisterValueChangedCallback(evt =>
+            _outputFileNameField = root.Q<TextField>("output-file-name-field");
+            _outputFileNameField.value = _recorder.Config.FileName;
+            _outputFileNameField.RegisterValueChangedCallback(evt =>
             {
                 var fileName = evt.newValue;
                 _recorder.Config.FileName = fileName;
@@ -159,22 +163,22 @@ namespace ArtNet.Editor.DmxRecorder
             });
 
             // 出力ディレクトリの設定
-            var outputDirectoryField = root.Q<TextField>("output-directory-field");
-            outputDirectoryField.value = _recorder.Config.Directory;
-            outputDirectoryField.RegisterValueChangedCallback(evt =>
+            _outputDirectoryField = root.Q<TextField>("output-directory-field");
+            _outputDirectoryField.value = _recorder.Config.Directory;
+            _outputDirectoryField.RegisterValueChangedCallback(evt =>
             {
                 var directory = evt.newValue;
                 _recorder.Config.Directory = directory;
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), directory);
             });
-            var selectDirectoryButton = root.Q<Button>("select-folder-button");
-            selectDirectoryButton.Add(new Image()
+            _selectDirectoryButton = root.Q<Button>("select-folder-button");
+            _selectDirectoryButton.Add(new Image()
                 {
                     image = EditorGUIUtility.IconContent("Folder Icon").image
                 }
             );
-            selectDirectoryButton.clicked += () =>
+            _selectDirectoryButton.clicked += () =>
             {
                 var selectedDirectory =
                     EditorUtility.OpenFolderPanel(title: "Output Folder",
@@ -184,7 +188,7 @@ namespace ArtNet.Editor.DmxRecorder
                 if (string.IsNullOrEmpty(selectedDirectory)) return;
 
                 _recorder.Config.Directory = selectedDirectory;
-                outputDirectoryField.value = selectedDirectory;
+                _outputDirectoryField.value = selectedDirectory;
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), selectedDirectory);
             };
@@ -235,6 +239,13 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 _errorMessageArea.style.visibility = Visibility.Hidden;
             }
+        }
+
+        private void SetEnabledTextField(bool enabled)
+        {
+            _outputFileNameField.SetEnabled(enabled);
+            _outputDirectoryField.SetEnabled(enabled);
+            _selectDirectoryButton.SetEnabled(enabled);
         }
 
         private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}{key}";
