@@ -6,21 +6,21 @@
         <ui:Label text="DMX Recorder" name="title" />
     </ui:VisualElement>
     <ui:VisualElement>
-        <ui:VisualElement name="time-code">
-            <ui:VisualElement name="time-code-container">
-                <ui:Label text="00" name="tc-hour" class="time-text" />
+        <ui:VisualElement name="timeCode">
+            <ui:VisualElement name="timeCodeContainer">
+                <ui:Label text="00" name="tcHour" class="time-text"/>
                 <ui:Label text=":" />
-                <ui:Label text="00" name="tc-minute" class="time-text" />
+                <ui:Label text="00" name="tcMinute" class="time-text"/>
                 <ui:Label text=":" />
-                <ui:Label text="00" name="tc-second" class="time-text" />
+                <ui:Label text="00" name="tcSecond" class="time-text"/>
                 <ui:Label text=";" />
-                <ui:Label text="00" name="tc-millisecond" class="time-text" />
+                <ui:Label text="00" name="tcMillisecond" class="time-text"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement>
             <ui:VisualElement name="ControlPanel">
-                <ui:Button name="play-button" focusable="false" />
-                <ui:Button name="pause-button" focusable="false" />
+                <ui:Button name="playButton" focusable="false"/>
+                <ui:Button name="pauseButton" focusable="false"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -30,23 +30,24 @@
             <ui:VisualElement class="section-content">
                 <ui:VisualElement>
                     <ui:VisualElement style="width: 100%;">
-                        <ui:TextField name="output-file-name-field" label="File Name" text="output_file_name" />
+                        <ui:TextField name="outputFileNameField" label="File Name" text="output_file_name"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement>
                     <ui:VisualElement style="width: 100%;">
-                        <ui:TextField name="output-directory-field" label="Folder" text="output directory" />
+                        <ui:TextField name="outputDirectoryField" label="Folder" text="output directory"/>
                     </ui:VisualElement>
-                    <ui:Button name="select-folder-button" />
+                    <ui:Button name="selectFolderButton"/>
                 </ui:VisualElement>
                 <ui:VisualElement>
-                    <ui:VisualElement style="width: 250px; align-items: flex-end;">
-                        <ui:Image name="output-warning-icon" tooltip="File already exists. Save the existing file by overwrite." />
+                    <ui:VisualElement style="width: 75px; align-items: flex-end;">
+                        <ui:Image name="outputWarningIcon"
+                                  tooltip="File already exists. Save the existing file by overwrite."/>
                     </ui:VisualElement>
                     <ui:VisualElement style="width: 100%;">
-                        <ui:Label name="output-file-name" text="output_file" />
+                        <ui:Label name="outputFileName" text="output_file"/>
                     </ui:VisualElement>
-                    <ui:Button name="open-output-folder-button" />
+                    <ui:Button name="openOutputFolderButton"/>
                 </ui:VisualElement>
                 <ui:VisualElement>
                     <ui:VisualElement name="errorMessageArea"/>

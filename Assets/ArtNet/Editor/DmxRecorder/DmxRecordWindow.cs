@@ -46,6 +46,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void CreateGUI()
         {
+            minSize = new Vector2(375, 400);
             var root = rootVisualElement;
 
             VisualElement recorderVisualElement = visualTree.Instantiate();
@@ -53,11 +54,11 @@ namespace ArtNet.Editor.DmxRecorder
             root.Add(recorderVisualElement);
             root.styleSheets.Add(styleSheet);
 
-            _timeCodeContainer = root.Q<VisualElement>("time-code-container");
-            _timeCodeHourLabel = root.Q<Label>("tc-hour");
-            _timeCodeMinuteLabel = root.Q<Label>("tc-minute");
-            _timeCodeSecondLabel = root.Q<Label>("tc-second");
-            _timeCodeMillisecondLabel = root.Q<Label>("tc-millisecond");
+            _timeCodeContainer = root.Q<VisualElement>("timeCodeContainer");
+            _timeCodeHourLabel = root.Q<Label>("tcHour");
+            _timeCodeMinuteLabel = root.Q<Label>("tcMinute");
+            _timeCodeSecondLabel = root.Q<Label>("tcSecond");
+            _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
 
             Initialize(root);
         }
@@ -98,8 +99,8 @@ namespace ArtNet.Editor.DmxRecorder
                     display = DisplayStyle.None
                 }
             };
-            var playButton = root.Q<Button>("play-button");
-            var pauseButton = root.Q<Button>("pause-button");
+            var playButton = root.Q<Button>("playButton");
+            var pauseButton = root.Q<Button>("pauseButton");
 
             playButton.Add(startButtonImage);
             playButton.Add(stopButtonImage);
@@ -158,11 +159,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeRecordingConfig(VisualElement root)
         {
-            _outputFilePathLabel = root.Q<Label>("output-file-name");
-            _outputWarningIcon = root.Q<Image>("output-warning-icon");
+            _outputFilePathLabel = root.Q<Label>("outputFileName");
+            _outputWarningIcon = root.Q<Image>("outputWarningIcon");
 
             // 出力ファイル名の設定
-            _outputFileNameField = root.Q<TextField>("output-file-name-field");
+            _outputFileNameField = root.Q<TextField>("outputFileNameField");
             _outputFileNameField.value = _recorder.Config.FileName;
             _outputFileNameField.RegisterValueChangedCallback(evt =>
             {
@@ -173,7 +174,7 @@ namespace ArtNet.Editor.DmxRecorder
             });
 
             // 出力ディレクトリの設定
-            _outputDirectoryField = root.Q<TextField>("output-directory-field");
+            _outputDirectoryField = root.Q<TextField>("outputDirectoryField");
             _outputDirectoryField.value = _recorder.Config.Directory;
             _outputDirectoryField.RegisterValueChangedCallback(evt =>
             {
@@ -182,7 +183,7 @@ namespace ArtNet.Editor.DmxRecorder
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), directory);
             });
-            _selectDirectoryButton = root.Q<Button>("select-folder-button");
+            _selectDirectoryButton = root.Q<Button>("selectFolderButton");
             _selectDirectoryButton.Add(new Image()
                 {
                     image = EditorGUIUtility.IconContent("Folder Icon").image
@@ -204,9 +205,9 @@ namespace ArtNet.Editor.DmxRecorder
             };
 
 
-            var outputWarningIcon = root.Q<Image>("output-warning-icon");
+            var outputWarningIcon = root.Q<Image>("outputWarningIcon");
             outputWarningIcon.image = EditorGUIUtility.IconContent("Warning@2x").image;
-            var openOutputFolderButton = root.Q<Button>("open-output-folder-button");
+            var openOutputFolderButton = root.Q<Button>("openOutputFolderButton");
             openOutputFolderButton.Add(new Image()
                 {
                     image = EditorGUIUtility.IconContent("FolderOpened Icon").image

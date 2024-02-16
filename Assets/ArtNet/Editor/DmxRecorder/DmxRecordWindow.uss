@@ -8,13 +8,13 @@
     -unity-font-style: bold;
 }
 
-#time-code {
+#timeCode {
     margin: 6px 6px 0 0;
     background-color: var(--unity-colors-default-background);
     height: 80px;
 }
 
-#time-code-container {
+#timeCodeContainer {
     width: 100%;
     flex-direction: row;
     justify-content: center;
@@ -22,14 +22,14 @@
     padding: 6px;
 }
 
-#time-code-container > Label {
-    font-size: 58px;
+#timeCodeContainer > Label {
+    font-size: 56px;
     -unity-text-align: middle-center;
 }
 
-#time-code-container > Label.time-text {
+#timeCodeContainer > Label.time-text {
     -unity-font-style: bold;
-    width: 72px;
+    width: 64px;
 }
 
 #ControlPanel {
@@ -69,7 +69,7 @@
     margin: 1px;
 }
 
-#output-warning-icon {
+#outputWarningIcon {
     width: 20px;
     height: 20px;
     padding: 0;
@@ -77,7 +77,7 @@
     display: none;
 }
 
-#output-file-name {
+#outputFileName {
     white-space: normal;
 }
 
