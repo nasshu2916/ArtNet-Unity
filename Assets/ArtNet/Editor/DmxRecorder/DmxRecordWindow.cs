@@ -19,7 +19,7 @@ namespace ArtNet.Editor.DmxRecorder
         private Label _errorMessageLabel;
         private TextField _outputFileNameField, _outputDirectoryField;
 
-        private Label _outputFilePathLabel;
+        private Label _outputFilePathLabel, _footerStatusLabel;
         private Image _outputWarningIcon;
         private Button _selectDirectoryButton;
         private VisualElement _timeCodeContainer, _errorMessageArea;
@@ -34,6 +34,14 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
             _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
             _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
+
+            var recordCount = _recorder.GetRecordedCount();
+            _footerStatusLabel.text = _recorder.Status switch
+            {
+                RecordingStatus.Recording => $"Recording. {recordCount} packet recorded",
+                RecordingStatus.Paused => $"Paused. {recordCount} packet recorded",
+                _ => ""
+            };
         }
 
         public void CreateGUI()
@@ -74,6 +82,8 @@ namespace ArtNet.Editor.DmxRecorder
 
             InitializeControlPanel(root);
             InitializeRecordingConfig(root);
+
+            _footerStatusLabel = root.Q<Label>("footerStatusLabel");
         }
 
         private void InitializeControlPanel(VisualElement root)

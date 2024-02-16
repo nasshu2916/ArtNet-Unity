@@ -30,6 +30,8 @@ namespace ArtNet.Editor.DmxRecorder
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
         public RecordConfig Config { get; set; }
 
+        public int GetRecordedCount() => _recordedDmx.Count;
+
         public void StartRecording()
         {
             if (Status != RecordingStatus.None)

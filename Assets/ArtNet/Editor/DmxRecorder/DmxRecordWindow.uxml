@@ -55,6 +55,6 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="footer">
-        <ui:Label text="Status" name="footer-status" />
+        <ui:Label name="footerStatusLabel"/>
     </ui:VisualElement>
 </ui:UXML>
