@@ -14,7 +14,7 @@ namespace ArtNet.Editor.DmxRecorder
         Paused,
     }
 
-    public class DmxRecorder
+    public class Recorder
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
         private int _alreadyRecordedTime;
@@ -23,7 +23,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private long _recordStartTime;
 
-        public DmxRecorder()
+        public Recorder()
         {
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }

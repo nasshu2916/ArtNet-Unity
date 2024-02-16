@@ -15,7 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private VisualTreeAsset visualTree;
         [SerializeField] private StyleSheet styleSheet;
 
-        private readonly DmxRecorder _recorder = new();
+        private readonly Recorder _recorder = new();
         private Label _errorMessageLabel;
         private TextField _outputFileNameField, _outputDirectoryField;
 
