@@ -1,61 +1,103 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance"
-         engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" MemoryProfiler="Unity.MemoryProfiler.Editor"
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements"
+         MemoryProfiler="Unity.MemoryProfiler.Editor"
          noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/ArtNet/Editor/DmxRecorder/DmxRecordWindow.uss?fileID=7433441132597879392&amp;guid=07dcf5323c1104049b2a13e81aa17743&amp;type=3#DmxRecordWindow" />
-    <ui:VisualElement>
-        <ui:Label text="DMX Recorder" name="title" />
+    <ui:VisualElement name="headerTab">
+        <ui:Label text="Recorder" name="headerRecorderLabel"/>
+        <ui:Label text="Sender" name="headerSenderLabel"/>
     </ui:VisualElement>
-    <ui:VisualElement>
-        <ui:VisualElement name="timeCode">
-            <ui:VisualElement name="timeCodeContainer">
-                <ui:Label text="00" name="tcHour" class="time-text"/>
-                <ui:Label text=":" />
-                <ui:Label text="00" name="tcMinute" class="time-text"/>
-                <ui:Label text=":" />
-                <ui:Label text="00" name="tcSecond" class="time-text"/>
-                <ui:Label text=";" />
-                <ui:Label text="00" name="tcMillisecond" class="time-text"/>
-            </ui:VisualElement>
-        </ui:VisualElement>
+    <ui:VisualElement name="recorderPanel" style="height: 100%; display: none;">
         <ui:VisualElement>
-            <ui:VisualElement name="ControlPanel">
-                <ui:Button name="playButton" focusable="false"/>
-                <ui:Button name="pauseButton" focusable="false"/>
+            <ui:VisualElement name="timeCode">
+                <ui:VisualElement name="timeCodeContainer">
+                    <ui:Label text="00" name="tcHour" class="time-text"/>
+                    <ui:Label text=":"/>
+                    <ui:Label text="00" name="tcMinute" class="time-text"/>
+                    <ui:Label text=":"/>
+                    <ui:Label text="00" name="tcSecond" class="time-text"/>
+                    <ui:Label text=";"/>
+                    <ui:Label text="00" name="tcMillisecond" class="time-text"/>
+                </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-    </ui:VisualElement>
-    <ui:VisualElement name="recordingConfig">
-        <ui:VisualElement>
-            <ui:Label text="Output File" display-tooltip-when-elided="true" class="section-title" />
-            <ui:VisualElement class="section-content">
-                <ui:VisualElement>
-                    <ui:VisualElement style="width: 100%;">
-                        <ui:TextField name="outputFileNameField" label="File Name" text="output_file_name"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement>
-                    <ui:VisualElement style="width: 100%;">
-                        <ui:TextField name="outputDirectoryField" label="Folder" text="output directory"/>
-                    </ui:VisualElement>
-                    <ui:Button name="selectFolderButton"/>
-                </ui:VisualElement>
-                <ui:VisualElement>
-                    <ui:VisualElement style="width: 75px; align-items: flex-end;">
-                        <ui:Image name="outputWarningIcon"
-                                  tooltip="File already exists. Save the existing file by overwrite."/>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="width: 100%;">
-                        <ui:Label name="outputFileName" text="output_file"/>
-                    </ui:VisualElement>
-                    <ui:Button name="openOutputFolderButton"/>
-                </ui:VisualElement>
-                <ui:VisualElement>
-                    <ui:VisualElement name="errorMessageArea"/>
+            <ui:VisualElement>
+                <ui:VisualElement name="ControlPanel">
+                    <ui:Button name="playButton" focusable="false"/>
+                    <ui:Button name="pauseButton" focusable="false"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="recordingConfig">
+            <ui:VisualElement>
+                <ui:Label text="Output File" display-tooltip-when-elided="true" class="section-title"/>
+                <ui:VisualElement class="section-content">
+                    <ui:VisualElement>
+                        <ui:VisualElement style="width: 100%;">
+                            <ui:TextField name="outputFileNameField" label="File Name" text="output_file_name"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                        <ui:VisualElement style="width: 100%;">
+                            <ui:TextField name="outputDirectoryField" label="Folder" text="output directory"/>
+                        </ui:VisualElement>
+                        <ui:Button name="selectFolderButton"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                        <ui:VisualElement style="width: 75px; align-items: flex-end;">
+                            <ui:Image name="outputWarningIcon"
+                                      tooltip="File already exists. Save the existing file by overwrite."/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="width: 100%;">
+                            <ui:Label name="outputFileName" text="output_file"/>
+                        </ui:VisualElement>
+                        <ui:Button name="openOutputFolderButton"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                        <ui:VisualElement name="errorMessageArea"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="footer">
+            <ui:Label name="footerStatusLabel"/>
+        </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="footer">
-        <ui:Label name="footerStatusLabel"/>
+    <ui:VisualElement name="senderPanel" style="height: 100%;">
+        <ui:VisualElement class="section-content">
+            <ui:VisualElement>
+                <ui:VisualElement style="width: 100%;">
+                    <ui:TextField name="senderFileNameField" text="file_name" label="DMX File"/>
+                </ui:VisualElement>
+                <ui:Button name="selectPlayFileButton"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="section-content">
+            <ui:VisualElement>
+                <ui:Button name="PlayButton"/>
+                <ui:Label name="playTimeLabel" text="0:00.000"/>
+                <ui:VisualElement style="width: 100%;">
+                    <ui:Slider name="playSlider" high-value="100" focusable="false"/>
+                    <ui:ProgressBar name="playProgressBar"/>
+                    <ui:VisualElement style="align-items: flex-end;">
+                        <ui:Label name="playbackMaxTimeLabel" text="0:00"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="senderConfig">
+            <ui:VisualElement>
+                <ui:Label text="Sender Setting" class="section-title"/>
+                <ui:VisualElement class="section-content">
+                    <ui:VisualElement>
+                        <ui:VisualElement style="width: 100%;">
+                            <ui:Toggle label="Loop" name="sendLoopToggle"/>
+                            <ui:TextField name="sendDistIpField" label="Dist IP" text="127.0.0.1"/>
+                            <ui:Toggle label="Use Record Sequence" name="SenderRecordSequence"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement/>
     </ui:VisualElement>
 </ui:UXML>

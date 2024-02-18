@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public class DmxRecordWindow : EditorWindow
+    public partial class DmxRecordWindow : EditorWindow
     {
         private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
 
@@ -21,6 +21,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private Label _outputFilePathLabel, _footerStatusLabel;
         private Image _outputWarningIcon;
+
+        private Texture _playButtonTexture, _preMatQuadTexture;
         private Button _selectDirectoryButton;
         private VisualElement _timeCodeContainer, _errorMessageArea;
 
@@ -42,6 +44,8 @@ namespace ArtNet.Editor.DmxRecorder
                 RecordingStatus.Paused => $"Paused. {recordCount} packet recorded",
                 _ => ""
             };
+
+            UpdateSender();
         }
 
         public void CreateGUI()
@@ -59,6 +63,9 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCodeMinuteLabel = root.Q<Label>("tcMinute");
             _timeCodeSecondLabel = root.Q<Label>("tcSecond");
             _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
+
+            _playButtonTexture = EditorGUIUtility.IconContent("PlayButton@2x").image;
+            _preMatQuadTexture = EditorGUIUtility.IconContent("PreMatQuad@2x").image;
 
             Initialize(root);
         }
@@ -81,23 +88,51 @@ namespace ArtNet.Editor.DmxRecorder
             };
             _recorder.Config = config;
 
+            InitializeHeaderTab(root);
             InitializeControlPanel(root);
             InitializeRecordingConfig(root);
+
+            InitializeSender(root);
 
             _footerStatusLabel = root.Q<Label>("footerStatusLabel");
         }
 
+        private void InitializeHeaderTab(VisualElement root)
+        {
+            var headerRecorderLabel = root.Q<Label>("headerRecorderLabel");
+            var headerSenderLabel = root.Q<Label>("headerSenderLabel");
+
+            var recorderPanel = root.Q<VisualElement>("recorderPanel");
+            var senderPanel = root.Q<VisualElement>("senderPanel");
+
+            headerSenderLabel.AddToClassList("selected");
+            senderPanel.style.display = DisplayStyle.Flex;
+            recorderPanel.style.display = DisplayStyle.None;
+
+            headerRecorderLabel.RegisterCallback<MouseUpEvent>(_ =>
+            {
+                headerRecorderLabel.AddToClassList("selected");
+                headerSenderLabel.RemoveFromClassList("selected");
+                recorderPanel.style.display = DisplayStyle.Flex;
+                senderPanel.style.display = DisplayStyle.None;
+            });
+
+            headerSenderLabel.RegisterCallback<MouseUpEvent>(_ =>
+            {
+                headerSenderLabel.AddToClassList("selected");
+                headerRecorderLabel.RemoveFromClassList("selected");
+                senderPanel.style.display = DisplayStyle.Flex;
+                recorderPanel.style.display = DisplayStyle.None;
+            });
+        }
+
         private void InitializeControlPanel(VisualElement root)
         {
-            var startButtonImage = new Image
-                { image = EditorGUIUtility.IconContent("PlayButton@2x").image };
+            var startButtonImage = new Image { image = _playButtonTexture };
             var stopButtonImage = new Image
             {
-                image = EditorGUIUtility.IconContent("PreMatQuad@2x").image,
-                style =
-                {
-                    display = DisplayStyle.None
-                }
+                image = _preMatQuadTexture,
+                style = { display = DisplayStyle.None }
             };
             var playButton = root.Q<Button>("playButton");
             var pauseButton = root.Q<Button>("pauseButton");
