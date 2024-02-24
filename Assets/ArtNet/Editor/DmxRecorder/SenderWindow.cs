@@ -90,8 +90,9 @@ namespace ArtNet.Editor.DmxRecorder
         private void InitializeSenderSettings(VisualElement root)
         {
             var sendLoopToggle = root.Q<Toggle>("sendLoopToggle");
-            sendLoopToggle.value =
-                bool.Parse(EditorUserSettings.GetConfigValue(EditorSettingKey("SenderLoop")) ?? "false");
+            var isLoop = bool.Parse(EditorUserSettings.GetConfigValue(EditorSettingKey("SenderLoop")) ?? "false");
+            sendLoopToggle.value = isLoop;
+            _sender.Config.IsLoop = isLoop;
             sendLoopToggle.RegisterValueChangedCallback((evt) =>
             {
                 _sender.Config.IsLoop = evt.newValue;
@@ -101,6 +102,7 @@ namespace ArtNet.Editor.DmxRecorder
             var senderDistIpField = root.Q<TextField>("sendDistIpField");
             var distIp = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderDistIp")) ?? _sender.Config.Ip;
             senderDistIpField.value = distIp;
+            _sender.Config.Ip = distIp;
             senderDistIpField.RegisterValueChangedCallback((evt) =>
             {
                 _sender.Config.Ip = evt.newValue;

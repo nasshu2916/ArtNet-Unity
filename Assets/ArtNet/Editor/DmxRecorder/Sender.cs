@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArtNet.Packets;
@@ -29,7 +30,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         public bool IsPlaying { get; private set; }
         private int LastTime { get; set; }
-        public int MaxTime => DmxPackets.Count > 0 ? DmxPackets[^1].Item1 : 0;
+        public int MaxTime { get; private set; }
         public event OnTimeChanged TimeChanged;
         public event OnChangedPlaying ChangedPlaying;
 
@@ -43,7 +44,8 @@ namespace ArtNet.Editor.DmxRecorder
             if (!System.IO.File.Exists(path)) return;
 
             var data = System.IO.File.ReadAllBytes(path);
-            DmxPackets = RecordData.Deserialize(data);
+            DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.Item1).ToList();
+            MaxTime = DmxPackets.Max(x => x.Item1);
         }
 
         public void Play()
@@ -80,9 +82,11 @@ namespace ArtNet.Editor.DmxRecorder
                 LastTime = MaxTime;
             }
 
-            var dmx = DmxPackets.FindLast(packet =>
-                packet.Item1 <= LastTime && packet.Item1 > oldTime);
-            if (dmx != default) SendDmx(dmx.Item2);
+            var dmxPackets = DmxPackets.Where(x => x.Item1 >= oldTime && x.Item1 < LastTime).Select(x => x.Item2);
+            foreach (var packet in dmxPackets)
+            {
+                SendDmx(packet);
+            }
 
             TimeChanged?.Invoke(LastTime);
 
