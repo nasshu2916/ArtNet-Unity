@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -7,8 +6,10 @@ namespace ArtNet.Editor.DmxRecorder
     partial class DmxRecordWindow
     {
         private readonly Sender _sender = new();
+        private bool _isAnyChange;
+        private bool _isPlaying;
 
-        private bool _isForceSenderSlider;
+        private int _lastTime;
 
         private Image _playButtonImage;
 
@@ -66,15 +67,24 @@ namespace ArtNet.Editor.DmxRecorder
                     _sender.Play();
                 }
             };
+            _sender.ChangedPlaying += isPlaying =>
+            {
+                _isPlaying = isPlaying;
+                _isAnyChange = true;
+            };
 
             _senderTimeLabel = root.Q<Label>("playTimeLabel");
             _senderTimeSlider = root.Q<Slider>("playSlider");
             _senderTimeSlider.RegisterValueChangedCallback((evt) =>
             {
-                _sender.ChangePlayTime(evt.newValue);
+                var time = (int) evt.newValue;
+                _sender.ChangePlayTime(time);
+                _senderTimeLabel.text = TimeText(time);
             });
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
+
+            _sender.TimeChanged += OnTimeChanged;
         }
 
         private void InitializeSenderSettings(VisualElement root)
@@ -122,18 +132,29 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void UpdateSender()
         {
-            if (_sender.IsPlaying) _sender.Update(Time.deltaTime);
+            if (!_isAnyChange) return;
 
-            var time = _sender.CurrentTime;
-            var minutes = (int) time / 60000;
-            var seconds = (int) time / 1000 % 60;
-            var milliseconds = (int) time % 1000;
+            _senderTimeLabel.text = TimeText(_lastTime);
+            _senderTimeSlider.value = _lastTime;
+            _senderProgressBar.value = _lastTime;
 
-            _senderTimeLabel.text = $"{minutes}:{seconds:D2}.{milliseconds:D3}";
-            _senderTimeSlider.value = time;
-            _senderProgressBar.value = time;
+            _playButtonImage.image = _isPlaying ? _preMatQuadTexture : _playButtonTexture;
 
-            _playButtonImage.image = _sender.IsPlaying ? _preMatQuadTexture : _playButtonTexture;
+            _isAnyChange = false;
+        }
+
+        private static string TimeText(int time)
+        {
+            var minutes = time / 60000;
+            var seconds = time / 1000 % 60;
+            var milliseconds = time % 1000;
+            return $"{minutes}:{seconds:D2}.{milliseconds:D3}";
+        }
+
+        private void OnTimeChanged(int time)
+        {
+            _lastTime = time;
+            _isAnyChange = true;
         }
     }
 }
