@@ -1,11 +1,18 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
 {
     partial class DmxRecordWindow
     {
+        private static readonly Color RecordingColor = new(0.78f, 0f, 0f, 1f);
+        private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
+
+        private readonly Recorder _recorder = new();
+
         private Label _errorMessageLabel;
         private TextField _outputFileNameField, _outputDirectoryField;
 
@@ -17,8 +24,37 @@ namespace ArtNet.Editor.DmxRecorder
 
         private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
 
+        private void UpdateRecorder()
+        {
+            var timeCode = _recorder.GetRecordingTime();
+            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
+            _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
+            _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
+            _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
+            _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
+
+            var recordCount = _recorder.GetRecordedCount();
+            _footerStatusLabel.text = _recorder.Status switch
+            {
+                RecordingStatus.Recording => $"Recording. {recordCount} packet recorded",
+                RecordingStatus.Paused => $"Paused. {recordCount} packet recorded",
+                _ => ""
+            };
+        }
+        private void InitializeRecorder(VisualElement root)
+        {
+            InitializeControlPanel(root);
+            InitializeRecordingConfig(root);
+        }
+
         private void InitializeControlPanel(VisualElement root)
         {
+            _timeCodeContainer = root.Q<VisualElement>("timeCodeContainer");
+            _timeCodeHourLabel = root.Q<Label>("tcHour");
+            _timeCodeMinuteLabel = root.Q<Label>("tcMinute");
+            _timeCodeSecondLabel = root.Q<Label>("tcSecond");
+            _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
+
             var startButtonImage = new Image { image = _playButtonTexture };
             var stopButtonImage = new Image
             {

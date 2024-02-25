@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,32 +8,14 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
 
-        private static readonly Color RecordingColor = new(0.78f, 0f, 0f, 1f);
-        private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
-        [SerializeField] private VisualTreeAsset visualTree;
+        [SerializeField] private VisualTreeAsset visualTree, recorderVisualTree, senderVisualTree;
         [SerializeField] private StyleSheet styleSheet;
-
-        private readonly Recorder _recorder = new();
 
         private Texture _playButtonTexture, _preMatQuadTexture;
 
         private void Update()
         {
-            var timeCode = _recorder.GetRecordingTime();
-            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
-            _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
-            _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
-            _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
-            _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
-
-            var recordCount = _recorder.GetRecordedCount();
-            _footerStatusLabel.text = _recorder.Status switch
-            {
-                RecordingStatus.Recording => $"Recording. {recordCount} packet recorded",
-                RecordingStatus.Paused => $"Paused. {recordCount} packet recorded",
-                _ => ""
-            };
-
+            UpdateRecorder();
             UpdateSender();
         }
 
@@ -43,21 +24,15 @@ namespace ArtNet.Editor.DmxRecorder
             minSize = new Vector2(375, 400);
             var root = rootVisualElement;
 
-            VisualElement recorderVisualElement = visualTree.Instantiate();
-            recorderVisualElement.AddToClassList("root");
-            root.Add(recorderVisualElement);
+            VisualElement visualElement = visualTree.Instantiate();
+            visualElement.AddToClassList("root");
+            root.Add(visualElement);
             root.styleSheets.Add(styleSheet);
-
-            _timeCodeContainer = root.Q<VisualElement>("timeCodeContainer");
-            _timeCodeHourLabel = root.Q<Label>("tcHour");
-            _timeCodeMinuteLabel = root.Q<Label>("tcMinute");
-            _timeCodeSecondLabel = root.Q<Label>("tcSecond");
-            _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
 
             _playButtonTexture = EditorGUIUtility.IconContent("PlayButton@2x").image;
             _preMatQuadTexture = EditorGUIUtility.IconContent("PreMatQuad@2x").image;
 
-            Initialize(root);
+            Initialize(visualElement);
         }
 
         [MenuItem("ArtNet/DmxRecorder")]
@@ -69,6 +44,16 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void Initialize(VisualElement root)
         {
+            var tabContent = new VisualElement { name = "tabContent" };
+            root.Add(tabContent);
+
+            VisualElement recorderVisualElement = recorderVisualTree.CloneTree();
+            recorderVisualElement.name = "recorderPanel";
+            tabContent.Add(recorderVisualElement);
+            VisualElement senderVisualElement = senderVisualTree.Instantiate();
+            senderVisualElement.name = "senderPanel";
+            tabContent.Add(senderVisualElement);
+
             var config = new RecordConfig
             {
                 Directory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
@@ -79,10 +64,8 @@ namespace ArtNet.Editor.DmxRecorder
             _recorder.Config = config;
 
             InitializeHeaderTab(root);
-            InitializeControlPanel(root);
-            InitializeRecordingConfig(root);
-
-            InitializeSender(root);
+            InitializeRecorder(recorderVisualElement);
+            InitializeSender(senderVisualElement);
 
             _footerStatusLabel = root.Q<Label>("footerStatusLabel");
         }
@@ -95,9 +78,9 @@ namespace ArtNet.Editor.DmxRecorder
             var recorderPanel = root.Q<VisualElement>("recorderPanel");
             var senderPanel = root.Q<VisualElement>("senderPanel");
 
-            headerSenderLabel.AddToClassList("selected");
-            senderPanel.style.display = DisplayStyle.Flex;
-            recorderPanel.style.display = DisplayStyle.None;
+            headerRecorderLabel.AddToClassList("selected");
+            senderPanel.style.display = DisplayStyle.None;
+            recorderPanel.style.display = DisplayStyle.Flex;
 
             headerRecorderLabel.RegisterCallback<MouseUpEvent>(_ =>
             {

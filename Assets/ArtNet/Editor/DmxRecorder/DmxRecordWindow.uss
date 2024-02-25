@@ -32,6 +32,14 @@ Button > Image {
     background-color: var(--unity-colors-button-background-pressed);
 }
 
+#tabContent {
+    height: 100%;
+}
+
+#recorderPanel {
+    height: 100%;
+}
+
 #timeCode {
     margin: 3px 0 3px 0;
     background-color: var(--unity-colors-default-background);
