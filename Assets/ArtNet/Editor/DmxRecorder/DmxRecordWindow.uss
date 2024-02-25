@@ -171,7 +171,7 @@ Button > Image {
     margin: 0 6px 0 6px;
 }
 
-#sendDistIpField > Label {
+#senderConfigFields Label {
     width: 150px;
     min-width: 150px;
 }

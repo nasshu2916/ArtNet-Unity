@@ -14,7 +14,7 @@
     </ui:VisualElement>
     <ui:VisualElement class="section-content">
         <ui:VisualElement>
-            <ui:Button name="PlayButton"/>
+            <ui:Button name="PlayButton" style="width: 45px; height: 45px;"/>
             <ui:Label name="playTimeLabel" text="0:00.000"/>
             <ui:VisualElement style="width: 100%;">
                 <ui:Slider name="playSlider" high-value="100" focusable="false"/>
@@ -30,7 +30,7 @@
             <ui:Label text="Sender Setting" class="section-title"/>
             <ui:VisualElement class="section-content">
                 <ui:VisualElement>
-                    <ui:VisualElement style="width: 100%;">
+                    <ui:VisualElement name="senderConfigFields" style="width: 100%;">
                         <ui:Toggle label="Loop" name="sendLoopToggle"/>
                         <ui:TextField name="sendDistIpField" label="Dist IP" text="127.0.0.1"/>
                         <ui:Toggle label="Use Record Sequence" name="SenderRecordSequence"/>
