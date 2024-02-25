@@ -14,7 +14,7 @@ Button > Image {
 
 #headerTab {
     flex-direction: row;
-    padding: 1;
+    padding: 1px;
     background-color: rgb(44, 44, 44);
 }
 
