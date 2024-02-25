@@ -1,4 +1,7 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using UnityEditor;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -6,6 +9,18 @@ namespace ArtNet.Editor.DmxRecorder
     partial class DmxRecordWindow
     {
         private readonly Sender _sender = new();
+
+        private readonly List<(float, string)> _senderSpeedDropdown = new()
+        {
+            (0.1f, "0.1x"),
+            (0.25f, "0.25x"),
+            (0.5f, "0.5x"),
+            (1f, "1x"),
+            (2f, "2x"),
+            (5f, "5x"),
+            (10f, "10x"),
+        };
+
         private bool _isAnyChange;
         private bool _isPlaying;
 
@@ -113,6 +128,33 @@ namespace ArtNet.Editor.DmxRecorder
             sendRecordSequenceToggle.RegisterValueChangedCallback((evt) =>
             {
                 _sender.Config.IsRecordSequence = evt.newValue;
+            });
+
+            var sendSpeedSlider = root.Q<Slider>("sendSpeed");
+            var sendSpeedDropdown = root.Q<DropdownField>("sendSpeedDropdown");
+            sendSpeedDropdown.choices.Clear();
+            sendSpeedDropdown.choices.AddRange(_senderSpeedDropdown.Select(x => x.Item2));
+            sendSpeedDropdown.index = -1;
+
+            _sender.Config.Speed =
+                float.Parse(EditorUserSettings.GetConfigValue(EditorSettingKey("SenderSpeed")) ?? "1");
+            sendSpeedSlider.value = _sender.Config.Speed;
+            sendSpeedSlider.label = $"Speed (x{_sender.Config.Speed})";
+            sendSpeedSlider.RegisterValueChangedCallback(evt =>
+            {
+                var speedValue = evt.newValue;
+                _sender.Config.Speed = speedValue;
+                EditorUserSettings.SetConfigValue(EditorSettingKey("SenderSpeed"),
+                    speedValue.ToString(CultureInfo.CurrentCulture));
+                sendSpeedSlider.label = $"Speed (x{speedValue})";
+                sendSpeedDropdown.index = -1;
+            });
+
+            sendSpeedDropdown.RegisterValueChangedCallback(evt =>
+            {
+                var speedValue = _senderSpeedDropdown.Find(x => x.Item2 == evt.newValue).Item1;
+                if (speedValue == 0) return;
+                sendSpeedSlider.value = speedValue;
             });
         }
 

@@ -11,7 +11,6 @@ namespace ArtNet.Editor.DmxRecorder
     public class Sender
     {
         public delegate void OnChangedPlaying(bool isPlaying);
-
         public delegate void OnTimeChanged(int time);
         private readonly Dictionary<int, byte> _sequenceMap = new();
         private readonly UdpSender _udpSender = new(ArtNetReceiver.ArtNetPort);
@@ -69,7 +68,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (!IsPlaying) return;
             var oldTime = LastTime;
-            LastTime += deltaTime;
+            LastTime += CalcAddTime(deltaTime);
             var isReset = false;
             if (LastTime > MaxTime)
             {
@@ -163,6 +162,15 @@ namespace ArtNet.Editor.DmxRecorder
 
                 await Task.Delay(1, token);
             }
+        }
+
+        private int CalcAddTime(int time)
+        {
+            var addTime = time * Config.Speed;
+            var addTimeInt = (int) addTime;
+            if (addTime - addTimeInt > new System.Random().NextDouble()) addTimeInt++;
+
+            return addTimeInt;
         }
     }
 }

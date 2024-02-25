@@ -93,6 +93,10 @@
                             <ui:Toggle label="Loop" name="sendLoopToggle"/>
                             <ui:TextField name="sendDistIpField" label="Dist IP" text="127.0.0.1"/>
                             <ui:Toggle label="Use Record Sequence" name="SenderRecordSequence"/>
+                            <ui:VisualElement style="flex-direction: row;">
+                                <ui:Slider label="Speed" high-value="10" name="sendSpeed" style="flex-grow: 1;"/>
+                                <ui:DropdownField name="sendSpeedDropdown" choices="-"/>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
