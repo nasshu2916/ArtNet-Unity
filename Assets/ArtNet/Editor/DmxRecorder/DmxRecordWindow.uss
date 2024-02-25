@@ -1,0 +1,177 @@
+.root {
+    height: 100%;
+}
+
+TextField > Label {
+    width: 75px;
+    min-width: 75px;
+}
+
+Button > Image {
+    width: 100%;
+    height: 100%;
+}
+
+#headerTab {
+    flex-direction: row;
+    padding: 1px;
+    background-color: rgb(44, 44, 44);
+}
+
+#headerTab > Label {
+    font-size: 14px;
+    -unity-font-style: bold;
+    padding: 6px;
+    background-color: var(--unity-colors-button-background);
+    border-color: var(--unity-colors-default-border);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+#headerTab > Label.selected {
+    background-color: var(--unity-colors-button-background-pressed);
+}
+
+#tabContent {
+    height: 100%;
+}
+
+#recorderPanel {
+    height: 100%;
+}
+
+#timeCode {
+    margin: 3px 0 3px 0;
+    background-color: var(--unity-colors-default-background);
+    height: 80px;
+}
+
+#timeCodeContainer {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 6px;
+}
+
+#timeCodeContainer > Label {
+    font-size: 56px;
+    -unity-text-align: middle-center;
+}
+
+#timeCodeContainer > Label.time-text {
+    -unity-font-style: bold;
+    width: 64px;
+}
+
+#ControlPanel {
+    height: 70px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#ControlPanel > Button {
+    background-color: rgb(85, 85, 85);
+    width: 54px;
+    height: 54px;
+    padding: 4px;
+    margin: 6px;
+}
+
+#ControlPanel > Button.selected {
+    background-color: var(--unity-colors-button-background-pressed);
+}
+
+#recordingConfig {
+    background-color: rgb(64, 64, 64);
+    flex-grow: 1;
+    padding: 6px;
+}
+
+#recordingConfig Button {
+    background-color: rgb(85, 85, 85);
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin: 1px;
+}
+
+#outputWarningIcon {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin: 0;
+    display: none;
+}
+
+#outputFileName {
+    white-space: normal;
+}
+
+.error-message-area {
+    background-color: var(--unity-colors-box-background);
+    border-color: var(--unity-colors-default-border);
+    border-width: 1px;
+    border-radius: 4px;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 3px;
+}
+
+.error-message-area > Image {
+    flex-grow: 0;
+}
+
+.error-message-area > Label {
+    flex-grow: 1;
+    font-size: 11px;
+    padding-left: 6px;
+}
+
+.section-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    background-color: rgb(44, 44, 44);
+    margin: 3px 0 0 0;
+    padding: 0 6px;
+}
+
+.section-content {
+    padding: 4px;
+}
+
+.section-content > VisualElement {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#footer {
+    background-color: rgb(44, 44, 44);
+    padding: 6px;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#selectPlayFileButton {
+    height: 18px;
+    width: 24px;
+    padding: 0;
+}
+
+#playTimeLabel {
+    font-size: 11px;
+    width: 50px;
+    margin-top: 8px;
+}
+
+#playProgressBar {
+    height: 15px;
+    margin: 0 6px 0 6px;
+}
+
+#senderConfigFields Label {
+    width: 150px;
+    min-width: 150px;
+}
