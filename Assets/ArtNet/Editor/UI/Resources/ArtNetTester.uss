@@ -18,7 +18,7 @@
 .panel {
     flex-shrink: 0;
     background-color: var(--unity-colors-box-background);
-    padding: 10;
+    padding: 10px;
 }
 
 .panel-title {
