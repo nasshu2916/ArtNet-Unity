@@ -4,6 +4,7 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public class SenderConfig
     {
+        public string LoadFilePath { get; set; }
         public IPAddress Ip { get; set; } = IPAddress.Parse("127.0.0.1");
         public bool IsLoop { get; set; }
         public bool IsRecordSequence { get; set; }

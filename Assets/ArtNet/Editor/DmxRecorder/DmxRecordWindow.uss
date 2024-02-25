@@ -14,7 +14,7 @@ Button > Image {
 
 #headerTab {
     flex-direction: row;
-    padding: 1;
+    padding: 1px;
     background-color: rgb(44, 44, 44);
 }
 
@@ -30,6 +30,14 @@ Button > Image {
 
 #headerTab > Label.selected {
     background-color: var(--unity-colors-button-background-pressed);
+}
+
+#tabContent {
+    height: 100%;
+}
+
+#recorderPanel {
+    height: 100%;
 }
 
 #timeCode {
@@ -163,7 +171,7 @@ Button > Image {
     margin: 0 6px 0 6px;
 }
 
-#sendDistIpField > Label {
+#senderConfigFields Label {
     width: 150px;
     min-width: 150px;
 }

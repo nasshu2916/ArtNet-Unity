@@ -41,12 +41,12 @@ namespace ArtNet.Editor.DmxRecorder
         private void InitializeSender(VisualElement root)
         {
             _senderFilePath = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderPath")) ??
-                              "select dmx file";
+                              "";
 
             InitializeSenderPanel(root);
             InitializeSenderSettings(root);
 
-            LoadDmxFile(_senderFilePath);
+            if (!string.IsNullOrEmpty(_senderFilePath)) LoadDmxFile(_senderFilePath);
         }
 
         private void InitializeSenderPanel(VisualElement root)

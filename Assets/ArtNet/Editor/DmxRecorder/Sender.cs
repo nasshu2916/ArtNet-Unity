@@ -42,6 +42,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (!System.IO.File.Exists(path)) return;
 
+            Config.LoadFilePath = path;
             var data = System.IO.File.ReadAllBytes(path);
             DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.Item1).ToList();
             MaxTime = DmxPackets.Max(x => x.Item1);
