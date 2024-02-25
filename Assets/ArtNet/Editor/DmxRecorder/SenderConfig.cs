@@ -1,8 +1,10 @@
-﻿namespace ArtNet.Editor.DmxRecorder
+﻿using System.Net;
+
+namespace ArtNet.Editor.DmxRecorder
 {
     public class SenderConfig
     {
-        public string Ip { get; set; } = "127.0.0.1";
+        public IPAddress Ip { get; set; } = IPAddress.Parse("127.0.0.1");
         public bool IsLoop { get; set; }
         public bool IsRecordSequence { get; set; }
         public float Speed { get; set; } = 1;

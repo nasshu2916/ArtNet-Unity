@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using UnityEditor;
 using UnityEngine.UIElements;
 
@@ -9,6 +10,7 @@ namespace ArtNet.Editor.DmxRecorder
     partial class DmxRecordWindow
     {
         private readonly Sender _sender = new();
+        private readonly List<string> _senderErrorMessages = new();
 
         private readonly List<(float, string)> _senderSpeedDropdown = new()
         {
@@ -27,6 +29,8 @@ namespace ArtNet.Editor.DmxRecorder
         private int _lastTime;
 
         private Image _playButtonImage;
+        private VisualElement _senderErrorMessageArea;
+        private Label _senderErrorMessageLabel;
 
         private string _senderFilePath;
         private ProgressBar _senderProgressBar;
@@ -115,13 +119,27 @@ namespace ArtNet.Editor.DmxRecorder
             });
 
             var senderDistIpField = root.Q<TextField>("sendDistIpField");
-            var distIp = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderDistIp")) ?? _sender.Config.Ip;
+            var distIp = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderDistIp")) ??
+                         _sender.Config.Ip.ToString();
             senderDistIpField.value = distIp;
-            _sender.Config.Ip = distIp;
+            _sender.Config.Ip = IPAddress.Parse(distIp);
             senderDistIpField.RegisterValueChangedCallback((evt) =>
             {
-                _sender.Config.Ip = evt.newValue;
-                EditorUserSettings.SetConfigValue(EditorSettingKey("SenderDistIp"), evt.newValue);
+                var ipText = evt.newValue;
+                if (!IPAddress.TryParse(ipText, out var ip))
+                {
+                    if (_senderErrorMessages.Contains("Invalid IP address")) return;
+                    _senderErrorMessages.Add("Invalid IP address");
+                    UpdateSenderErrorMessage();
+                }
+                else
+                {
+                    _sender.Config.Ip = ip;
+                    EditorUserSettings.SetConfigValue(EditorSettingKey("SenderDistIp"), ipText);
+                    if (!_senderErrorMessages.Contains("Invalid IP address")) return;
+                    _senderErrorMessages.Remove("Invalid IP address");
+                    UpdateSenderErrorMessage();
+                }
             });
 
             var sendRecordSequenceToggle = root.Q<Toggle>("sendRecordSequenceToggle");
@@ -156,6 +174,16 @@ namespace ArtNet.Editor.DmxRecorder
                 if (speedValue == 0) return;
                 sendSpeedSlider.value = speedValue;
             });
+
+            _senderErrorMessageArea = root.Q<VisualElement>("senderErrorMessageArea");
+            _senderErrorMessageArea.Add(new Image()
+                {
+                    image = EditorGUIUtility.IconContent("console.erroricon@2x").image
+                }
+            );
+            _senderErrorMessageLabel = new Label();
+            _senderErrorMessageArea.Add(_senderErrorMessageLabel);
+            UpdateSenderErrorMessage();
         }
 
         private void LoadDmxFile(string path)
@@ -199,6 +227,19 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _lastTime = time;
             _isAnyChange = true;
+        }
+
+        private void UpdateSenderErrorMessage()
+        {
+            if (_senderErrorMessages.Count > 0)
+            {
+                _senderErrorMessageLabel.text = string.Join("\n", _senderErrorMessages);
+                _senderErrorMessageArea.style.visibility = Visibility.Visible;
+            }
+            else
+            {
+                _senderErrorMessageArea.style.visibility = Visibility.Hidden;
+            }
         }
     }
 }

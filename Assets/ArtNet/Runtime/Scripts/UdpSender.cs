@@ -14,9 +14,9 @@ namespace ArtNet
         }
         public int Port { get; }
 
-        public void Send(byte[] data, string ip)
+        public void Send(byte[] data, IPAddress ip)
         {
-            _socket.SendTo(data, new IPEndPoint(IPAddress.Parse(ip), Port));
+            _socket.SendTo(data, new IPEndPoint(ip, Port));
         }
     }
 }
