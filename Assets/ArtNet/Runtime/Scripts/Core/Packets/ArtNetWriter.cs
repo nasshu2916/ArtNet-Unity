@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Net;
 using System.Text;
 
@@ -12,7 +12,7 @@ namespace ArtNet.Packets
 
         public void WriteNetwork(ushort value)
         {
-            base.Write(IPAddress.HostToNetworkOrder((short)value));
+            base.Write(IPAddress.HostToNetworkOrder((short) value));
         }
 
         public void WriteNetwork(string value, int length)

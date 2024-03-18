@@ -86,7 +86,7 @@ namespace ArtNet.Editor
 
             if (packet.OpCode == OpCode.Dmx)
             {
-                OnDmxReceived((DmxPacket)packet);
+                OnDmxReceived((DmxPacket) packet);
             }
         }
 

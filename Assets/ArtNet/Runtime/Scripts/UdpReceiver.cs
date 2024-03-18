@@ -15,7 +15,7 @@ namespace ArtNet
         private byte[] _receiveBuffer = new byte[1500];
 
         public int Port { get; }
-        public bool IsRunning => _task is {IsCanceled: false, IsCompleted: false};
+        public bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
 
         public ReceivedPacketEventHandler OnReceivedPacket = (_, _, _) => { };
         public ErrorOccuredEventHandler OnUdpStartFailed = _ => { };

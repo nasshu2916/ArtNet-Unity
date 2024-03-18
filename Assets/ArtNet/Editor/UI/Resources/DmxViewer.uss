@@ -3,7 +3,7 @@ DmxAddressViewer {
     min-height: 30px;
     width: 5%;
     background-color: var(--unity-colors-default-background);
-    border-width: 1;
+    border-width: 1px;
     border-color: var(--unity-colors-default-border);
 }
 

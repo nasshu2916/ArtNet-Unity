@@ -10,7 +10,7 @@ namespace ArtNet.Packets
         private const string ArtNetId = "Art-Net\0";
         private const byte FixedArtNetPacketLength = 10;
         private static readonly byte[] IdentificationIds = Encoding.ASCII.GetBytes(ArtNetId);
-        private static readonly byte IdentificationIdsLength = (byte)IdentificationIds.Length;
+        private static readonly byte IdentificationIdsLength = (byte) IdentificationIds.Length;
 
         protected ArtNetPacket(Enums.OpCode opCode)
         {
@@ -40,7 +40,7 @@ namespace ArtNet.Packets
         protected virtual void Serialize(ArtNetWriter artNetWriter)
         {
             artNetWriter.WriteNetwork(ArtNetId, 8);
-            artNetWriter.Write((ushort)OpCode);
+            artNetWriter.Write((ushort) OpCode);
         }
 
         [CanBeNull]
@@ -69,6 +69,6 @@ namespace ArtNet.Packets
         }
 
         private static Enums.OpCode GetOpCode(ReadOnlySpan<byte> buffer) =>
-            (Enums.OpCode)(buffer[0] + (buffer[1] << 8));
+            (Enums.OpCode) (buffer[0] + (buffer[1] << 8));
     }
 }

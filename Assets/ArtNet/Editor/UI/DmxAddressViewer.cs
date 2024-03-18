@@ -12,17 +12,17 @@ namespace ArtNet.Editor.UI
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
             private UxmlIntAttributeDescription _addressNumAttr = new()
-                { name = "address-num" };
+            { name = "address-num" };
 
             private UxmlIntAttributeDescription _addressValueAttr = new()
-                { name = "address-value" };
+            { name = "address-value" };
 
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
             {
                 base.Init(ve, bag, cc);
-                var testElement = (DmxAddressViewer)ve;
+                var testElement = (DmxAddressViewer) ve;
                 testElement._addressNumLabel.text = _addressNumAttr.GetValueFromBag(bag, cc).ToString();
-                testElement.value = (byte)_addressValueAttr.GetValueFromBag(bag, cc);
+                testElement.value = (byte) _addressValueAttr.GetValueFromBag(bag, cc);
             }
         }
 
