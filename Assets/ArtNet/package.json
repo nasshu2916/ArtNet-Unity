@@ -1,7 +1,7 @@
 {
   "name": "net.naoyakohda.artnet-unity",
   "author": "Naoya Kohda",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "ArtNet-Unity",
   "description": "Art-Net library for Unity",
   "dependencies": {},
