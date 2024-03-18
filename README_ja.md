@@ -1,6 +1,7 @@
 ﻿# ArtNet-Unity
 
-Unity(C#) で ArtNet を扱うためのライブラリです。ArtNet のパケットを受信し、Callback から受信したデータを処理することができます。
+Unity(C#) で ArtNet を扱うためのライブラリです。
+ArtNet のパケットを受信し、Callback から受信したデータを処理することができます。
 
 エディタ拡張から ArtNet の受信の確認状況の確認ができます。また、受信したパケットを保存し、送信することも可能です。
 
@@ -39,9 +40,10 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ### ArtNetTester
 
 Game を実行せずに ArtNet の受信状況を確認するためのエディタ拡張です。
-Window 表示時は ArtNet のパケットを受信しないため、 `Start Receive ArtNet Packet` ボタンを押すことで受信を開始します。
+Window 表示時は ArtNet のパケットを受信していません。
+そのため、`Start Receive ArtNet Packet` ボタンを押すことで受信させる必要があります。
 
-このエディタ拡張では、最後に ArtNet のパケットを受信した時刻と OP Code の内容を確認できます。
+このエディタ拡張では、最後に ArtNet パケットを受信した時刻と OP Code の内容を確認できます。
 また、Universe 単位で最後に受信した DMX の値も確認できます。
 
 ### DmxRecorder
