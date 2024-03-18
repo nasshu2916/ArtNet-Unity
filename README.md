@@ -1,25 +1,26 @@
 # ArtNet-Unity
 
 A tool to receive ArtNet in Unity(C#).
-Receive DMX512 via ArtNet.
+DMX data can be received, recorded, and played back.
+
+[日本語](./README_ja.md)
 
 ![dmx_receive](Docs/dmx_receive.gif)
 
 ## Install
 
-Install via Unity Package Manager.
+You can install it with Unity Package Manager.
 
-※ Required Unity version is 2021.3.1 or later.
-
-```
-https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#v0.1.2
-```
-
-or develop branch
+1. Open `Window` > `Package Manager` in Unity.
+2. Click the `+` button and select `Add package from git URL`.
+3. Enter the following URL and click the `Add` button.
 
 ```
-https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#develop
+https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ```
+
+> [!NOTE]
+> Unity 2021.3.1 or later is required.
 
 ## Usage
 
