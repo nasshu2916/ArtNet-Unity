@@ -8,6 +8,8 @@ You can check the status of ArtNet reception from the editor extension. You can 
 
 ![dmx_receive](Docs/dmx_receive.gif)
 
+https://github.com/nasshu2916/ArtNet-Unity/assets/13119954/36851801-4f0a-4a2a-98aa-0b4659588a59
+
 ## Install
 
 You can install it with Unity Package Manager.
