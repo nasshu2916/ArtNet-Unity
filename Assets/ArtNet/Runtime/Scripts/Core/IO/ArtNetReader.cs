@@ -1,7 +1,8 @@
 using System;
 using System.Buffers.Binary;
+using System.Text;
 
-namespace ArtNet.Packets
+namespace ArtNet.IO
 {
     public ref struct ArtNetReader
     {
@@ -44,7 +45,7 @@ namespace ArtNet.Packets
 
         internal string ReadString(int length)
         {
-            var value = System.Text.Encoding.ASCII.GetString(_data.Slice(_position, length));
+            var value = Encoding.ASCII.GetString(_data.Slice(_position, length));
             _position += length;
             return value;
         }

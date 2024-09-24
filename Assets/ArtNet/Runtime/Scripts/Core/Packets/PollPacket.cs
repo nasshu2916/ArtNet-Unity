@@ -1,5 +1,6 @@
 using System;
 using ArtNet.Enums;
+using ArtNet.IO;
 
 namespace ArtNet.Packets
 {

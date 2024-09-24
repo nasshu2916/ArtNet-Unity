@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -125,14 +126,14 @@ namespace ArtNet.Editor.DmxRecorder
 
             var storeData = RecordData.Serialize(_recordedDmx);
 
-            if (!System.IO.Directory.Exists(Config.Directory))
+            if (!Directory.Exists(Config.Directory))
             {
-                System.IO.Directory.CreateDirectory(Config.Directory);
+                Directory.CreateDirectory(Config.Directory);
             }
 
             var path = Config.OutputPath;
-            var exists = System.IO.File.Exists(path);
-            System.IO.File.WriteAllBytes(path, storeData);
+            var exists = File.Exists(path);
+            File.WriteAllBytes(path, storeData);
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
         }

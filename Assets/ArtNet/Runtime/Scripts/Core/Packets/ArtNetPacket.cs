@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Text;
+using ArtNet.Enums;
+using ArtNet.IO;
 using JetBrains.Annotations;
 
 namespace ArtNet.Packets
@@ -12,18 +14,18 @@ namespace ArtNet.Packets
         private static readonly byte[] IdentificationIds = Encoding.ASCII.GetBytes(ArtNetId);
         private static readonly byte IdentificationIdsLength = (byte) IdentificationIds.Length;
 
-        protected ArtNetPacket(Enums.OpCode opCode)
+        protected ArtNetPacket(OpCode opCode)
         {
             OpCode = opCode;
         }
 
-        protected ArtNetPacket(ReadOnlySpan<byte> buffer, Enums.OpCode opCode) : this(opCode)
+        protected ArtNetPacket(ReadOnlySpan<byte> buffer, OpCode opCode) : this(opCode)
         {
             var artReader = new ArtNetReader(buffer[FixedArtNetPacketLength..]);
             Deserialize(artReader);
         }
 
-        public Enums.OpCode OpCode { get; }
+        public OpCode OpCode { get; }
         public ushort ProtocolVersion { get; protected set; } = 14;
 
         public byte[] ToByteArray()
@@ -50,9 +52,9 @@ namespace ArtNet.Packets
 
             return GetOpCode(buffer.Slice(IdentificationIdsLength, 2)) switch
             {
-                Enums.OpCode.Poll => new PollPacket(buffer),
-                Enums.OpCode.PollReply => new PollReplyPacket(buffer),
-                Enums.OpCode.Dmx => new DmxPacket(buffer),
+                OpCode.Poll => new PollPacket(buffer),
+                OpCode.PollReply => new PollReplyPacket(buffer),
+                OpCode.Dmx => new DmxPacket(buffer),
                 _ => null
             };
         }
@@ -68,7 +70,7 @@ namespace ArtNet.Packets
             return true;
         }
 
-        private static Enums.OpCode GetOpCode(ReadOnlySpan<byte> buffer) =>
-            (Enums.OpCode) (buffer[0] + (buffer[1] << 8));
+        private static OpCode GetOpCode(ReadOnlySpan<byte> buffer) =>
+            (OpCode) (buffer[0] + (buffer[1] << 8));
     }
 }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using ArtNet.Editor.UI;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -17,21 +18,32 @@ namespace ArtNet.Editor
         [SerializeField] private string _receiverStatus;
         [SerializeField] private string _lastReceived;
         [SerializeField] private string _lastOpCode;
+        private readonly Dictionary<ushort, byte[]> _dmxData = new();
 
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private readonly Dictionary<ushort, byte[]> _dmxData = new();
-        private readonly Queue<ushort> _updatedUniverses = new();
         private readonly Dictionary<ushort, UniverseInfo> _universeInfos = new();
-        private Button _receiveStartButton;
-        private ScrollView _universeSelector;
+        private readonly Queue<ushort> _updatedUniverses = new();
         private DmxViewer _dmxViewer;
+        private Button _receiveStartButton;
         private ushort _selectedUniverseNum;
+        private ScrollView _universeSelector;
 
-        [MenuItem("ArtNet/ArtNetTester")]
-        public static void ShowExample()
+        private void Update()
         {
-            var wnd = GetWindow<ArtNetTester>();
-            wnd.titleContent = new GUIContent("ArtNetTester");
+            lock (_updatedUniverses)
+            {
+                while (0 < _updatedUniverses.Count)
+                {
+                    var universe = _updatedUniverses.Dequeue();
+                    if (!_universeInfos.ContainsKey(universe)) AddUniverseInfo(universe);
+
+                    _universeInfos[universe].ReceivedAt = DateTime.Now;
+                    if (universe == _selectedUniverseNum)
+                    {
+                        _dmxViewer.value = _dmxData[universe];
+                    }
+                }
+            }
         }
 
         public void CreateGUI()
@@ -57,26 +69,15 @@ namespace ArtNet.Editor
             root.Bind(new SerializedObject(this));
         }
 
-        private void Update()
+        [MenuItem("ArtNet/ArtNetTester")]
+        public static void ShowExample()
         {
-            lock (_updatedUniverses)
-            {
-                while (0 < _updatedUniverses.Count)
-                {
-                    var universe = _updatedUniverses.Dequeue();
-                    if (!_universeInfos.ContainsKey(universe)) AddUniverseInfo(universe);
-
-                    _universeInfos[universe].ReceivedAt = DateTime.Now;
-                    if (universe == _selectedUniverseNum)
-                    {
-                        _dmxViewer.value = _dmxData[universe];
-                    }
-                }
-            }
+            var wnd = GetWindow<ArtNetTester>();
+            wnd.titleContent = new GUIContent("ArtNetTester");
         }
 
 
-        private void OnReceivedPacket(byte[] receiveBuffer, int length, System.Net.EndPoint remoteEp)
+        private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
             var packet = ArtNetPacket.Create(receiveBuffer);
             if (packet == null) return;

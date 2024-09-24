@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArtNet.Packets;
 using UnityEngine;
+using Random = System.Random;
 
 namespace ArtNet.Editor.DmxRecorder
 {
@@ -40,10 +42,10 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void Load(string path)
         {
-            if (!System.IO.File.Exists(path)) return;
+            if (!File.Exists(path)) return;
 
             Config.LoadFilePath = path;
-            var data = System.IO.File.ReadAllBytes(path);
+            var data = File.ReadAllBytes(path);
             DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.Item1).ToList();
             MaxTime = DmxPackets.Max(x => x.Item1);
         }
@@ -169,7 +171,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var addTime = time * Config.Speed;
             var addTimeInt = (int) addTime;
-            if (addTime - addTimeInt > new System.Random().NextDouble()) addTimeInt++;
+            if (addTime - addTimeInt > new Random().NextDouble()) addTimeInt++;
 
             return addTimeInt;
         }
