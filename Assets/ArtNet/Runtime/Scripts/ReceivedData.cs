@@ -6,10 +6,6 @@ namespace ArtNet
 {
     public class ReceivedData<TPacket> where TPacket : ArtNetPacket
     {
-        public TPacket Packet { get; }
-        public EndPoint RemoteEp { get; }
-        public DateTime ReceivedAt { get; }
-
         private ReceivedData()
         {
             ReceivedAt = DateTime.Now;
@@ -17,5 +13,8 @@ namespace ArtNet
 
         public ReceivedData(TPacket packet, EndPoint remoteEndPoint) : this() =>
             (Packet, RemoteEp) = (packet, remoteEndPoint);
+        public TPacket Packet { get; }
+        public EndPoint RemoteEp { get; }
+        public DateTime ReceivedAt { get; }
     }
 }
