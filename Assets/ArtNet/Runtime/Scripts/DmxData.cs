@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ArtNet
 {
-    internal partial class DmxData : MonoBehaviour
+    public partial class DmxData : MonoBehaviour
     {
         private int[] _dmxValues = new int[512];
 
