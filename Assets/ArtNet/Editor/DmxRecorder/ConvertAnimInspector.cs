@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using ArtNet.Packets;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -42,6 +39,7 @@ namespace ArtNet.Editor.DmxRecorder
             foreach (var timelineUniverse in timelineConverter.Timelines)
             {
                 var universe = timelineUniverse.Universe;
+                timelineUniverse.ThinOutUnchangedFrames();
                 var clip = timelineUniverse.ToAnimationClip();
 
                 SaveAnimationClip(clip, $"Assets/Universe{universe + 1}.anim");

@@ -65,6 +65,31 @@ namespace ArtNet.Editor.DmxRecorder
 
             return curves;
         }
+
+        public void ThinOutUnchangedFrames()
+        {
+            for (var i = 0; i < ChannelDmxFrameData.Length; i++)
+            {
+                var dmxFrameData = ChannelDmxFrameData[i];
+                if (dmxFrameData.Count == 0) continue;
+
+                var latest = dmxFrameData[0];
+                var newDmxFrameData = new List<DmxFrameData> {dmxFrameData[0]};
+
+                for (var j = 1; j < dmxFrameData.Count - 1; j++)
+                {
+                    var current = dmxFrameData[j];
+                    var next = dmxFrameData[j + 1];
+                    if (latest.Value == current.Value && current.Value == next.Value) continue;
+
+                    latest = current;
+                    newDmxFrameData.Add(dmxFrameData[j]);
+                }
+
+                newDmxFrameData.Add(dmxFrameData[^1]);
+                ChannelDmxFrameData[i] = newDmxFrameData;
+            }
+        }
     }
 
     public struct DmxFrameData
