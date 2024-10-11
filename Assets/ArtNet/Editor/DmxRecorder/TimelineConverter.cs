@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Packets;
 using UnityEngine;
@@ -59,7 +60,8 @@ namespace ArtNet.Editor.DmxRecorder
             var curves = new AnimationCurve[ChannelDmxFrameData.Length];
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
-                var keyframes = ChannelDmxFrameData[i].Select(data => new Keyframe(data.Millisecond / 1000f, data.Value)).ToArray();
+                var keyframes = ChannelDmxFrameData[i]
+                    .Select(data => new Keyframe(data.Millisecond / 1000f, data.Value)).ToArray();
                 curves[i] = new AnimationCurve(keyframes);
             }
 
@@ -74,13 +76,13 @@ namespace ArtNet.Editor.DmxRecorder
                 if (dmxFrameData.Count == 0) continue;
 
                 var latest = dmxFrameData[0];
-                var newDmxFrameData = new List<DmxFrameData> {dmxFrameData[0]};
+                var newDmxFrameData = new List<DmxFrameData> { dmxFrameData[0] };
 
                 for (var j = 1; j < dmxFrameData.Count - 1; j++)
                 {
                     var current = dmxFrameData[j];
                     var next = dmxFrameData[j + 1];
-                    if (latest.Value == current.Value && current.Value == next.Value) continue;
+                    if (IsOmittedFrame(latest, current, next)) continue;
 
                     latest = current;
                     newDmxFrameData.Add(dmxFrameData[j]);
@@ -89,6 +91,20 @@ namespace ArtNet.Editor.DmxRecorder
                 newDmxFrameData.Add(dmxFrameData[^1]);
                 ChannelDmxFrameData[i] = newDmxFrameData;
             }
+        }
+
+        private static bool IsOmittedFrame(
+            DmxFrameData prev,
+            DmxFrameData current,
+            DmxFrameData next,
+            float tolerance = 0.01f)
+        {
+            var prevDiff = current.Value - prev.Value;
+            var nextDiff = next.Value - current.Value;
+            var prevDiffTime = current.Millisecond - prev.Millisecond;
+            var nextDiffTime = next.Millisecond - current.Millisecond;
+
+            return Math.Abs((float) prevDiff / prevDiffTime - (float) nextDiff / nextDiffTime) <= tolerance;
         }
     }
 
