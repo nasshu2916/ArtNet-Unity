@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -35,6 +36,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var bytes = binary.bytes;
             TimelineConverter timelineConverter = new(RecordData.Deserialize(bytes));
+            var dmxTimelines = new List<DmxTimeline>();
 
             foreach (var timelineUniverse in timelineConverter.Timelines)
             {
@@ -42,8 +44,19 @@ namespace ArtNet.Editor.DmxRecorder
                 timelineUniverse.ThinOutUnchangedFrames();
                 var clip = timelineUniverse.ToAnimationClip();
 
-                SaveAnimationClip(clip, $"Assets/Universe{universe + 1}.anim");
+                SaveAnimationClip(clip, $"Assets/Test/Universe{universe + 1}.anim");
+
+                var timelineElement = new DmxTimeline
+                {
+                    DmxTimelineClip = clip,
+                    Universe = universe + 1
+                };
+                dmxTimelines.Add(timelineElement);
             }
+
+            SaveDmxTimelineAsset(dmxTimelines, "Assets/Test/DmxTimeline.asset");
+
+            AssetDatabase.Refresh();
         }
 
         private static void SaveAnimationClip(AnimationClip clip, string path)
@@ -51,7 +64,15 @@ namespace ArtNet.Editor.DmxRecorder
             AssetDatabase.CreateAsset(clip, path);
             AssetDatabase.SaveAssets();
             Debug.Log("AnimationClip saved to " + path);
-            AssetDatabase.Refresh();
+        }
+
+        private static void SaveDmxTimelineAsset(List<DmxTimeline> dmxTimeline, string path)
+        {
+            var dmxTimelineAsset = CreateInstance<DmxTimelineSetting>();
+            dmxTimelineAsset.DmxTimelines = dmxTimeline;
+            AssetDatabase.CreateAsset(dmxTimelineAsset, path);
+            AssetDatabase.SaveAssets();
+            Debug.Log("DmxTimelineAsset saved to " + path);
         }
     }
 }
