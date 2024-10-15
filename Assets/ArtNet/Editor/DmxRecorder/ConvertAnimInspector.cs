@@ -44,12 +44,12 @@ namespace ArtNet.Editor.DmxRecorder
                 timelineUniverse.ThinOutUnchangedFrames();
                 var clip = timelineUniverse.ToAnimationClip();
 
-                SaveAnimationClip(clip, $"Assets/Test/Universe{universe + 1}.anim");
+                SaveAnimationClip(clip, $"Assets/Test/Universe{universe}.anim");
 
                 var timelineElement = new DmxTimeline
                 {
                     DmxTimelineClip = clip,
-                    Universe = universe + 1
+                    Universe = universe
                 };
                 dmxTimelines.Add(timelineElement);
             }

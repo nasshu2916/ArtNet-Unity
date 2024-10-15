@@ -13,6 +13,6 @@ namespace ArtNet.Editor.DmxRecorder
     public class DmxTimeline
     {
         public AnimationClip DmxTimelineClip;
-        [Range(1, 256)] public int Universe;
+        [Range(0, 255)] public int Universe;
     }
 }

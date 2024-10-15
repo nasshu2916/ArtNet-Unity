@@ -44,7 +44,7 @@ namespace ArtNet.Editor.DmxRecorder
             var curves = ConvertAnimationCurves();
             var clip = new AnimationClip
             {
-                name = $"Universe{Universe + 1}"
+                name = $"Universe{Universe}"
             };
             for (var i = 0; i < curves.Length; i++)
             {
