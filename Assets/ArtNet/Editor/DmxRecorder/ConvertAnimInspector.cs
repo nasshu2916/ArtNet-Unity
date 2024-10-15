@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -33,46 +32,17 @@ namespace ArtNet.Editor.DmxRecorder
                 Debug.LogError("Binary is null");
                 return;
             }
+            if (string.IsNullOrEmpty(convertAnim.OutputDirectory))
+            {
+                Debug.LogError("Output directory is null or empty");
+                return;
+            }
 
             var bytes = binary.bytes;
             TimelineConverter timelineConverter = new(RecordData.Deserialize(bytes));
-            var dmxTimelines = new List<DmxTimeline>();
+            timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory);
 
-            foreach (var timelineUniverse in timelineConverter.Timelines)
-            {
-                var universe = timelineUniverse.Universe;
-                timelineUniverse.ThinOutUnchangedFrames();
-                var clip = timelineUniverse.ToAnimationClip();
-
-                SaveAnimationClip(clip, $"Assets/Test/Universe{universe}.anim");
-
-                var timelineElement = new DmxTimeline
-                {
-                    DmxTimelineClip = clip,
-                    Universe = universe
-                };
-                dmxTimelines.Add(timelineElement);
-            }
-
-            SaveDmxTimelineAsset(dmxTimelines, "Assets/Test/DmxTimeline.asset");
-
-            AssetDatabase.Refresh();
-        }
-
-        private static void SaveAnimationClip(AnimationClip clip, string path)
-        {
-            AssetDatabase.CreateAsset(clip, path);
-            AssetDatabase.SaveAssets();
-            Debug.Log("AnimationClip saved to " + path);
-        }
-
-        private static void SaveDmxTimelineAsset(List<DmxTimeline> dmxTimeline, string path)
-        {
-            var dmxTimelineAsset = CreateInstance<DmxTimelineSetting>();
-            dmxTimelineAsset.DmxTimelines = dmxTimeline;
-            AssetDatabase.CreateAsset(dmxTimelineAsset, path);
-            AssetDatabase.SaveAssets();
-            Debug.Log("DmxTimelineAsset saved to " + path);
+            Debug.Log("Conversion complete");
         }
     }
 }

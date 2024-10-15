@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Packets;
+using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -18,6 +19,43 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 Timelines.Add(new TimelineUniverse(group.Key, group.ToList()));
             }
+        }
+
+        public void SaveDmxTimelineClips(string directory)
+        {
+            if (System.IO.Directory.Exists(directory) == false)
+            {
+                System.IO.Directory.CreateDirectory(directory);
+            }
+
+            var dmxTimelines = new List<DmxTimeline>(Timelines.Count);
+            foreach (var timelineUniverse in Timelines)
+            {
+                var universe = timelineUniverse.Universe;
+                timelineUniverse.ThinOutUnchangedFrames();
+                var clip = timelineUniverse.ToAnimationClip();
+                SaveAsset(clip, directory, $"Universe{universe}.anim");
+
+                var timelineElement = new DmxTimeline
+                {
+                    DmxTimelineClip = clip,
+                    Universe = universe
+                };
+                dmxTimelines.Add(timelineElement);
+            }
+
+            var dmxTimelineAsset = ScriptableObject.CreateInstance<DmxTimelineSetting>();
+            dmxTimelineAsset.DmxTimelines = dmxTimelines;
+            SaveAsset(dmxTimelineAsset, directory, "DmxTimeline.asset");
+
+            AssetDatabase.Refresh();
+        }
+
+        private static void SaveAsset<T>(T asset, string directory, string fileName) where T : UnityEngine.Object
+        {
+            var path = $"{directory}/{fileName}";
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
         }
     }
 
