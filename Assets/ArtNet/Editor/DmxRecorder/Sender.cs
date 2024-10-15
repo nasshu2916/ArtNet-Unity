@@ -27,7 +27,7 @@ namespace ArtNet.Editor.DmxRecorder
         private bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
 
         public SenderConfig Config { get; } = new();
-        private List<(int, DmxPacket)> DmxPackets { get; set; } = new();
+        private List<(int time, DmxPacket packet)> DmxPackets { get; set; } = new();
 
         public bool IsPlaying { get; private set; }
         private int LastTime { get; set; }
@@ -46,8 +46,8 @@ namespace ArtNet.Editor.DmxRecorder
 
             Config.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
-            DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.Item1).ToList();
-            MaxTime = DmxPackets.Max(x => x.Item1);
+            DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.time).ToList();
+            MaxTime = DmxPackets.Max(x => x.time);
         }
 
         public void Play()
@@ -84,7 +84,7 @@ namespace ArtNet.Editor.DmxRecorder
                 LastTime = MaxTime;
             }
 
-            var dmxPackets = DmxPackets.Where(x => x.Item1 >= oldTime && x.Item1 < LastTime).Select(x => x.Item2);
+            var dmxPackets = DmxPackets.Where(x => x.time >= oldTime && x.time < LastTime).Select(x => x.packet);
             foreach (var packet in dmxPackets)
             {
                 SendDmx(packet);

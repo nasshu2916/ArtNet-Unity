@@ -15,9 +15,9 @@ namespace ArtNet.Editor.DmxRecorder
         private static readonly byte[] ReservedBuffer = new byte[11];
         private static byte Version = 0x01;
 
-        public static byte[] Serialize(List<(int, DmxPacket)> dmxPackets)
+        public static byte[] Serialize(List<(int time, DmxPacket packet)> dmxPackets)
         {
-            var startTime = dmxPackets.Select(x => x.Item1).OrderBy(x => x).First();
+            var startTime = dmxPackets.Select(x => x.time).OrderBy(x => x).First();
             using var memoryStream = new MemoryStream();
             memoryStream.Write(Identifiers);
             memoryStream.WriteByte(Version);
@@ -37,20 +37,20 @@ namespace ArtNet.Editor.DmxRecorder
             return memoryStream.ToArray();
         }
 
-        public static List<(int, DmxPacket)> Deserialize(ReadOnlySpan<byte> data)
+        public static List<(int time, DmxPacket packet)> Deserialize(ReadOnlySpan<byte> data)
         {
             var dataLength = data.Length;
             if (dataLength < Identifiers.Length || !data[..Identifiers.Length].SequenceEqual(Identifiers))
                 return null;
-            byte dataVersion = data[IdentifierLength];
+            var dataVersion = data[IdentifierLength];
             if (dataVersion != Version)
             {
                 Debug.LogError($"ArtNet Recorder: Version mismatch. Required: {Version}, Found: {dataVersion}");
                 return null;
             }
 
-            int position = IdentifierLength + 1 + ReservedBuffer.Length;
-            var result = new List<(int, DmxPacket)>();
+            var position = IdentifierLength + 1 + ReservedBuffer.Length;
+            var result = new List<(int time, DmxPacket packet)>();
             while (position < dataLength - 10)
             {
                 var time = BitConverter.ToInt32(data[position..]);
