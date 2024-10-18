@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -56,9 +56,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             var selectPlayFileButton = root.Q<Button>("selectPlayFileButton");
             selectPlayFileButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("Folder Icon").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("Folder Icon").image
+            }
             );
             selectPlayFileButton.clicked += () =>
             {
@@ -177,9 +177,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             _senderErrorMessageArea = root.Q<VisualElement>("senderErrorMessageArea");
             _senderErrorMessageArea.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("console.erroricon@2x").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("console.erroricon@2x").image
+            }
             );
             _senderErrorMessageLabel = new Label();
             _senderErrorMessageArea.Add(_senderErrorMessageLabel);
