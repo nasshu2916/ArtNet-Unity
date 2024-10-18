@@ -17,7 +17,7 @@ namespace ArtNet
                 _dmxValues[index] = newValue;
                 if (index is >= 1 and <= 512)
                 {
-                   GetType().GetField($"Ch{index:D3}").SetValue(this, newValue);
+                    GetType().GetField($"Ch{index:D3}").SetValue(this, newValue);
                 }
             }
         }

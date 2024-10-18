@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
@@ -147,9 +147,9 @@ namespace ArtNet.Editor.DmxRecorder
             });
             _selectDirectoryButton = root.Q<Button>("selectFolderButton");
             _selectDirectoryButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("Folder Icon").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("Folder Icon").image
+            }
             );
             _selectDirectoryButton.clicked += () =>
             {
@@ -171,9 +171,9 @@ namespace ArtNet.Editor.DmxRecorder
             outputWarningIcon.image = EditorGUIUtility.IconContent("Warning@2x").image;
             var openOutputFolderButton = root.Q<Button>("openOutputFolderButton");
             openOutputFolderButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("FolderOpened Icon").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("FolderOpened Icon").image
+            }
             );
             openOutputFolderButton.clicked += () =>
             {
@@ -182,9 +182,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             _errorMessageArea = root.Q<VisualElement>("errorMessageArea");
             _errorMessageArea.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("console.erroricon@2x").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("console.erroricon@2x").image
+            }
             );
             _errorMessageLabel = new Label();
             _errorMessageArea.Add(_errorMessageLabel);
