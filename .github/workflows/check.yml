@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      - name: Check typo
+        uses: crate-ci/typos@v1.26.0
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
