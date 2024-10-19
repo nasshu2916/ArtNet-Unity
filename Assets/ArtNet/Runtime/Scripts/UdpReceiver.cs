@@ -18,12 +18,12 @@ namespace ArtNet
         public bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
 
         public ReceivedPacketEventHandler OnReceivedPacket = (_, _, _) => { };
-        public ErrorOccuredEventHandler OnUdpStartFailed = _ => { };
-        public ErrorOccuredEventHandler OnUdpReceiveFailed = _ => { };
-        public ErrorOccuredEventHandler OnUdpReceiveRaiseException = _ => { };
+        public ErrorOccurredEventHandler OnUdpStartFailed = _ => { };
+        public ErrorOccurredEventHandler OnUdpReceiveFailed = _ => { };
+        public ErrorOccurredEventHandler OnUdpReceiveRaiseException = _ => { };
 
         public delegate void ReceivedPacketEventHandler(byte[] receiveBuffer, int length, EndPoint remoteEp);
-        public delegate void ErrorOccuredEventHandler(Exception e);
+        public delegate void ErrorOccurredEventHandler(Exception e);
         public UdpReceiver(int port)
         {
             Port = port;
