@@ -50,7 +50,7 @@
     background-color: var(--unity-colors-button-background-pressed);
 }
 
-UniverseInfo .universe-number-label {
+UniverseInfo .universe-label {
     -unity-font-style: bold;
     font-size: 12px;
     padding-bottom: 5px;

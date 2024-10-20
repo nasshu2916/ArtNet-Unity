@@ -24,15 +24,15 @@ namespace ArtNet.Editor.UI
             }
         }
 
-        public UniverseInfo(ushort number) : this()
+        public UniverseInfo(ushort universe) : this()
         {
-            Universe = number;
+            Universe = universe;
         }
 
         private UniverseInfo()
         {
             _universeLabel = new Label();
-            _universeLabel.AddToClassList("universe-number-label");
+            _universeLabel.AddToClassList("universe-label");
             Add(_universeLabel);
             _receivedAtLabel = new Label();
             _receivedAtLabel.AddToClassList("received-at-label");

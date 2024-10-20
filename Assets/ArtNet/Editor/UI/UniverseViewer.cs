@@ -57,10 +57,9 @@ namespace ArtNet.Editor.UI
 
             for (ushort i = 0; i < SelectableUniverseCount; i++)
             {
-                var number = i;
-                var universeInfo = new UniverseInfo(number);
-                universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(number, evt);
-                if (number == _selectedUniverse) universeInfo.AddToClassList("selected");
+                var universeInfo = new UniverseInfo(i);
+                universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(i, evt);
+                if (i == _selectedUniverse) universeInfo.AddToClassList("selected");
 
                 universeSelector.Add(universeInfo);
             }
