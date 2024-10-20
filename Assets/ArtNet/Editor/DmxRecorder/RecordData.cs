@@ -15,7 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
         private static readonly byte[] ReservedBuffer = new byte[11];
         private static byte Version = 0x01;
 
-        public static byte[] Serialize(List<(int time, DmxPacket packet)> dmxPackets)
+        public static byte[] Serialize(IReadOnlyList<(int time, DmxPacket packet)> dmxPackets)
         {
             var startTime = dmxPackets.Select(x => x.time).OrderBy(x => x).First();
             using var memoryStream = new MemoryStream();
