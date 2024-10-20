@@ -8,17 +8,17 @@ namespace ArtNet.Editor.UI
         private const ushort SelectableUniverseCount = 16;
 
         private readonly DmxViewer _dmxViewer;
-        private ushort _selectedUniverseNum;
+        private ushort _selectedUniverse;
         private DmxManager _dmxManager;
 
         public ushort value
         {
-            get => _selectedUniverseNum;
+            get => _selectedUniverse;
             set
             {
-                if (_selectedUniverseNum == value) return;
+                if (_selectedUniverse == value) return;
 
-                using (var pooled = ChangeEvent<ushort>.GetPooled(_selectedUniverseNum, value))
+                using (var pooled = ChangeEvent<ushort>.GetPooled(_selectedUniverse, value))
                 {
                     pooled.target = this;
                     SetValueWithoutNotify(value);
@@ -29,8 +29,8 @@ namespace ArtNet.Editor.UI
 
         public void SetValueWithoutNotify(ushort newValue)
         {
-            _selectedUniverseNum = newValue;
-            _dmxViewer.value = _dmxManager.DmxValues(_selectedUniverseNum);
+            _selectedUniverse = newValue;
+            _dmxViewer.value = _dmxManager.DmxValues(_selectedUniverse);
         }
 
         public DmxManager DmxManager
@@ -44,7 +44,7 @@ namespace ArtNet.Editor.UI
 
         public void UpdateDmxViewer()
         {
-            _dmxViewer.value = _dmxManager == null ? new byte[512] : _dmxManager.DmxValues(_selectedUniverseNum);
+            _dmxViewer.value = _dmxManager == null ? new byte[512] : _dmxManager.DmxValues(_selectedUniverse);
         }
 
         public UniverseViewer()
@@ -60,7 +60,7 @@ namespace ArtNet.Editor.UI
                 var number = i;
                 var universeInfo = new UniverseInfo(number);
                 universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(number, evt);
-                if (number == _selectedUniverseNum) universeInfo.AddToClassList("selected");
+                if (number == _selectedUniverse) universeInfo.AddToClassList("selected");
 
                 universeSelector.Add(universeInfo);
             }
@@ -75,12 +75,12 @@ namespace ArtNet.Editor.UI
             styleSheets.Add(styleSheet);
         }
 
-        private void OnUniverseSelected(ushort universeNumber, EventBase evt)
+        private void OnUniverseSelected(ushort universe, EventBase evt)
         {
             if (evt.target is not UniverseInfo universeInfo) return;
             this.Q<UniverseInfo>(null, "selected")?.RemoveFromClassList("selected");
             universeInfo.AddToClassList("selected");
-            value = universeNumber;
+            value = universe;
         }
 
         public new class UxmlFactory : UxmlFactory<UniverseViewer, UxmlTraits>

@@ -25,7 +25,7 @@ namespace ArtNet.Editor
         private readonly Queue<ushort> _updatedUniverses = new();
         private DmxViewer _dmxViewer;
         private Button _receiveStartButton;
-        private ushort _selectedUniverseNum;
+        private ushort _selectedUniverse;
         private ScrollView _universeSelector;
 
         private void Update()
@@ -38,7 +38,7 @@ namespace ArtNet.Editor
                     if (!_universeInfos.ContainsKey(universe)) AddUniverseInfo(universe);
 
                     _universeInfos[universe].ReceivedAt = DateTime.Now;
-                    if (universe == _selectedUniverseNum)
+                    if (universe == _selectedUniverse)
                     {
                         _dmxViewer.value = _dmxData[universe];
                     }
@@ -137,7 +137,7 @@ namespace ArtNet.Editor
             universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(universe, evt);
             if (_universeInfos.Count == 0)
             {
-                _selectedUniverseNum = universe;
+                _selectedUniverse = universe;
                 universeInfo.AddToClassList("selected");
             }
 
@@ -145,13 +145,13 @@ namespace ArtNet.Editor
             _universeSelector.Add(universeInfo);
         }
 
-        private void OnUniverseSelected(ushort universeNumber, EventBase evt)
+        private void OnUniverseSelected(ushort universe, EventBase evt)
         {
             if (evt.target is not UniverseInfo universeInfo) return;
             _universeSelector.Q<UniverseInfo>(null, "selected")?.RemoveFromClassList("selected");
             universeInfo.AddToClassList("selected");
-            _selectedUniverseNum = universeNumber;
-            _dmxViewer.value = _dmxData[universeNumber];
+            _selectedUniverse = universe;
+            _dmxViewer.value = _dmxData[universe];
         }
     }
 }
