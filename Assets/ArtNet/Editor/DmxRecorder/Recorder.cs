@@ -124,18 +124,39 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var storeData = RecordData.Serialize(_recordedDmx);
-
             if (!Directory.Exists(Config.Directory))
             {
                 Directory.CreateDirectory(Config.Directory);
             }
 
+            switch (Config.OutputFormat)
+            {
+                case RecodeFormat.Binary:
+                    StoreBinary();
+                    break;
+                case RecodeFormat.AnimationClip:
+                    StoreAnimationClip();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void StoreBinary()
+        {
+            var binary = RecordData.Serialize(_recordedDmx);
+
             var path = Config.OutputPath;
             var exists = File.Exists(path);
-            File.WriteAllBytes(path, storeData);
+            File.WriteAllBytes(path, binary);
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
+        }
+
+        private void StoreAnimationClip()
+        {
+            var timelineConverter = new TimelineConverter(_recordedDmx);
+            timelineConverter.SaveDmxTimelineClips(Config.Directory);
         }
     }
 }

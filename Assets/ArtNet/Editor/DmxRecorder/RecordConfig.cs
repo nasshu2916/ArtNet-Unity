@@ -2,12 +2,20 @@ using System.Collections.Generic;
 
 namespace ArtNet.Editor.DmxRecorder
 {
+    public enum RecodeFormat
+    {
+        Binary = 0,
+        AnimationClip = 1,
+    }
+
     public class RecordConfig
     {
         private const string Extension = ".dmx";
 
         public string Directory;
         public string FileName;
+
+        public RecodeFormat OutputFormat { get; set; } = RecodeFormat.Binary;
 
         public string OutputPath => $"{Directory}/{FileName}{Extension}";
 

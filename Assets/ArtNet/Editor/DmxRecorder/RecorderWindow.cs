@@ -121,6 +121,17 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeRecordingConfig(VisualElement root)
         {
+            // 出力ファイルのフォーマット選択
+            var outputFormatGroup = root.Q<RadioButtonGroup>("outputFormatGroup");
+            outputFormatGroup.choices = new[] { "Binary", "AnimationClip" };
+            outputFormatGroup.value = 0;
+
+            outputFormatGroup.RegisterValueChangedCallback(evt =>
+            {
+                _recorder.Config.OutputFormat = (RecodeFormat) evt.newValue;
+                UpdateErrorMessage();
+            });
+
             _outputFilePathLabel = root.Q<Label>("outputFileName");
             _outputWarningIcon = root.Q<Image>("outputWarningIcon");
 
