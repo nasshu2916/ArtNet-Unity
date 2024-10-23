@@ -10,19 +10,38 @@ namespace ArtNet.Editor.DmxRecorder
 
     public class RecordConfig
     {
+        public RecodeFormat RecordFormat { get; set; }
+
+        public BinaryRecordConfig BinaryConfig { get; }
+        public AnimationClipRecordConfig AnimationClipConfig { get; }
+
+        public RecordConfig(RecodeFormat format, BinaryRecordConfig binaryConfig, AnimationClipRecordConfig
+                animationClipConfig)
+        {
+            RecordFormat = format;
+            BinaryConfig = binaryConfig;
+            AnimationClipConfig = animationClipConfig;
+        }
+
+        private IRecordConfig Config => RecordFormat switch
+        {
+            RecodeFormat.Binary => BinaryConfig,
+            RecodeFormat.AnimationClip => AnimationClipConfig,
+            _ => throw new System.NotImplementedException()
+        };
+
+        public bool Validate() => ValidateErrors().Count == 0;
+        public List<string> ValidateErrors() => Config.ValidateErrors();
+    }
+
+    public class BinaryRecordConfig : IRecordConfig
+    {
         private const string Extension = ".dmx";
 
-        public string Directory;
-        public string FileName;
-
-        public RecodeFormat OutputFormat { get; set; } = RecodeFormat.Binary;
+        public string Directory { get; set; }
+        public string FileName { get; set; }
 
         public string OutputPath => $"{Directory}/{FileName}{Extension}";
-
-        public bool Validate()
-        {
-            return ValidateDirectory() && ValidateFileName();
-        }
 
         public List<string> ValidateErrors()
         {
@@ -35,5 +54,18 @@ namespace ArtNet.Editor.DmxRecorder
 
         private bool ValidateDirectory() => !string.IsNullOrEmpty(Directory);
         private bool ValidateFileName() => !string.IsNullOrEmpty(FileName);
+    }
+
+    public class AnimationClipRecordConfig : IRecordConfig
+    {
+        public List<string> ValidateErrors()
+        {
+            return new List<string>();
+        }
+    }
+
+    public interface IRecordConfig
+    {
+        public List<string> ValidateErrors();
     }
 }

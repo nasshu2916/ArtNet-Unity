@@ -27,16 +27,35 @@
                     <ui:RadioButtonGroup label="File Format" value="-1" name="outputFormatGroup" />
                 </ui:VisualElement>
                 <ui:VisualElement class="section-content" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
-                    <ui:VisualElement>
-                        <ui:VisualElement style="width: 100%;">
-                            <ui:TextField name="outputFileNameField" label="File Name" text="output_file_name" />
+                    <ui:VisualElement style="flex-direction: column;">
+                        <ui:VisualElement name="binaryOutputConfig" style="flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row;">
+                                <ui:VisualElement style="width: 100%;">
+                                    <ui:TextField name="outputFileNameField" label="File Name" text="output_file_name" />
+                                </ui:VisualElement>
+                                <ui:Button style="display: flex; visibility: hidden;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row;">
+                                <ui:VisualElement style="width: 100%;">
+                                    <ui:TextField name="outputDirectoryField" label="Folder" text="output directory" />
+                                </ui:VisualElement>
+                                <ui:Button name="selectFolderButton" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement>
-                        <ui:VisualElement style="width: 100%;">
-                            <ui:TextField name="outputDirectoryField" label="Folder" text="output directory" />
+                        <ui:VisualElement name="animationClipOutputConfig" style="flex-direction: column;">
+                            <ui:VisualElement style="flex-direction: row; display: none;">
+                                <ui:VisualElement style="width: 100%;">
+                                    <ui:TextField name="outputAnimDirNameField" label="File Name" text="output_file_name" />
+                                </ui:VisualElement>
+                                <ui:Button style="display: flex; visibility: hidden;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row;">
+                                <ui:VisualElement style="width: 100%;">
+                                    <ui:TextField name="outputAssetDirectoryField" label="Folder" text="output directory" />
+                                </ui:VisualElement>
+                                <ui:Button name="selectAssetFolderButton" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:Button name="selectFolderButton" />
                     </ui:VisualElement>
                     <ui:VisualElement>
                         <ui:VisualElement style="width: 75px; align-items: flex-end;">

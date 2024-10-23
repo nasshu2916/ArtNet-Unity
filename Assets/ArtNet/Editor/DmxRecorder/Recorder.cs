@@ -124,12 +124,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            if (!Directory.Exists(Config.Directory))
-            {
-                Directory.CreateDirectory(Config.Directory);
-            }
-
-            switch (Config.OutputFormat)
+            switch (Config.RecordFormat)
             {
                 case RecodeFormat.Binary:
                     StoreBinary();
@@ -144,9 +139,16 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreBinary()
         {
+            var binaryConfig = Config.BinaryConfig;
+
+            if (!Directory.Exists(binaryConfig.Directory))
+            {
+                Directory.CreateDirectory(binaryConfig.Directory);
+            }
+
             var binary = RecordData.Serialize(_recordedDmx);
 
-            var path = Config.OutputPath;
+            var path = binaryConfig.OutputPath;
             var exists = File.Exists(path);
             File.WriteAllBytes(path, binary);
             var message = exists ? "Data updated" : "Data stored";
@@ -156,7 +158,8 @@ namespace ArtNet.Editor.DmxRecorder
         private void StoreAnimationClip()
         {
             var timelineConverter = new TimelineConverter(_recordedDmx);
-            timelineConverter.SaveDmxTimelineClips(Config.Directory);
+            // TODO: AnimationClip の保存処理を実装する
+            // timelineConverter.SaveDmxTimelineClips(Config.OutputAnimationClipPath);
         }
     }
 }
