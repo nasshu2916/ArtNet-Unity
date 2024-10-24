@@ -29,7 +29,7 @@ namespace ArtNet.Editor.DmxRecorder
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
-        public RecordConfig Config { get; set; }
+        public RecordConfigs RecordConfigs { get; set; }
 
         public int GetRecordedCount() => _recordedDmx.Count;
 
@@ -124,7 +124,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            switch (Config.RecordFormat)
+            switch (RecordConfigs.RecordFormat)
             {
                 case RecodeFormat.Binary:
                     StoreBinary();
@@ -139,7 +139,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreBinary()
         {
-            var binaryConfig = Config.BinaryConfig;
+            var binaryConfig = RecordConfigs.BinaryConfig;
 
             if (!Directory.Exists(binaryConfig.Directory))
             {

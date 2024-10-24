@@ -68,7 +68,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var animationClipRecordConfig = new AnimationClipRecordConfig();
 
-            _recorder.Config = new RecordConfig(format, binaryRecordConfig, animationClipRecordConfig);
+            _recorder.RecordConfigs = new RecordConfigs(format, binaryRecordConfig, animationClipRecordConfig);
 
             InitializeHeaderTab(root);
             InitializeRecorder(recorderVisualElement);

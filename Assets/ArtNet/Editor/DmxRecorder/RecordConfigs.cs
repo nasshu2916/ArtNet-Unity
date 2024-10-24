@@ -8,14 +8,14 @@ namespace ArtNet.Editor.DmxRecorder
         AnimationClip = 1,
     }
 
-    public class RecordConfig
+    public class RecordConfigs
     {
         public RecodeFormat RecordFormat { get; set; }
 
         public BinaryRecordConfig BinaryConfig { get; }
         public AnimationClipRecordConfig AnimationClipConfig { get; }
 
-        public RecordConfig(RecodeFormat format, BinaryRecordConfig binaryConfig, AnimationClipRecordConfig
+        public RecordConfigs(RecodeFormat format, BinaryRecordConfig binaryConfig, AnimationClipRecordConfig
                 animationClipConfig)
         {
             RecordFormat = format;
