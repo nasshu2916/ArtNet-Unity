@@ -29,7 +29,7 @@ namespace ArtNet.Editor.DmxRecorder
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
-        public RecordConfigs RecordConfigs { get; set; }
+        public RecorderConfigs RecorderConfigs { get; set; }
 
         public int GetRecordedCount() => _recordedDmx.Count;
 
@@ -124,7 +124,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            switch (RecordConfigs.RecordFormat)
+            switch (RecorderConfigs.RecordFormat)
             {
                 case RecodeFormat.Binary:
                     StoreBinary();
@@ -139,7 +139,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreBinary()
         {
-            var binaryConfig = RecordConfigs.BinaryConfig;
+            var binaryConfig = RecorderConfigs.BinaryConfig;
 
             if (!Directory.Exists(binaryConfig.Directory))
             {
@@ -157,7 +157,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreAnimationClip()
         {
-            var animationClipConfig = RecordConfigs.AnimationClipConfig;
+            var animationClipConfig = RecorderConfigs.AnimationClipConfig;
             var timelineConverter = new TimelineConverter(_recordedDmx);
             timelineConverter.SaveDmxTimelineClips(animationClipConfig.OutputAnimationClipAssetPath);
         }
