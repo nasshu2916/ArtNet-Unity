@@ -58,6 +58,8 @@ namespace ArtNet.Editor.DmxRecorder
 
     public class AnimationClipRecordConfig : IRecordConfig
     {
+        public string OutputAnimationClipAssetPath { get; set; } = "Assets/Recording";
+
         public List<string> ValidateErrors()
         {
             return new List<string>();

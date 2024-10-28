@@ -157,9 +157,9 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void StoreAnimationClip()
         {
+            var animationClipConfig = RecordConfigs.AnimationClipConfig;
             var timelineConverter = new TimelineConverter(_recordedDmx);
-            // TODO: AnimationClip の保存処理を実装する
-            // timelineConverter.SaveDmxTimelineClips(Config.OutputAnimationClipPath);
+            timelineConverter.SaveDmxTimelineClips(animationClipConfig.OutputAnimationClipAssetPath);
         }
     }
 }

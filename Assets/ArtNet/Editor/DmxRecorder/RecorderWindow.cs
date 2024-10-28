@@ -186,6 +186,16 @@ namespace ArtNet.Editor.DmxRecorder
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), selectedDirectory);
             };
 
+            // Animation Config
+            var outputAssetDirectoryField = root.Q<TextField>("outputAssetDirectoryField");
+            outputAssetDirectoryField.value = _recorder.RecordConfigs.AnimationClipConfig.OutputAnimationClipAssetPath;
+            outputAssetDirectoryField.RegisterValueChangedCallback(evt =>
+            {
+                var directory = evt.newValue;
+                _recorder.RecordConfigs.AnimationClipConfig.OutputAnimationClipAssetPath = directory;
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputAssetDirectory"), directory);
+            });
+
 
             var outputWarningIcon = root.Q<Image>("outputWarningIcon");
             outputWarningIcon.image = EditorGUIUtility.IconContent("Warning@2x").image;
