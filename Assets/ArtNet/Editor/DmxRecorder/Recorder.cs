@@ -29,7 +29,7 @@ namespace ArtNet.Editor.DmxRecorder
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
-        public RecordConfig Config { get; set; }
+        public RecordConfigs RecordConfigs { get; set; }
 
         public int GetRecordedCount() => _recordedDmx.Count;
 
@@ -124,18 +124,42 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var storeData = RecordData.Serialize(_recordedDmx);
-
-            if (!Directory.Exists(Config.Directory))
+            switch (RecordConfigs.RecordFormat)
             {
-                Directory.CreateDirectory(Config.Directory);
+                case RecodeFormat.Binary:
+                    StoreBinary();
+                    break;
+                case RecodeFormat.AnimationClip:
+                    StoreAnimationClip();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void StoreBinary()
+        {
+            var binaryConfig = RecordConfigs.BinaryConfig;
+
+            if (!Directory.Exists(binaryConfig.Directory))
+            {
+                Directory.CreateDirectory(binaryConfig.Directory);
             }
 
-            var path = Config.OutputPath;
+            var binary = RecordData.Serialize(_recordedDmx);
+
+            var path = binaryConfig.OutputPath;
             var exists = File.Exists(path);
-            File.WriteAllBytes(path, storeData);
+            File.WriteAllBytes(path, binary);
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
+        }
+
+        private void StoreAnimationClip()
+        {
+            var animationClipConfig = RecordConfigs.AnimationClipConfig;
+            var timelineConverter = new TimelineConverter(_recordedDmx);
+            timelineConverter.SaveDmxTimelineClips(animationClipConfig.OutputAnimationClipAssetPath);
         }
     }
 }

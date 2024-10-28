@@ -14,6 +14,9 @@ namespace ArtNet.Editor.DmxRecorder
         private readonly Recorder _recorder = new();
 
         private Label _errorMessageLabel;
+
+        private VisualElement _outputBinaryConfig, _outputAnimationClipConfig;
+        private TextField _outputAssetDirectoryField;
         private TextField _outputFileNameField, _outputDirectoryField;
 
         private Label _outputFilePathLabel, _footerStatusLabel;
@@ -68,7 +71,7 @@ namespace ArtNet.Editor.DmxRecorder
             playButton.Add(stopButtonImage);
             playButton.clicked += () =>
             {
-                if (!_recorder.Config.Validate()) return;
+                if (!_recorder.RecordConfigs.Validate()) return;
                 if (_recorder.Status == RecordingStatus.None)
                 {
                     SetEnabledTextField(false);
@@ -121,27 +124,44 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeRecordingConfig(VisualElement root)
         {
+            _outputBinaryConfig = root.Q<VisualElement>("binaryOutputConfig");
+            _outputAnimationClipConfig = root.Q<VisualElement>("animationClipOutputConfig");
+
+            // 出力ファイルのフォーマット選択
+            var outputFormatGroup = root.Q<RadioButtonGroup>("outputFormatGroup");
+            outputFormatGroup.choices = new[] { "Binary", "AnimationClip" };
+            outputFormatGroup.value = (int) _recorder.RecordConfigs.RecordFormat;
+            ChangeOutputFormat(_recorder.RecordConfigs.RecordFormat);
+
+            outputFormatGroup.RegisterValueChangedCallback(evt =>
+            {
+                var format = (RecodeFormat) evt.newValue;
+                ChangeOutputFormat(format);
+                EditorUserSettings.SetConfigValue(EditorSettingKey("RecodeFormat"), format.ToString());
+                UpdateErrorMessage();
+            });
+
             _outputFilePathLabel = root.Q<Label>("outputFileName");
             _outputWarningIcon = root.Q<Image>("outputWarningIcon");
 
             // 出力ファイル名の設定
             _outputFileNameField = root.Q<TextField>("outputFileNameField");
-            _outputFileNameField.value = _recorder.Config.FileName;
+            _outputFileNameField.value = _recorder.RecordConfigs.BinaryConfig.FileName;
             _outputFileNameField.RegisterValueChangedCallback(evt =>
             {
                 var fileName = evt.newValue;
-                _recorder.Config.FileName = fileName;
+                _recorder.RecordConfigs.BinaryConfig.FileName = fileName;
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), fileName);
             });
 
             // 出力ディレクトリの設定
             _outputDirectoryField = root.Q<TextField>("outputDirectoryField");
-            _outputDirectoryField.value = _recorder.Config.Directory;
+            _outputDirectoryField.value = _recorder.RecordConfigs.BinaryConfig.Directory;
             _outputDirectoryField.RegisterValueChangedCallback(evt =>
             {
                 var directory = evt.newValue;
-                _recorder.Config.Directory = directory;
+                _recorder.RecordConfigs.BinaryConfig.Directory = directory;
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), directory);
             });
@@ -155,16 +175,26 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 var selectedDirectory =
                     EditorUtility.OpenFolderPanel(title: "Output Folder",
-                        folder: _recorder.Config.Directory,
+                        folder: _recorder.RecordConfigs.BinaryConfig.Directory,
                         defaultName: "");
 
                 if (string.IsNullOrEmpty(selectedDirectory)) return;
 
-                _recorder.Config.Directory = selectedDirectory;
+                _recorder.RecordConfigs.BinaryConfig.Directory = selectedDirectory;
                 _outputDirectoryField.value = selectedDirectory;
                 UpdateOutputFilePath();
                 EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), selectedDirectory);
             };
+
+            // Animation Config
+            var outputAssetDirectoryField = root.Q<TextField>("outputAssetDirectoryField");
+            outputAssetDirectoryField.value = _recorder.RecordConfigs.AnimationClipConfig.OutputAnimationClipAssetPath;
+            outputAssetDirectoryField.RegisterValueChangedCallback(evt =>
+            {
+                var directory = evt.newValue;
+                _recorder.RecordConfigs.AnimationClipConfig.OutputAnimationClipAssetPath = directory;
+                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputAssetDirectory"), directory);
+            });
 
 
             var outputWarningIcon = root.Q<Image>("outputWarningIcon");
@@ -177,7 +207,7 @@ namespace ArtNet.Editor.DmxRecorder
             );
             openOutputFolderButton.clicked += () =>
             {
-                Process.Start(_recorder.Config.Directory);
+                Process.Start(_recorder.RecordConfigs.BinaryConfig.Directory);
             };
 
             _errorMessageArea = root.Q<VisualElement>("errorMessageArea");
@@ -192,9 +222,28 @@ namespace ArtNet.Editor.DmxRecorder
             UpdateOutputFilePath();
         }
 
+        private void ChangeOutputFormat(RecodeFormat format)
+        {
+            _outputBinaryConfig.style.display = DisplayStyle.None;
+            _outputAnimationClipConfig.style.display = DisplayStyle.None;
+            switch (format)
+            {
+                case RecodeFormat.Binary:
+                    _outputBinaryConfig.style.display = DisplayStyle.Flex;
+                    break;
+                case RecodeFormat.AnimationClip:
+                    _outputAnimationClipConfig.style.display = DisplayStyle.Flex;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
+
+            _recorder.RecordConfigs.RecordFormat = format;
+        }
+
         private void UpdateOutputFilePath()
         {
-            var path = _recorder.Config.OutputPath;
+            var path = _recorder.RecordConfigs.BinaryConfig.OutputPath;
             _outputFilePathLabel.text = path;
             _outputWarningIcon.style.display = System.IO.File.Exists(path) ? DisplayStyle.Flex : DisplayStyle.None;
             UpdateErrorMessage();
@@ -202,7 +251,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void UpdateErrorMessage()
         {
-            var errors = _recorder.Config.ValidateErrors();
+            var errors = _recorder.RecordConfigs.ValidateErrors();
             if (errors.Count > 0)
             {
                 _errorMessageLabel.text = string.Join("\n", errors);

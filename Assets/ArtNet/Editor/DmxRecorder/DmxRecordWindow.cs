@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -54,14 +55,20 @@ namespace ArtNet.Editor.DmxRecorder
             senderVisualElement.name = "senderPanel";
             tabContent.Add(senderVisualElement);
 
-            var config = new RecordConfig
+            var recordFormatStringType = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFormat")) ??
+                                         RecodeFormat.Binary.ToString();
+            var format = (RecodeFormat) Enum.Parse(typeof(RecodeFormat), recordFormatStringType);
+            var binaryRecordConfig = new BinaryRecordConfig
             {
                 Directory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
                             Application.dataPath,
                 FileName = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFileName")) ??
-                           "dmx-record"
+                           "dmx-record",
             };
-            _recorder.Config = config;
+
+            var animationClipRecordConfig = new AnimationClipRecordConfig();
+
+            _recorder.RecordConfigs = new RecordConfigs(format, binaryRecordConfig, animationClipRecordConfig);
 
             InitializeHeaderTab(root);
             InitializeRecorder(recorderVisualElement);
