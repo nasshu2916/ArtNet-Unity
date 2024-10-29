@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public class SenderConfigs : ScriptableObject
+    public class SenderSettings : ScriptableObject
     {
         [SerializeField] private string _loadFilePath;
         [SerializeField] private string _ip = "127.0.0.1";
@@ -24,35 +24,35 @@ namespace ArtNet.Editor.DmxRecorder
 
         private string _savePath;
 
-        public static SenderConfigs GetOrNewGlobalConfigs()
+        public static SenderSettings GetOrNewGlobalSettings()
         {
-            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxSenderConfigs.asset");
+            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxSenderSettings.asset");
             return Load(globalPath);
         }
 
-        private static SenderConfigs Load(string path)
+        private static SenderSettings Load(string path)
         {
-            SenderConfigs configs;
+            SenderSettings settings;
             try
             {
                 var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
-                configs = objs.FirstOrDefault(o => o is SenderConfigs) as SenderConfigs;
+                settings = objs.FirstOrDefault(o => o is SenderSettings) as SenderSettings;
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load SenderConfigs: {e.Message}");
-                configs = null;
+                Debug.LogError($"Failed to load SenderSettings: {e.Message}");
+                settings = null;
             }
 
-            if (configs == null)
+            if (settings == null)
             {
-                configs = CreateInstance<SenderConfigs>();
-                // configs.hideFlags = HideFlags.HideAndDontSave;
-                configs.name = "DmxSenderConfigs";
+                settings = CreateInstance<SenderSettings>();
+                // Settings.hideFlags = HideFlags.HideAndDontSave;
+                settings.name = "DmxSenderSettings";
             }
 
-            configs._savePath = path;
-            return configs;
+            settings._savePath = path;
+            return settings;
         }
 
         public void Save()
@@ -70,7 +70,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to save SenderConfigs: {e.Message}");
+                Debug.LogError($"Failed to save SenderSettings: {e.Message}");
             }
         }
     }

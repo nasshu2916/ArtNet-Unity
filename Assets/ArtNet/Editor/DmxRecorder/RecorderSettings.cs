@@ -15,7 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
         AnimationClip = 1,
     }
 
-    public class RecorderConfigs : ScriptableObject
+    public class RecorderSettings : ScriptableObject
     {
         [SerializeField] private RecodeFormat _recordFormat;
 
@@ -23,38 +23,38 @@ namespace ArtNet.Editor.DmxRecorder
 
         public RecodeFormat RecordFormat => _recordFormat;
 
-        public BinaryRecordConfig BinaryConfig { get; } = new();
-        public AnimationClipRecordConfig AnimationClipConfig { get; } = new();
+        public BinaryRecordSetting BinarySetting { get; } = new();
+        public AnimationClipRecordSetting AnimationClipSetting { get; } = new();
 
-        public static RecorderConfigs GetOrNewGlobalConfigs()
+        public static RecorderSettings GetOrNewGlobalSettings()
         {
-            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxRecorderConfigs.asset");
+            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxRecorderSettings.asset");
             return Load(globalPath);
         }
 
-        private static RecorderConfigs Load(string path)
+        private static RecorderSettings Load(string path)
         {
-            RecorderConfigs configs;
+            RecorderSettings settings;
             try
             {
                 var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
-                configs = objs.FirstOrDefault(o => o is RecorderConfigs) as RecorderConfigs;
+                settings = objs.FirstOrDefault(o => o is RecorderSettings) as RecorderSettings;
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load RecorderConfigs: {e.Message}");
-                configs = null;
+                Debug.LogError($"Failed to load RecorderSettings: {e.Message}");
+                settings = null;
             }
 
-            if (configs == null)
+            if (settings == null)
             {
-                configs = CreateInstance<RecorderConfigs>();
-                // configs.hideFlags = HideFlags.HideAndDontSave;
-                configs.name = "DmxRecorderConfigs";
+                settings = CreateInstance<RecorderSettings>();
+                // Settings.hideFlags = HideFlags.HideAndDontSave;
+                settings.name = "DmxRecorderSettings";
             }
 
-            configs._savePath = path;
-            return configs;
+            settings._savePath = path;
+            return settings;
         }
 
         public void Save()
@@ -72,7 +72,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to save RecorderConfigs: {e.Message}");
+                Debug.LogError($"Failed to save RecorderSettings: {e.Message}");
             }
         }
 
@@ -86,18 +86,18 @@ namespace ArtNet.Editor.DmxRecorder
             Save();
         }
 
-        private IRecordConfig Config => RecordFormat switch
+        private IRecordSetting Setting => RecordFormat switch
         {
-            RecodeFormat.Binary => BinaryConfig,
-            RecodeFormat.AnimationClip => AnimationClipConfig,
+            RecodeFormat.Binary => BinarySetting,
+            RecodeFormat.AnimationClip => AnimationClipSetting,
             _ => throw new System.NotImplementedException()
         };
 
         public bool Validate() => ValidateErrors().Count == 0;
-        public List<string> ValidateErrors() => Config.ValidateErrors();
+        public List<string> ValidateErrors() => Setting.ValidateErrors();
     }
 
-    public class BinaryRecordConfig : IRecordConfig
+    public class BinaryRecordSetting : IRecordSetting
     {
         private const string Extension = ".dmx";
 
@@ -119,7 +119,7 @@ namespace ArtNet.Editor.DmxRecorder
         private bool ValidateFileName() => !string.IsNullOrEmpty(FileName);
     }
 
-    public class AnimationClipRecordConfig : IRecordConfig
+    public class AnimationClipRecordSetting : IRecordSetting
     {
         public string OutputAnimationClipAssetPath { get; set; } = "Assets/Recording";
 
@@ -129,7 +129,7 @@ namespace ArtNet.Editor.DmxRecorder
         }
     }
 
-    public interface IRecordConfig
+    public interface IRecordSetting
     {
         public List<string> ValidateErrors();
     }

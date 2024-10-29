@@ -49,7 +49,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void Initialize(VisualElement root)
         {
-            _recorder.RecorderConfigs = RecorderConfigs.GetOrNewGlobalConfigs();
+            _recorder.RecorderSettings = RecorderSettings.GetOrNewGlobalSettings();
 
             var tabContent = new VisualElement { name = "tabContent" };
             root.Add(tabContent);
