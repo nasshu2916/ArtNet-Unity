@@ -96,7 +96,5 @@ namespace ArtNet.Editor.DmxRecorder
                 recorderPanel.style.display = DisplayStyle.None;
             });
         }
-
-        private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}{key}";
     }
 }

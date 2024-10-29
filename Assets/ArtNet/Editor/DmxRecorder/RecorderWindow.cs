@@ -219,8 +219,15 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SaveConfig()
         {
-            if (_recorder.RecorderConfigs == null) return;
-            _recorder.RecorderConfigs.Save();
+            if (_recorder.RecorderConfigs != null)
+            {
+                _recorder.RecorderConfigs.Save();
+            }
+
+            if (_sender.SenderConfigs != null)
+            {
+                _sender.SenderConfigs.Save();
+            }
         }
 
         private void ChangeOutputFormat(RecodeFormat format)

@@ -26,7 +26,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
 
-        public SenderConfig Config { get; } = new();
+        public SenderConfigs SenderConfigs { get; set; }
         private List<(int time, DmxPacket packet)> DmxPackets { get; set; } = new();
 
         public bool IsPlaying { get; private set; }
@@ -44,7 +44,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (!File.Exists(path)) return;
 
-            Config.LoadFilePath = path;
+            SenderConfigs.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
             DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.time).ToList();
             MaxTime = DmxPackets.Max(x => x.time);
@@ -75,7 +75,7 @@ namespace ArtNet.Editor.DmxRecorder
             var isReset = false;
             if (LastTime > MaxTime)
             {
-                if (!Config.IsLoop)
+                if (!SenderConfigs.IsLoop)
                 {
                     ChangedPlaying?.Invoke(false);
                 }
@@ -98,7 +98,7 @@ namespace ArtNet.Editor.DmxRecorder
         private void SendDmx(DmxPacket packet)
         {
             var universe = packet.Universe;
-            if (!Config.IsRecordSequence)
+            if (!SenderConfigs.IsRecordSequence)
             {
                 var sequence = _sequenceMap.GetValueOrDefault(universe, (byte) 0);
                 sequence = sequence == byte.MaxValue ? (byte) 0 : (byte) (sequence + 1);
@@ -111,7 +111,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var data = packet.ToByteArray();
-            _udpSender.Send(data, Config.Ip);
+            _udpSender.Send(data, SenderConfigs.Ip);
         }
 
         private void IsPlayingChanged(bool isPlaying)
@@ -169,7 +169,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private int CalcAddTime(int time)
         {
-            var addTime = time * Config.Speed;
+            var addTime = time * SenderConfigs.Speed;
             var addTimeInt = (int) addTime;
             if (addTime - addTimeInt > new Random().NextDouble()) addTimeInt++;
 
