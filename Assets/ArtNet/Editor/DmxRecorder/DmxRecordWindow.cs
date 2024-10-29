@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -36,6 +35,11 @@ namespace ArtNet.Editor.DmxRecorder
             Initialize(visualElement);
         }
 
+        private void OnDestroy()
+        {
+            SaveConfig();
+        }
+
         [MenuItem("ArtNet/DmxRecorder")]
         public static void ShowDmxRecorder()
         {
@@ -45,6 +49,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void Initialize(VisualElement root)
         {
+            _recorder.RecorderSettings = RecorderSettings.GetOrNewGlobalSettings();
+
             var tabContent = new VisualElement { name = "tabContent" };
             root.Add(tabContent);
 
@@ -54,21 +60,6 @@ namespace ArtNet.Editor.DmxRecorder
             VisualElement senderVisualElement = senderVisualTree.Instantiate();
             senderVisualElement.name = "senderPanel";
             tabContent.Add(senderVisualElement);
-
-            var recordFormatStringType = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFormat")) ??
-                                         RecodeFormat.Binary.ToString();
-            var format = (RecodeFormat) Enum.Parse(typeof(RecodeFormat), recordFormatStringType);
-            var binaryRecordConfig = new BinaryRecordConfig
-            {
-                Directory = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputDirectory")) ??
-                            Application.dataPath,
-                FileName = EditorUserSettings.GetConfigValue(EditorSettingKey("OutputFileName")) ??
-                           "dmx-record",
-            };
-
-            var animationClipRecordConfig = new AnimationClipRecordConfig();
-
-            _recorder.RecordConfigs = new RecordConfigs(format, binaryRecordConfig, animationClipRecordConfig);
 
             InitializeHeaderTab(root);
             InitializeRecorder(recorderVisualElement);
@@ -105,7 +96,5 @@ namespace ArtNet.Editor.DmxRecorder
                 recorderPanel.style.display = DisplayStyle.None;
             });
         }
-
-        private static string EditorSettingKey(string key) => $"{EditorSettingPrefix}{key}";
     }
 }

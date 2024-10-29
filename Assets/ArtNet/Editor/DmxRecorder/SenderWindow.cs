@@ -40,9 +40,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeSender(VisualElement root)
         {
-            _senderFilePath = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderPath")) ??
-                              "";
-
             InitializeSenderPanel(root);
             InitializeSenderSettings(root);
 
@@ -63,12 +60,11 @@ namespace ArtNet.Editor.DmxRecorder
             selectPlayFileButton.clicked += () =>
             {
                 var selectedFile =
-                    EditorUtility.OpenFilePanel("Select Play File", _recorder.RecordConfigs.BinaryConfig.Directory, "dmx");
+                    EditorUtility.OpenFilePanel("Select Play File", _recorder.RecorderSettings.BinarySetting.Directory, "dmx");
                 if (string.IsNullOrEmpty(selectedFile)) return;
 
                 senderFileNameField.value = selectedFile;
                 _senderFilePath = selectedFile;
-                EditorUserSettings.SetConfigValue(EditorSettingKey("SenderPath"), selectedFile);
                 LoadDmxFile(_senderFilePath);
             };
 
@@ -108,21 +104,17 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void InitializeSenderSettings(VisualElement root)
         {
+            _sender.SenderSettings = SenderSettings.GetOrNewGlobalSettings();
+
             var sendLoopToggle = root.Q<Toggle>("sendLoopToggle");
-            var isLoop = bool.Parse(EditorUserSettings.GetConfigValue(EditorSettingKey("SenderLoop")) ?? "false");
-            sendLoopToggle.value = isLoop;
-            _sender.Config.IsLoop = isLoop;
+            sendLoopToggle.value = _sender.SenderSettings.IsLoop;
             sendLoopToggle.RegisterValueChangedCallback((evt) =>
             {
-                _sender.Config.IsLoop = evt.newValue;
-                EditorUserSettings.SetConfigValue(EditorSettingKey("SenderLoop"), evt.newValue.ToString());
+                _sender.SenderSettings.IsLoop = evt.newValue;
             });
 
             var senderDistIpField = root.Q<TextField>("sendDistIpField");
-            var distIp = EditorUserSettings.GetConfigValue(EditorSettingKey("SenderDistIp")) ??
-                         _sender.Config.Ip.ToString();
-            senderDistIpField.value = distIp;
-            _sender.Config.Ip = IPAddress.Parse(distIp);
+            senderDistIpField.value = _sender.SenderSettings.Ip.ToString(); ;
             senderDistIpField.RegisterValueChangedCallback((evt) =>
             {
                 var ipText = evt.newValue;
@@ -134,8 +126,7 @@ namespace ArtNet.Editor.DmxRecorder
                 }
                 else
                 {
-                    _sender.Config.Ip = ip;
-                    EditorUserSettings.SetConfigValue(EditorSettingKey("SenderDistIp"), ipText);
+                    _sender.SenderSettings.Ip = ip;
                     if (!_senderErrorMessages.Contains("Invalid IP address")) return;
                     _senderErrorMessages.Remove("Invalid IP address");
                     UpdateSenderErrorMessage();
@@ -143,9 +134,9 @@ namespace ArtNet.Editor.DmxRecorder
             });
 
             var sendRecordSequenceToggle = root.Q<Toggle>("sendRecordSequenceToggle");
-            sendRecordSequenceToggle.RegisterValueChangedCallback((evt) =>
+            sendRecordSequenceToggle.RegisterValueChangedCallback(evt =>
             {
-                _sender.Config.IsRecordSequence = evt.newValue;
+                _sender.SenderSettings.IsRecordSequence = evt.newValue;
             });
 
             var sendSpeedSlider = root.Q<Slider>("sendSpeed");
@@ -154,16 +145,12 @@ namespace ArtNet.Editor.DmxRecorder
             sendSpeedDropdown.choices.AddRange(_senderSpeedDropdown.Select(x => x.Item2));
             sendSpeedDropdown.index = -1;
 
-            _sender.Config.Speed =
-                float.Parse(EditorUserSettings.GetConfigValue(EditorSettingKey("SenderSpeed")) ?? "1");
-            sendSpeedSlider.value = _sender.Config.Speed;
-            sendSpeedSlider.label = $"Speed (x{_sender.Config.Speed})";
+            sendSpeedSlider.value = _sender.SenderSettings.Speed;
+            sendSpeedSlider.label = $"Speed (x{_sender.SenderSettings.Speed})";
             sendSpeedSlider.RegisterValueChangedCallback(evt =>
             {
                 var speedValue = evt.newValue;
-                _sender.Config.Speed = speedValue;
-                EditorUserSettings.SetConfigValue(EditorSettingKey("SenderSpeed"),
-                    speedValue.ToString(CultureInfo.CurrentCulture));
+                _sender.SenderSettings.Speed = speedValue;
                 sendSpeedSlider.label = $"Speed (x{speedValue})";
                 sendSpeedDropdown.index = -1;
             });
