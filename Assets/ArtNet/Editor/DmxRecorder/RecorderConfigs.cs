@@ -1,4 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ArtNet.Editor.DmxRecorder
 {
@@ -8,19 +15,75 @@ namespace ArtNet.Editor.DmxRecorder
         AnimationClip = 1,
     }
 
-    public class RecorderConfigs
+    public class RecorderConfigs : ScriptableObject
     {
-        public RecodeFormat RecordFormat { get; set; }
+        [SerializeField] private RecodeFormat _recordFormat;
 
-        public BinaryRecordConfig BinaryConfig { get; }
-        public AnimationClipRecordConfig AnimationClipConfig { get; }
+        private string _savePath;
 
-        public RecorderConfigs(RecodeFormat format, BinaryRecordConfig binaryConfig, AnimationClipRecordConfig
-                animationClipConfig)
+        public RecodeFormat RecordFormat => _recordFormat;
+
+        public BinaryRecordConfig BinaryConfig { get; } = new();
+        public AnimationClipRecordConfig AnimationClipConfig { get; } = new();
+
+        public static RecorderConfigs GetOrNewGlobalConfigs()
         {
-            RecordFormat = format;
-            BinaryConfig = binaryConfig;
-            AnimationClipConfig = animationClipConfig;
+            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxRecorderConfigs.asset");
+            return Load(globalPath);
+        }
+
+        private static RecorderConfigs Load(string path)
+        {
+            RecorderConfigs configs;
+            try
+            {
+                var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
+                configs = objs.FirstOrDefault(o => o is RecorderConfigs) as RecorderConfigs;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load RecorderConfigs: {e.Message}");
+                configs = null;
+            }
+
+            if (configs == null)
+            {
+                configs = CreateInstance<RecorderConfigs>();
+                // configs.hideFlags = HideFlags.HideAndDontSave;
+                configs.name = "DmxRecorderConfigs";
+            }
+
+            configs._savePath = path;
+            return configs;
+        }
+
+        public void Save()
+        {
+            if (string.IsNullOrEmpty(_savePath)) return;
+
+            try
+            {
+                var directory = Path.GetDirectoryName(_savePath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                var objs = new Object[] { this };
+                InternalEditorUtility.SaveToSerializedFileAndForget(objs, _savePath, true);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save RecorderConfigs: {e.Message}");
+            }
+        }
+
+        public void ChangeRecordFormat(RecodeFormat format)
+        {
+            EditorUtility.SetDirty(this);
+            Undo.RecordObject(this, "Change Record Format");
+            if (_recordFormat == format) return;
+
+            _recordFormat = format;
+            Save();
         }
 
         private IRecordConfig Config => RecordFormat switch
