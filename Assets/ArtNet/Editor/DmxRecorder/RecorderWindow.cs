@@ -13,6 +13,9 @@ namespace ArtNet.Editor.DmxRecorder
 
         private readonly Recorder _recorder = new();
 
+        private Image _startButtonImage, _stopButtonImage;
+        private Button _pauseButton;
+
         private Label _errorMessageLabel;
 
         private VisualElement _outputBinaryConfig, _outputAnimationClipConfig;
@@ -46,8 +49,9 @@ namespace ArtNet.Editor.DmxRecorder
         }
         private void InitializeRecorder(VisualElement root)
         {
+            _recorder.RecorderSettings = RecorderSettings.GetOrNewGlobalSettings();
             InitializeControlPanel(root);
-            InitializeRecordingConfig(root);
+            InitializeRecordSetting(root);
         }
 
         private void InitializeControlPanel(VisualElement root)
@@ -58,71 +62,28 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCodeSecondLabel = root.Q<Label>("tcSecond");
             _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
 
-            var startButtonImage = new Image { image = _playButtonTexture };
-            var stopButtonImage = new Image
+            _startButtonImage = new Image { image = _playButtonTexture };
+            _stopButtonImage = new Image
             {
                 image = _preMatQuadTexture,
                 style = { display = DisplayStyle.None }
             };
             var playButton = root.Q<Button>("playButton");
-            var pauseButton = root.Q<Button>("pauseButton");
+            _pauseButton = root.Q<Button>("pauseButton");
 
-            playButton.Add(startButtonImage);
-            playButton.Add(stopButtonImage);
-            playButton.clicked += () =>
-            {
-                if (!_recorder.RecorderSettings.Validate()) return;
-                if (_recorder.Status == RecordingStatus.None)
-                {
-                    SetEnabledTextField(false);
-                    _recorder.StartRecording();
+            playButton.Add(_startButtonImage);
+            playButton.Add(_stopButtonImage);
+            playButton.clicked += OnRecordStartButton;
 
-                    startButtonImage.style.display = DisplayStyle.None;
-                    stopButtonImage.style.display = DisplayStyle.Flex;
-
-                    _timeCodeContainer.style.backgroundColor = RecordingColor;
-                    pauseButton.SetEnabled(true);
-                }
-                else
-                {
-                    _recorder.StopRecording();
-
-                    startButtonImage.style.display = DisplayStyle.Flex;
-                    stopButtonImage.style.display = DisplayStyle.None;
-
-                    _timeCodeContainer.style.backgroundColor = default;
-                    pauseButton.RemoveFromClassList("selected");
-                    pauseButton.SetEnabled(false);
-                    SetEnabledTextField(true);
-                }
-            };
-
-            pauseButton.SetEnabled(false);
-            pauseButton.Add(new Image()
+            _pauseButton.SetEnabled(false);
+            _pauseButton.Add(new Image
             {
                 image = EditorGUIUtility.IconContent("PauseButton@2x").image
             });
-            pauseButton.clicked += () =>
-            {
-                switch (_recorder.Status)
-                {
-                    case RecordingStatus.Recording:
-                        _recorder.PauseRecording();
-
-                        pauseButton.AddToClassList("selected");
-                        _timeCodeContainer.style.backgroundColor = PausedColor;
-                        break;
-                    case RecordingStatus.Paused:
-                        _recorder.ResumeRecording();
-
-                        pauseButton.RemoveFromClassList("selected");
-                        _timeCodeContainer.style.backgroundColor = RecordingColor;
-                        break;
-                }
-            };
+            _pauseButton.clicked += OnRecordPauseButton;
         }
 
-        private void InitializeRecordingConfig(VisualElement root)
+        private void InitializeRecordSetting(VisualElement root)
         {
             _outputBinaryConfig = root.Q<VisualElement>("binaryOutputConfig");
             _outputAnimationClipConfig = root.Q<VisualElement>("animationClipOutputConfig");
@@ -276,6 +237,69 @@ namespace ArtNet.Editor.DmxRecorder
             _outputFileNameField.SetEnabled(enabled);
             _outputDirectoryField.SetEnabled(enabled);
             _selectDirectoryButton.SetEnabled(enabled);
+        }
+
+        private void OnRecordStartButton()
+        {
+            if (!_recorder.RecorderSettings.Validate()) return;
+            if (_recorder.Status == RecordingStatus.None)
+            {
+                SetEnabledTextField(false);
+                _recorder.StartRecording();
+
+                _startButtonImage.style.display = DisplayStyle.None;
+                _stopButtonImage.style.display = DisplayStyle.Flex;
+
+                _timeCodeContainer.style.backgroundColor = RecordingColor;
+                _pauseButton.SetEnabled(true);
+            }
+            else
+            {
+                _recorder.StopRecording();
+
+                _startButtonImage.style.display = DisplayStyle.Flex;
+                _stopButtonImage.style.display = DisplayStyle.None;
+
+                _timeCodeContainer.style.backgroundColor = default;
+                _pauseButton.RemoveFromClassList("selected");
+                _pauseButton.SetEnabled(false);
+                SetEnabledTextField(true);
+            }
+        }
+
+        private void OnRecordPauseButton()
+        {
+            switch (_recorder.Status)
+            {
+                case RecordingStatus.Recording:
+                    _recorder.PauseRecording();
+                    break;
+                case RecordingStatus.Paused:
+                    _recorder.ResumeRecording();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            UpdateRecordStatus();
+        }
+
+        private void UpdateRecordStatus()
+        {
+            switch (_recorder.Status)
+            {
+                case RecordingStatus.Recording:
+                    _pauseButton.AddToClassList("selected");
+                    _timeCodeContainer.style.backgroundColor = PausedColor;
+                    break;
+                case RecordingStatus.Paused:
+                case RecordingStatus.None:
+                    _pauseButton.RemoveFromClassList("selected");
+                    _timeCodeContainer.style.backgroundColor = RecordingColor;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

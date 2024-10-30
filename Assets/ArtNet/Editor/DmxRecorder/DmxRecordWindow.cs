@@ -19,7 +19,23 @@ namespace ArtNet.Editor.DmxRecorder
             UpdateSender();
         }
 
-        public void CreateGUI()
+        private void OnDestroy()
+        {
+            SaveConfig();
+        }
+
+        [MenuItem("ArtNet/DmxRecorder")]
+        public static void ShowDmxRecorder()
+        {
+            GetWindow(typeof(DmxRecordWindow), false, "DmxRecorder");
+        }
+
+        private void OnEnable()
+        {
+            CreateView();
+        }
+
+        private void CreateView()
         {
             minSize = new Vector2(375, 400);
             var root = rootVisualElement;
@@ -35,22 +51,8 @@ namespace ArtNet.Editor.DmxRecorder
             Initialize(visualElement);
         }
 
-        private void OnDestroy()
-        {
-            SaveConfig();
-        }
-
-        [MenuItem("ArtNet/DmxRecorder")]
-        public static void ShowDmxRecorder()
-        {
-            var window = GetWindow<DmxRecordWindow>();
-            window.titleContent = new GUIContent("DmxRecorder");
-        }
-
         private void Initialize(VisualElement root)
         {
-            _recorder.RecorderSettings = RecorderSettings.GetOrNewGlobalSettings();
-
             var tabContent = new VisualElement { name = "tabContent" };
             root.Add(tabContent);
 
