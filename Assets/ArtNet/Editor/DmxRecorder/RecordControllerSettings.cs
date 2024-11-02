@@ -15,7 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
         AnimationClip = 1,
     }
 
-    public class RecorderSettings : ScriptableObject
+    public class RecordControllerSettings : ScriptableObject
     {
         [SerializeField] private RecodeFormat _recordFormat;
 
@@ -26,19 +26,19 @@ namespace ArtNet.Editor.DmxRecorder
         public BinaryRecordSetting BinarySetting { get; } = new();
         public AnimationClipRecordSetting AnimationClipSetting { get; } = new();
 
-        public static RecorderSettings GetOrNewGlobalSettings()
+        public static RecordControllerSettings GetOrNewGlobalSettings()
         {
             var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxRecorderSettings.asset");
             return Load(globalPath);
         }
 
-        private static RecorderSettings Load(string path)
+        private static RecordControllerSettings Load(string path)
         {
-            RecorderSettings settings;
+            RecordControllerSettings settings;
             try
             {
                 var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
-                settings = objs.FirstOrDefault(o => o is RecorderSettings) as RecorderSettings;
+                settings = objs.FirstOrDefault(o => o is RecordControllerSettings) as RecordControllerSettings;
             }
             catch (Exception e)
             {
@@ -48,7 +48,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             if (settings == null)
             {
-                settings = CreateInstance<RecorderSettings>();
+                settings = CreateInstance<RecordControllerSettings>();
                 // Settings.hideFlags = HideFlags.HideAndDontSave;
                 settings.name = "DmxRecorderSettings";
             }
