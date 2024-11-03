@@ -40,7 +40,7 @@ namespace ArtNet.Editor.DmxRecorder
             });
             Add(_toggle);
 
-            UpdateState(false, false);
+            UpdateState(false);
 
             var iconContainer = new IMGUIContainer(() =>
             {
@@ -70,7 +70,7 @@ namespace ArtNet.Editor.DmxRecorder
             SetItemEnabled(recordControllerSettings, recorderEnabled);
         }
 
-        public void UpdateState(bool checkForErrors = true, bool checkForWarnings = true)
+        public void UpdateState(bool checkErrorAndWarning = true)
         {
             if (Settings == null)
             {
@@ -78,19 +78,18 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            if (checkForErrors && Settings.HasErrors())
+            switch (checkErrorAndWarning)
             {
-                State = RecorderState.HasErrors;
-                return;
+                case true when Settings.HasErrors():
+                    State = RecorderState.HasErrors;
+                    return;
+                case true when Settings.HasWarnings():
+                    State = RecorderState.HasWarnings;
+                    return;
+                default:
+                    State = RecorderState.Normal;
+                    break;
             }
-
-            if (checkForWarnings && Settings.HasWarnings())
-            {
-                State = RecorderState.HasWarnings;
-                return;
-            }
-
-            State = RecorderState.Normal;
         }
 
         public RecorderState State

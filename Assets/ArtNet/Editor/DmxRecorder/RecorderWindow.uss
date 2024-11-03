@@ -1,0 +1,37 @@
+.root {
+    height: 100%;
+}
+
+.Panel {
+    margin-top : 10px;
+    padding-left : 5px;
+    padding-right : 5px;
+    border-bottom-width:2px;
+
+    border-color: #292929;
+}
+
+#recorderList {
+    flex-grow: 1;
+}
+
+RecorderItem {
+    margin-top : 4px;
+    padding: 5px;
+
+    border-width:1px;
+
+    background-color: #404040;
+    border-color: #2B2B2B;
+}
+
+RecorderItem.selected {
+    background-color: #555555;
+    border-color: #A2A2A2;
+}
+
+.RecorderItemIcon {
+    width : 14px;
+    height : 14px;
+    margin: 1px 3px 3px 3px;
+}

@@ -19,12 +19,16 @@ namespace ArtNet.Editor.DmxRecorder
     {
         [SerializeField] private RecodeFormat _recordFormat;
 
+        [SerializeField] private List<RecordSettings> _recorderSettings = new();
+
         private string _savePath;
 
         public RecodeFormat RecordFormat => _recordFormat;
 
         public BinaryRecordSetting BinarySetting { get; } = new();
         public AnimationClipRecordSetting AnimationClipSetting { get; } = new();
+
+        public List<RecordSettings> RecorderSettings => _recorderSettings;
 
         public static RecordControllerSettings GetOrNewGlobalSettings()
         {
@@ -67,13 +71,43 @@ namespace ArtNet.Editor.DmxRecorder
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                var objs = new Object[] { this };
+                var recordersCopy = RecorderSettings.ToArray();
+
+                var objs = new Object[recordersCopy.Length + 1];
+                objs[0] = this;
+
+                for (var i = 0; i < recordersCopy.Length; ++i)
+                    objs[i + 1] = recordersCopy[i];
+
                 InternalEditorUtility.SaveToSerializedFileAndForget(objs, _savePath, true);
             }
             catch (Exception e)
             {
                 Debug.LogError($"Failed to save RecorderSettings: {e.Message}");
             }
+        }
+
+        public void AddRecorderSettings(RecordSettings settings)
+        {
+            EditorUtility.SetDirty(this);
+            Undo.RegisterCompleteObjectUndo(this, "Add Recorder Settings");
+            if (!_recorderSettings.Contains(settings))
+            {
+                _recorderSettings.Add(settings);
+            }
+
+            Save();
+        }
+
+        public void RemoveRecorderSettings(RecordSettings settings)
+        {
+            if (!_recorderSettings.Contains(settings)) return;
+
+            EditorUtility.SetDirty(this);
+            Undo.RegisterCompleteObjectUndo(this, "Remove Recorder Settings");
+            _recorderSettings.Remove(settings);
+            Undo.DestroyObjectImmediate(settings);
+            Save();
         }
 
         public void ChangeRecordFormat(RecodeFormat format)
