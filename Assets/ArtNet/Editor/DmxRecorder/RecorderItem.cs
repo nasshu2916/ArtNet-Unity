@@ -14,7 +14,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         private bool _isDisabled;
 
-        private readonly Texture2D _recorderIcon;
         private Texture2D _icon;
         private RecorderState _state;
 
@@ -143,7 +142,7 @@ namespace ArtNet.Editor.DmxRecorder
                         break;
 
                     case RecorderState.Normal:
-                        _icon = _recorderIcon;
+                        _icon = Settings.Icon;
                         break;
                 }
 
