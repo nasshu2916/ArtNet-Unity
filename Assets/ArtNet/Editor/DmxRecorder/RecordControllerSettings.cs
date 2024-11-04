@@ -19,7 +19,7 @@ namespace ArtNet.Editor.DmxRecorder
     {
         [SerializeField] private RecodeFormat _recordFormat;
 
-        [SerializeField] private List<RecordSettings> _recorderSettings = new();
+        [SerializeField] private List<RecorderSettings> _recorderSettings = new();
 
         private string _savePath;
 
@@ -28,7 +28,7 @@ namespace ArtNet.Editor.DmxRecorder
         public BinaryRecordSetting BinarySetting { get; } = new();
         public AnimationClipRecordSetting AnimationClipSetting { get; } = new();
 
-        public List<RecordSettings> RecorderSettings => _recorderSettings;
+        public List<RecorderSettings> RecorderSettings => _recorderSettings;
 
         public static RecordControllerSettings GetOrNewGlobalSettings()
         {
@@ -87,7 +87,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public void AddRecorderSettings(RecordSettings settings)
+        public void AddRecorderSettings(RecorderSettings settings)
         {
             EditorUtility.SetDirty(this);
             Undo.RegisterCompleteObjectUndo(this, "Add Recorder Settings");
@@ -99,7 +99,7 @@ namespace ArtNet.Editor.DmxRecorder
             Save();
         }
 
-        public void RemoveRecorderSettings(RecordSettings settings)
+        public void RemoveRecorderSettings(RecorderSettings settings)
         {
             if (!_recorderSettings.Contains(settings)) return;
 

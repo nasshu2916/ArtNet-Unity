@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public abstract class RecordSettings : ScriptableObject, ISerializationCallbackReceiver
+    public abstract class RecorderSettings : ScriptableObject, ISerializationCallbackReceiver
     {
         private const int MaxPathLength = 259;
 

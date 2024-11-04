@@ -7,7 +7,7 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public class RecorderItem : VisualElement
     {
-        public RecordSettings Settings { get; }
+        public RecorderSettings Settings { get; }
 
         private readonly Toggle _toggle = new();
 
@@ -28,9 +28,9 @@ namespace ArtNet.Editor.DmxRecorder
             Invalid
         }
 
-        public RecorderItem(RecordControllerSettings recordControllerSettings, RecordSettings recordSettings)
+        public RecorderItem(RecordControllerSettings recordControllerSettings, RecorderSettings recorderSettings)
         {
-            Settings = recordSettings;
+            Settings = recorderSettings;
 
             style.flexDirection = FlexDirection.Row;
 
@@ -62,7 +62,7 @@ namespace ArtNet.Editor.DmxRecorder
             iconContainer.SetEnabled(false);
             Add(iconContainer);
 
-            Add(new Label(recordSettings.name));
+            Add(new Label(recorderSettings.name));
 
             var recorderEnabled = Settings.Enabled;
             _toggle.value = recorderEnabled;

@@ -140,7 +140,7 @@ namespace ArtNet.Editor.DmxRecorder
             var menu = new GenericMenu();
 
             // TODO: type をハードコートではなく動的に取得する
-            var recordersTypes = new[] { typeof(RecordAnimationSettings) };
+            var recordersTypes = new[] { typeof(AnimationRecorderSettings) };
             foreach (var type in recordersTypes)
             {
                 var context = new GUIContent(type.Name);
@@ -184,9 +184,9 @@ namespace ArtNet.Editor.DmxRecorder
             menu.ShowAsContext();
         }
 
-        private RecorderItem CreateRecorderItem(RecordSettings recordSettings)
+        private RecorderItem CreateRecorderItem(RecorderSettings recorderSettings)
         {
-            var recorderItem = new RecorderItem(_controllerSettings, recordSettings);
+            var recorderItem = new RecorderItem(_controllerSettings, recorderSettings);
             recorderItem.OnEnableStateChanged += enabled =>
             {
                 if (enabled)
@@ -209,13 +209,13 @@ namespace ArtNet.Editor.DmxRecorder
             Repaint();
         }
 
-        private void AddRecorder(RecordSettings record, string recorderName, bool enabled)
+        private void AddRecorder(RecorderSettings recorder, string recorderName, bool enabled)
         {
-            record.name = UniqueRecorderName(recorderName);
-            record.Enabled = enabled;
-            _controllerSettings.AddRecorderSettings(record);
+            recorder.name = UniqueRecorderName(recorderName);
+            recorder.Enabled = enabled;
+            _controllerSettings.AddRecorderSettings(recorder);
 
-            var item = CreateRecorderItem(record);
+            var item = CreateRecorderItem(recorder);
             _recorderList.Add(item);
             _recorderList.Selection = item;
             _recorderList.Focus();
@@ -237,7 +237,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnAddNewRecorder(Type type)
         {
-            var recorder = (RecordSettings) CreateInstance(type);
+            var recorder = (RecorderSettings) CreateInstance(type);
             AddRecorder(recorder, ObjectNames.NicifyVariableName(recorder.DefaultName), true);
 
             _state = State.Idle;
