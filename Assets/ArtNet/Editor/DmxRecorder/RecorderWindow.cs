@@ -254,32 +254,13 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnRecorderSelectionChanged()
         {
-            var prevSelectedItem = _selectedRecorderItem;
-            if (prevSelectedItem != null)
-            {
-                var recorderEditor = prevSelectedItem.Editor;
-                recorderEditor.OnDataChanged -= RecorderDataChanged;
-            }
-
             _selectedRecorderItem = _recorderList.Selection;
             foreach (var item in _recorderList.Items)
             {
                 item.SetItemSelected(_selectedRecorderItem == item);
             }
 
-            if (_selectedRecorderItem != null)
-            {
-                var recorderEditor = _selectedRecorderItem.Editor;
-                recorderEditor.OnDataChanged += RecorderDataChanged;
-            }
-
             Repaint();
-        }
-
-        private void RecorderDataChanged()
-        {
-            if (_controllerSettings != null)
-                _controllerSettings.Save();
         }
 
         private void AddRecorder(RecorderSettings recorder, string recorderName, bool enabled)
