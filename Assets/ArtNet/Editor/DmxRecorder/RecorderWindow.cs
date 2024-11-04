@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -28,6 +29,8 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private VisualTreeAsset _visualTree;
         [SerializeField] private StyleSheet _styleSheet;
 
+        private static IEnumerable<Type> _cachedRecorderTypes;
+
         private RecorderList _recorderList;
         private RecorderItem _selectedRecorderItem;
 
@@ -46,6 +49,9 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnEnable()
         {
+            _cachedRecorderTypes ??= typeof(RecorderSettings).Assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(RecorderSettings)) && !t.IsAbstract);
+
             CreateView();
             RegisterCallbacks();
         }
@@ -189,9 +195,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var menu = new GenericMenu();
 
-            // TODO: type をハードコートではなく動的に取得する
-            var recordersTypes = new[] { typeof(AnimationRecorderSettings) };
-            foreach (var type in recordersTypes)
+            foreach (var type in _cachedRecorderTypes)
             {
                 var context = new GUIContent(type.Name);
                 if (DisableEditRecordSettings())
