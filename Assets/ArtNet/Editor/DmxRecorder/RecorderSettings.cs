@@ -12,7 +12,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected internal abstract string Extension { get; }
 
-        internal abstract string  DefaultName { get; }
+        internal abstract string DefaultName { get; }
 
         public bool Enabled
         {

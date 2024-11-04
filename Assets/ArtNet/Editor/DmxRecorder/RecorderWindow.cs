@@ -29,6 +29,7 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private StyleSheet _styleSheet;
 
         private RecorderList _recorderList;
+        private RecorderItem _selectedRecorderItem;
 
         private RecordControllerSettings _controllerSettings;
 
@@ -106,7 +107,7 @@ namespace ArtNet.Editor.DmxRecorder
             var recordersPanel = visualElement.Q<VisualElement>("recordersPanel");
 
             var addRecorderLabel = visualElement.Q<Label>("addRecorderLabel");
-            addRecorderLabel.RegisterCallback<ClickEvent>(e => ShowRecorderContextMenu());
+            addRecorderLabel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
             _recorderList = new RecorderList
             {
                 name = "recorderList",
@@ -117,6 +118,9 @@ namespace ArtNet.Editor.DmxRecorder
             _recorderList.OnSelectionChanged += OnRecorderSelectionChanged;
             _recorderList.OnContextMenu += ShowRecorderContextMenu;
             recordersPanel.Add(_recorderList);
+
+            var recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
+            recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
 
             SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
         }
@@ -135,6 +139,52 @@ namespace ArtNet.Editor.DmxRecorder
             ReloadRecorderSettings();
         }
 
+        private void RecorderSettingsGUI()
+        {
+            if (_selectedRecorderItem != null)
+            {
+                if (_selectedRecorderItem.State == RecorderItem.RecorderState.Invalid)
+                {
+                    EditorGUILayout.LabelField("This Recorder has invalid settings", EditorStyles.boldLabel);
+                }
+                else
+                {
+                    var editor = _selectedRecorderItem.Editor;
+
+                    if (editor == null)
+                    {
+                        EditorGUILayout.LabelField("No editor found for this Recorder", EditorStyles.boldLabel);
+                    }
+                    else
+                    {
+                        EditorGUILayout.Separator();
+
+                        EditorGUILayout.BeginHorizontal();
+                        var recorderName = editor.target.GetType().Name;
+                        EditorGUILayout.LabelField("Recorder Type", ObjectNames.NicifyVariableName(recorderName));
+
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.Separator();
+
+                        EditorGUI.BeginChangeCheck();
+
+                        editor.OnInspectorGUI();
+
+                        if (EditorGUI.EndChangeCheck() || EditorUtility.IsDirty(_selectedRecorderItem.Settings))
+                        {
+                            // data changed
+                            _controllerSettings.Save();
+                            _selectedRecorderItem.UpdateState();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                EditorGUILayout.LabelField("No recorder selected");
+            }
+        }
+
         private void ShowRecorderContextMenu()
         {
             var menu = new GenericMenu();
@@ -150,7 +200,7 @@ namespace ArtNet.Editor.DmxRecorder
                 }
                 else
                 {
-                    menu.AddItem(context, false, data => OnAddNewRecorder(type), type);
+                    menu.AddItem(context, false, _ => OnAddNewRecorder(type), type);
                 }
             }
 
@@ -200,13 +250,32 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnRecorderSelectionChanged()
         {
-            var selectedItem = _recorderList.Selection;
+            var prevSelectedItem = _selectedRecorderItem;
+            if (prevSelectedItem != null)
+            {
+                var recorderEditor = prevSelectedItem.Editor;
+                recorderEditor.OnDataChanged -= RecorderDataChanged;
+            }
+
+            _selectedRecorderItem = _recorderList.Selection;
             foreach (var item in _recorderList.Items)
             {
-                item.SetItemSelected(selectedItem == item);
+                item.SetItemSelected(_selectedRecorderItem == item);
+            }
+
+            if (_selectedRecorderItem != null)
+            {
+                var recorderEditor = _selectedRecorderItem.Editor;
+                recorderEditor.OnDataChanged += RecorderDataChanged;
             }
 
             Repaint();
+        }
+
+        private void RecorderDataChanged()
+        {
+            if (_controllerSettings != null)
+                _controllerSettings.Save();
         }
 
         private void AddRecorder(RecorderSettings recorder, string recorderName, bool enabled)

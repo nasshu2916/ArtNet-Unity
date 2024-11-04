@@ -8,6 +8,7 @@ namespace ArtNet.Editor.DmxRecorder
     public class RecorderItem : VisualElement
     {
         public RecorderSettings Settings { get; }
+        public RecorderSettingsEditor Editor { get; }
 
         private readonly Toggle _toggle = new();
 
@@ -31,6 +32,12 @@ namespace ArtNet.Editor.DmxRecorder
         public RecorderItem(RecordControllerSettings recordControllerSettings, RecorderSettings recorderSettings)
         {
             Settings = recorderSettings;
+
+            if (Settings != null)
+            {
+                Editor = (RecorderSettingsEditor) UnityEditor.Editor.CreateEditor(Settings);
+                Editor.OnRecorderValidated += OnRecorderValidated;
+            }
 
             style.flexDirection = FlexDirection.Row;
 
@@ -174,6 +181,11 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             OnEnableStateChanged?.Invoke(value);
+        }
+
+        private void OnRecorderValidated()
+        {
+            UpdateState();
         }
     }
 }
