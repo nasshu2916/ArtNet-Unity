@@ -124,42 +124,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            switch (RecordControllerSettings.RecordFormat)
-            {
-                case RecodeFormat.Binary:
-                    StoreBinary();
-                    break;
-                case RecodeFormat.AnimationClip:
-                    StoreAnimationClip();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private void StoreBinary()
-        {
-            var binaryConfig = RecordControllerSettings.BinarySetting;
-
-            if (!Directory.Exists(binaryConfig.Directory))
-            {
-                Directory.CreateDirectory(binaryConfig.Directory);
-            }
-
-            var binary = RecordData.Serialize(_recordedDmx);
-
-            var path = binaryConfig.OutputPath;
-            var exists = File.Exists(path);
-            File.WriteAllBytes(path, binary);
-            var message = exists ? "Data updated" : "Data stored";
-            Debug.Log($"ArtNet Recorder: {message} at {path}");
-        }
-
-        private void StoreAnimationClip()
-        {
-            var animationClipConfig = RecordControllerSettings.AnimationClipSetting;
-            var timelineConverter = new TimelineConverter(_recordedDmx);
-            timelineConverter.SaveDmxTimelineClips(animationClipConfig.OutputAnimationClipAssetPath);
+            // TODO: Implement storing recorded data
         }
     }
 }

@@ -60,7 +60,7 @@ namespace ArtNet.Editor.DmxRecorder
             selectPlayFileButton.clicked += () =>
             {
                 var selectedFile =
-                    EditorUtility.OpenFilePanel("Select Play File", _recorder.RecordControllerSettings.BinarySetting.Directory, "dmx");
+                    EditorUtility.OpenFilePanel("Select Play File", "Assets", "dmx");
                 if (string.IsNullOrEmpty(selectedFile)) return;
 
                 senderFileNameField.value = selectedFile;
