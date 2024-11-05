@@ -122,6 +122,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             _recorderList.OnItemContextMenu += OnRecorderContextMenu;
             _recorderList.OnSelectionChanged += OnRecorderSelectionChanged;
+            _recorderList.OnItemRename += item => item.StartRenaming();
             _recorderList.OnContextMenu += ShowRecorderContextMenu;
             recordersPanel.Add(_recorderList);
 

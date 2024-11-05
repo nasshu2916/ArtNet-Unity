@@ -11,6 +11,7 @@ namespace ArtNet.Editor.DmxRecorder
         public event Action OnSelectionChanged;
         public event Action OnContextMenu;
         public event Action<T> OnItemContextMenu;
+        public event Action<T> OnItemRename;
 
         private int _selectIndex;
 
@@ -106,6 +107,11 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
+        private bool HasFocus()
+        {
+            return focusController.focusedElement == this;
+        }
+
         private void OnItemMouseDown(MouseDownEvent evt)
         {
             if (evt.clickCount != 1) return;
@@ -115,18 +121,16 @@ namespace ArtNet.Editor.DmxRecorder
 
             if (evt.modifiers == EventModifiers.None)
             {
-                Selection = item;
+                var alreadySelected = Selection == item;
+                if (evt.button == (int) MouseButton.LeftMouse && alreadySelected)
+                {
+                    if (HasFocus()) OnItemRename?.Invoke(item);
+                }
+                else
+                {
+                    Selection = item;
+                }
             }
-
-            evt.StopImmediatePropagation();
-        }
-
-        private void OnMouseUp(MouseUpEvent evt)
-        {
-            if (evt.clickCount != 1) return;
-
-            if (evt.button == (int) MouseButton.RightMouse)
-                OnContextMenu?.Invoke();
 
             evt.StopImmediatePropagation();
         }
@@ -137,6 +141,16 @@ namespace ArtNet.Editor.DmxRecorder
             if (evt.modifiers != EventModifiers.None || evt.button != (int) MouseButton.RightMouse) return;
 
             OnItemContextMenu?.Invoke((T) evt.currentTarget);
+
+            evt.StopImmediatePropagation();
+        }
+
+        private void OnMouseUp(MouseUpEvent evt)
+        {
+            if (evt.clickCount != 1) return;
+
+            if (evt.button == (int) MouseButton.RightMouse)
+                OnContextMenu?.Invoke();
 
             evt.StopImmediatePropagation();
         }

@@ -11,6 +11,7 @@ namespace ArtNet.Editor.DmxRecorder
         public RecorderSettingsEditor Editor { get; }
 
         private readonly Toggle _toggle = new();
+        private readonly EditableLabel _editableLabel;
 
         private bool _isDisabled;
 
@@ -68,7 +69,15 @@ namespace ArtNet.Editor.DmxRecorder
             iconContainer.SetEnabled(false);
             Add(iconContainer);
 
-            Add(new Label(recorderSettings.name));
+            _editableLabel = new EditableLabel(recorderSettings.name)
+            {
+                OnValueChanged = newValue =>
+                {
+                    Settings.name = newValue;
+                    recordControllerSettings.Save();
+                }
+            };
+            Add(_editableLabel);
 
             var recorderEnabled = Settings.Enabled;
             _toggle.value = recorderEnabled;
@@ -169,6 +178,7 @@ namespace ArtNet.Editor.DmxRecorder
             recordControllerSettings.Save();
 
             _toggle.value = value;
+            _editableLabel.SetLabelEnabled(value);
 
             if (value)
             {
@@ -181,6 +191,12 @@ namespace ArtNet.Editor.DmxRecorder
 
             OnEnableStateChanged?.Invoke(value);
         }
+
+        public void StartRenaming()
+        {
+            _editableLabel.StartEditing();
+        }
+
 
         private void OnRecorderValidated()
         {
