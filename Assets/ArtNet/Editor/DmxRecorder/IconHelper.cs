@@ -11,9 +11,9 @@ namespace ArtNet.Editor.DmxRecorder
         public static Texture ErrorIcon => Icon("console.erroricon");
         public static Texture WarningIcon => Icon("console.warnicon");
         public static Texture InfoIcon => Icon("console.infoicon");
-        public static Texture PlayButton => Icon("PlayButton", true);
-        public static Texture PreMatQuad => Icon("PreMatQuad", true);
-        public static Texture PauseButton => Icon("PauseButton", true);
+        public static Texture PlayButton => Icon("PlayButton@2x", true);
+        public static Texture PreMatQuad => Icon("PreMatQuad@2x", true);
+        public static Texture PauseButton => Icon("PauseButton@2x", true);
 
         internal static Texture Icon(string iconPath, bool provideDarkModel = false)
         {

@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" MemoryProfiler="Unity.MemoryProfiler.Editor" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/ArtNet/Editor/DmxRecorder/RecorderWindow.uss?fileID=7433441132597879392&amp;guid=a5da80f6bbbc5cf45879aecefa525477&amp;type=3#RecorderWindow" />
-    <ui:VisualElement>
+    <ui:VisualElement class="Panel" style="min-height: 140px;">
         <ui:Label text="00:00:00.000" name="timeCode" />
         <ui:VisualElement name="controllerButton">
             <ui:Button name="playButton" focusable="false" />
@@ -9,7 +9,7 @@
     </ui:VisualElement>
     <ui:VisualElement style="flex-direction: row; flex-grow: 1;">
         <ui:VisualElement name="recordersPanel" class="Panel" style="width: 200px; max-width: 500px; min-width: 150px;">
-            <ui:VisualElement>
+            <ui:VisualElement class="RecorderListHeader">
                 <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addRecorderLabel" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
             </ui:VisualElement>
         </ui:VisualElement>

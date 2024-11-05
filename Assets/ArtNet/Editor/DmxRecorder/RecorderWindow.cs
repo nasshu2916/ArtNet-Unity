@@ -22,6 +22,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         [SerializeField] private VisualTreeAsset _visualTree;
         [SerializeField] private StyleSheet _styleSheet;
+        [SerializeField] private StyleSheet _darkStyleSheet, _lightStyleSheet;
 
         private static IEnumerable<Type> _cachedRecorderTypes;
 
@@ -111,9 +112,18 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
+            var skinStyleSheet = EditorGUIUtility.isProSkin ? _darkStyleSheet : _lightStyleSheet;
+            if (_darkStyleSheet == null)
+            {
+                Debug.LogError("SkinStyleSheet is null");
+                return;
+            }
+
             VisualElement visualElement = _visualTree.Instantiate();
             visualElement.AddToClassList("root");
             root.Add(visualElement);
+
+            root.styleSheets.Add(skinStyleSheet);
             root.styleSheets.Add(_styleSheet);
 
             // TimeCode の作成

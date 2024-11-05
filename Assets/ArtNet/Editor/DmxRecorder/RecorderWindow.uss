@@ -3,12 +3,7 @@
 }
 
 .Panel {
-    margin-top : 10px;
-    padding-left : 5px;
-    padding-right : 5px;
     border-bottom-width:2px;
-
-    border-color: #292929;
 }
 
 Button > Image {
@@ -35,13 +30,12 @@ Button > Image {
 }
 
 #controllerButton {
-    height: 70px;
     flex-direction: row;
     justify-content: center;
 }
 
 #controllerButton > Button {
-    background-color: rgb(85, 85, 85);
+    background-color: var(--unity-colors-button-background);
     width: 54px;
     height: 54px;
     padding: 4px;
@@ -54,6 +48,14 @@ Button > Image {
 
 /* recorders panel */
 
+#recordersPanel {
+    border-right-width: 4px;
+}
+
+.RecorderListHeader {
+    border-bottom-width: 2px;
+}
+
 #recorderList {
     flex-grow: 1;
 }
@@ -61,28 +63,27 @@ Button > Image {
 RecorderItem {
     margin-top : 4px;
     padding: 5px;
-
     border-width:1px;
-
-    background-color: #404040;
-    border-color: #2B2B2B;
-}
-
-RecorderItem.selected {
-    background-color: #555555;
-    border-color: #A2A2A2;
 }
 
 .RecorderItemIcon {
     width : 14px;
     height : 14px;
-    margin: 1px 3px 3px 3px;
+    margin: 2px 3px 3px 3px;
+}
+
+EditableLabel > Label {
+    margin-top: 1px;
+    overflow: hidden;
+}
+
+#recorderSettingsPanel {
+    padding: 6px 18px;
 }
 
 /* footer */
 
 #footer {
-    background-color: rgb(44, 44, 44);
     padding: 6px;
     flex-direction: row;
     justify-content: space-between;
