@@ -53,6 +53,16 @@ namespace ArtNet.Editor.DmxRecorder
             RegisterCallbacks();
         }
 
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+        }
+
+        private void Update()
+        {
+            if (IsRecording) _timeCode.text = _controller.TimeCode();
+        }
+
         private void RegisterCallbacks()
         {
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
@@ -108,7 +118,6 @@ namespace ArtNet.Editor.DmxRecorder
 
             // TimeCode の作成
             _timeCode = visualElement.Q<Label>("timeCode");
-            // TODO: TimeCode を更新する
 
             _playButton = visualElement.Q<Button>("playButton");
             _playButton.clicked += OnPlayButtonClicked;
@@ -369,6 +378,7 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Clear();
             _playButton.Add(new Image { image = IconHelper.PlayButton });
             _stopButton.SetEnabled(false);
+            _timeCode.text = _controller.TimeCode();
         }
     }
 }
