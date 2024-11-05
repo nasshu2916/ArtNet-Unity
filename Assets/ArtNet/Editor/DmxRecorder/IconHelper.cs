@@ -5,19 +5,21 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public static class IconHelper
     {
-        private static Texture2D _errorIcon, _warningIcon, _infoIcon;
+        private static Texture _errorIcon, _warningIcon, _infoIcon;
+        private static Texture _playButton, _preMatQuad, _pauseButton;
 
-        public static Texture2D ErrorIcon => Icon(_errorIcon, "icons/console.erroricon.png");
+        public static Texture ErrorIcon => Icon(_errorIcon, "console.erroricon");
+        public static Texture WarningIcon => Icon(_warningIcon, "console.warnicon");
+        public static Texture InfoIcon => Icon(_infoIcon, "console.infoicon");
+        public static Texture PlayButton => Icon(_playButton, "PlayButton");
+        public static Texture PreMatQuad => Icon(_preMatQuad, "PreMatQuad");
+        public static Texture PauseButton => Icon(_pauseButton, "PauseButton");
 
-        public static Texture2D WarningIcon => Icon(_warningIcon, "icons/console.warnicon.png");
-
-        public static Texture2D InfoIcon => Icon(_infoIcon, "icons/console.infoicon.png");
-
-        private static Texture2D Icon(Texture2D icon, string iconPath)
+        private static Texture Icon(Texture icon, string iconPath)
         {
             if (icon != null) return icon;
 
-            icon = EditorGUIUtility.Load(iconPath) as Texture2D;
+            icon = EditorGUIUtility.IconContent(iconPath).image;
             return icon;
         }
     }

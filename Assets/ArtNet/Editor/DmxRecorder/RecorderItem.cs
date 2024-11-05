@@ -15,7 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private bool _isDisabled;
 
-        private Texture2D _icon;
+        private Texture _icon;
         private RecorderState _state;
 
         public event Action<bool> OnEnableStateChanged;
