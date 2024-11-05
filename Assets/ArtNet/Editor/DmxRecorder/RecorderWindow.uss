@@ -11,6 +11,49 @@
     border-color: #292929;
 }
 
+Button > Image {
+    width: 100%;
+    height: 100%;
+}
+
+/* Controller */
+
+#timeCode {
+    font-size: 56px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+
+    background-color: var(--unity-colors-default-background);
+}
+
+#timeCode.recording {
+    background-color: #802020;
+}
+
+#timeCode.paused {
+    background-color: #208020;
+}
+
+#controllerButton {
+    height: 70px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#controllerButton > Button {
+    background-color: rgb(85, 85, 85);
+    width: 54px;
+    height: 54px;
+    padding: 4px;
+    margin: 6px;
+}
+
+#controllerButton > Button.selected {
+    background-color: var(--unity-colors-button-background-pressed);
+}
+
+/* recorders panel */
+
 #recorderList {
     flex-grow: 1;
 }
@@ -34,4 +77,13 @@ RecorderItem.selected {
     width : 14px;
     height : 14px;
     margin: 1px 3px 3px 3px;
+}
+
+/* footer */
+
+#footer {
+    background-color: rgb(44, 44, 44);
+    padding: 6px;
+    flex-direction: row;
+    justify-content: space-between;
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -15,21 +14,25 @@ namespace ArtNet.Editor.DmxRecorder
         Paused,
     }
 
-    public class Recorder
+    public class RecordController
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private int _alreadyRecordedTime;
+        private int _recordedTime;
 
         private List<(int, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
 
-        public Recorder()
+        public RecordControllerSettings Settings { get; }
+        public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
+
+        public RecordController(RecordControllerSettings settings)
         {
+            Settings = settings;
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
+
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
-        public RecordControllerSettings RecordControllerSettings { get; set; }
 
         public int GetRecordedCount() => _recordedDmx.Count;
 
@@ -41,11 +44,12 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            _receiver.StartReceive();
             _recordedDmx = new List<(int, DmxPacket)>();
-            _alreadyRecordedTime = 0;
-            _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _recordedTime = 0;
             Status = RecordingStatus.Recording;
+            _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _receiver.StartReceive();
+            OnStartRecording?.Invoke();
         }
 
         public void StopRecording()
@@ -58,10 +62,11 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.None;
-            _alreadyRecordedTime = time;
+            _recordedTime = time;
 
             _receiver.StopReceive();
             StoreDmxPacket();
+            OnStopRecording?.Invoke();
         }
 
         public void PauseRecording()
@@ -74,8 +79,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.Paused;
-            _alreadyRecordedTime = time;
+            _recordedTime = time;
             _recordStartTime = 0;
+            OnPauseRecording?.Invoke();
         }
 
         public void ResumeRecording()
@@ -88,17 +94,18 @@ namespace ArtNet.Editor.DmxRecorder
 
             _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             Status = RecordingStatus.Recording;
+            OnResumeRecording?.Invoke();
         }
 
         public int GetRecordingTime()
         {
             if (Status != RecordingStatus.Recording)
             {
-                return _alreadyRecordedTime;
+                return _recordedTime;
             }
 
             var currentRecordTime = (int) (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _recordStartTime);
-            return currentRecordTime + _alreadyRecordedTime;
+            return currentRecordTime + _recordedTime;
         }
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)

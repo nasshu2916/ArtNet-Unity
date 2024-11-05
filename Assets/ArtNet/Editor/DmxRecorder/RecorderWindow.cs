@@ -20,12 +20,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         private class RecorderList : ElementItemList<RecorderItem> { }
 
-        private enum State
-        {
-            Idle,
-            Recording,
-        }
-
         [SerializeField] private VisualTreeAsset _visualTree;
         [SerializeField] private StyleSheet _styleSheet;
 
@@ -34,11 +28,14 @@ namespace ArtNet.Editor.DmxRecorder
         private RecorderList _recorderList;
         private RecorderItem _selectedRecorderItem;
 
+        private RecordController _controller;
         private RecordControllerSettings _controllerSettings;
 
-        private State _state;
+        private Label _timeCode;
+        private Button _playButton, _stopButton;
 
-        private bool IsRecording => _state == State.Recording;
+        private bool IsRecording => _controller?.Status == RecordingStatus.Recording;
+
 
         [MenuItem("ArtNet/DMX Recorder")]
         public static void ShowWindow()
@@ -109,6 +106,19 @@ namespace ArtNet.Editor.DmxRecorder
             root.Add(visualElement);
             root.styleSheets.Add(_styleSheet);
 
+            // TimeCode の作成
+            _timeCode = visualElement.Q<Label>("timeCode");
+            // TODO: TimeCode を更新する
+
+            _playButton = visualElement.Q<Button>("playButton");
+            _playButton.clicked += OnPlayButtonClicked;
+            _playButton.Add(new Image { image = IconHelper.PlayButton });
+
+            _stopButton = visualElement.Q<Button>("stopButton");
+            _stopButton.clicked += OnStopButtonClicked;
+            _stopButton.Add(new Image { image = IconHelper.PreMatQuad });
+            _stopButton.SetEnabled(false);
+
             // RecordersPanel の作成
             var recordersPanel = visualElement.Q<VisualElement>("recordersPanel");
 
@@ -140,8 +150,11 @@ namespace ArtNet.Editor.DmxRecorder
         private void SetRecordControllerSettings(RecordControllerSettings settings)
         {
             _controllerSettings = settings;
-
-            // TODO: RecorderController Class に settings を渡す
+            _controller = new RecordController(settings);
+            _controller.OnStartRecording += OnStartRecording;
+            _controller.OnPauseRecording += OnPauseRecording;
+            _controller.OnStopRecording += OnFinishRecording;
+            _controller.OnResumeRecording += OnStartRecording;
 
             ReloadRecorderSettings();
         }
@@ -294,14 +307,68 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var recorder = (RecorderSettings) CreateInstance(type);
             AddRecorder(recorder, ObjectNames.NicifyVariableName(recorder.DefaultName), true);
-
-            _state = State.Idle;
         }
 
         private string UniqueRecorderName(string recorderName)
         {
             var existingNames = _controllerSettings.RecorderSettings.Select(settings => settings.name).ToArray();
             return ObjectNames.GetUniqueName(existingNames, recorderName);
+        }
+
+        private void OnPlayButtonClicked()
+        {
+            if (_controller == null)
+                return;
+
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    _controller.PauseRecording();
+                    break;
+                case RecordingStatus.Paused:
+                    _controller.ResumeRecording();
+                    break;
+                case RecordingStatus.None:
+                    _controller.StartRecording();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void OnStopButtonClicked()
+        {
+            if (_controller == null)
+                return;
+
+            if (_controller.Status != RecordingStatus.None)
+                _controller.StopRecording();
+        }
+
+        private void OnStartRecording()
+        {
+            _timeCode.ClearClassList();
+            _timeCode.AddToClassList("recording");
+            _playButton.Clear();
+            _playButton.Add(new Image { image = IconHelper.PauseButton });
+            _stopButton.SetEnabled(true);
+        }
+
+        private void OnPauseRecording()
+        {
+            _timeCode.ClearClassList();
+            _timeCode.AddToClassList("paused");
+            _playButton.Clear();
+            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _stopButton.SetEnabled(true);
+        }
+
+        private void OnFinishRecording()
+        {
+            _timeCode.ClearClassList();
+            _playButton.Clear();
+            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _stopButton.SetEnabled(false);
         }
     }
 }
