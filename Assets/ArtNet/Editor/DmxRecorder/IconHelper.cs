@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -5,21 +6,29 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public static class IconHelper
     {
-        private static Texture _errorIcon, _warningIcon, _infoIcon;
-        private static Texture _playButton, _preMatQuad, _pauseButton;
+        private static readonly Dictionary<string, Texture> IconCache = new();
 
-        public static Texture ErrorIcon => Icon(_errorIcon, "console.erroricon");
-        public static Texture WarningIcon => Icon(_warningIcon, "console.warnicon");
-        public static Texture InfoIcon => Icon(_infoIcon, "console.infoicon");
-        public static Texture PlayButton => Icon(_playButton, "PlayButton");
-        public static Texture PreMatQuad => Icon(_preMatQuad, "PreMatQuad");
-        public static Texture PauseButton => Icon(_pauseButton, "PauseButton");
+        public static Texture ErrorIcon => Icon("console.erroricon");
+        public static Texture WarningIcon => Icon("console.warnicon");
+        public static Texture InfoIcon => Icon("console.infoicon");
+        public static Texture PlayButton => Icon("PlayButton", true);
+        public static Texture PreMatQuad => Icon("PreMatQuad", true);
+        public static Texture PauseButton => Icon("PauseButton", true);
 
-        private static Texture Icon(Texture icon, string iconPath)
+        internal static Texture Icon(string iconPath, bool provideDarkModel = false)
         {
-            if (icon != null) return icon;
+            if (provideDarkModel && EditorGUIUtility.isProSkin)
+            {
+                iconPath = "d_" + iconPath;
+            }
+
+            if (IconCache.TryGetValue(iconPath, out var icon))
+            {
+                return icon;
+            }
 
             icon = EditorGUIUtility.IconContent(iconPath).image;
+            IconCache[iconPath] = icon;
             return icon;
         }
     }

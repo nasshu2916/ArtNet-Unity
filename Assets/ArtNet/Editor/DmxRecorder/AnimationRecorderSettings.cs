@@ -7,8 +7,6 @@ namespace ArtNet.Editor.DmxRecorder
     {
         protected internal override string Extension => "anim";
         internal override string DefaultName => "Animation";
-        protected internal override Texture2D Icon => _icon ??= (Texture2D) EditorGUIUtility.Load("Animation Icon");
-
-        private static Texture2D _icon;
+        protected internal override Texture Icon => IconHelper.Icon("Animation Icon", true);
     }
 }

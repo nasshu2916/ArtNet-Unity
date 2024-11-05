@@ -11,7 +11,7 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private bool _enabled = true;
 
         protected internal abstract string Extension { get; }
-        protected internal abstract Texture2D Icon { get; }
+        protected internal abstract Texture Icon { get; }
 
         internal abstract string DefaultName { get; }
 
