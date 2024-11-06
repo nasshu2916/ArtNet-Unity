@@ -6,25 +6,33 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public partial class DmxRecordWindow : EditorWindow
     {
-        private const string EditorSettingPrefix = "ArtNet.DmxRecorder.";
-
-        [SerializeField] private VisualTreeAsset visualTree, recorderVisualTree, senderVisualTree;
+        [SerializeField] private VisualTreeAsset senderVisualTree;
         [SerializeField] private StyleSheet styleSheet;
 
         private Texture _playButtonTexture, _preMatQuadTexture;
 
         private void Update()
         {
-            UpdateRecorder();
             UpdateSender();
         }
 
-        public void CreateGUI()
+        [MenuItem("ArtNet/DmxRecorder")]
+        public static void ShowDmxRecorder()
+        {
+            GetWindow(typeof(DmxRecordWindow), false, "DmxRecorder");
+        }
+
+        private void OnEnable()
+        {
+            CreateView();
+        }
+
+        private void CreateView()
         {
             minSize = new Vector2(375, 400);
             var root = rootVisualElement;
 
-            VisualElement visualElement = visualTree.Instantiate();
+            VisualElement visualElement = senderVisualTree.Instantiate();
             visualElement.AddToClassList("root");
             root.Add(visualElement);
             root.styleSheets.Add(styleSheet);
@@ -35,66 +43,9 @@ namespace ArtNet.Editor.DmxRecorder
             Initialize(visualElement);
         }
 
-        private void OnDestroy()
-        {
-            SaveConfig();
-        }
-
-        [MenuItem("ArtNet/DmxRecorder")]
-        public static void ShowDmxRecorder()
-        {
-            var window = GetWindow<DmxRecordWindow>();
-            window.titleContent = new GUIContent("DmxRecorder");
-        }
-
         private void Initialize(VisualElement root)
         {
-            _recorder.RecorderSettings = RecorderSettings.GetOrNewGlobalSettings();
-
-            var tabContent = new VisualElement { name = "tabContent" };
-            root.Add(tabContent);
-
-            VisualElement recorderVisualElement = recorderVisualTree.CloneTree();
-            recorderVisualElement.name = "recorderPanel";
-            tabContent.Add(recorderVisualElement);
-            VisualElement senderVisualElement = senderVisualTree.Instantiate();
-            senderVisualElement.name = "senderPanel";
-            tabContent.Add(senderVisualElement);
-
-            InitializeHeaderTab(root);
-            InitializeRecorder(recorderVisualElement);
-            InitializeSender(senderVisualElement);
-
-            _footerStatusLabel = root.Q<Label>("footerStatusLabel");
-        }
-
-        private void InitializeHeaderTab(VisualElement root)
-        {
-            var headerRecorderLabel = root.Q<Label>("headerRecorderLabel");
-            var headerSenderLabel = root.Q<Label>("headerSenderLabel");
-
-            var recorderPanel = root.Q<VisualElement>("recorderPanel");
-            var senderPanel = root.Q<VisualElement>("senderPanel");
-
-            headerRecorderLabel.AddToClassList("selected");
-            senderPanel.style.display = DisplayStyle.None;
-            recorderPanel.style.display = DisplayStyle.Flex;
-
-            headerRecorderLabel.RegisterCallback<MouseUpEvent>(_ =>
-            {
-                headerRecorderLabel.AddToClassList("selected");
-                headerSenderLabel.RemoveFromClassList("selected");
-                recorderPanel.style.display = DisplayStyle.Flex;
-                senderPanel.style.display = DisplayStyle.None;
-            });
-
-            headerSenderLabel.RegisterCallback<MouseUpEvent>(_ =>
-            {
-                headerSenderLabel.AddToClassList("selected");
-                headerRecorderLabel.RemoveFromClassList("selected");
-                senderPanel.style.display = DisplayStyle.Flex;
-                recorderPanel.style.display = DisplayStyle.None;
-            });
+            InitializeSender(root);
         }
     }
 }

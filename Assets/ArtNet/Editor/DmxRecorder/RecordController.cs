@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -15,21 +16,25 @@ namespace ArtNet.Editor.DmxRecorder
         Paused,
     }
 
-    public class Recorder
+    public class RecordController
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private int _alreadyRecordedTime;
+        private int _recordedTime;
 
         private List<(int, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
 
-        public Recorder()
+        public RecordControllerSettings Settings { get; }
+        public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
+
+        public RecordController(RecordControllerSettings settings)
         {
+            Settings = settings;
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
+
         public RecordingStatus Status { get; private set; } = RecordingStatus.None;
-        public RecorderSettings RecorderSettings { get; set; }
 
         public int GetRecordedCount() => _recordedDmx.Count;
 
@@ -41,11 +46,12 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            _receiver.StartReceive();
             _recordedDmx = new List<(int, DmxPacket)>();
-            _alreadyRecordedTime = 0;
-            _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _recordedTime = 0;
             Status = RecordingStatus.Recording;
+            _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _receiver.StartReceive();
+            OnStartRecording?.Invoke();
         }
 
         public void StopRecording()
@@ -58,10 +64,11 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.None;
-            _alreadyRecordedTime = time;
+            _recordedTime = time;
 
             _receiver.StopReceive();
             StoreDmxPacket();
+            OnStopRecording?.Invoke();
         }
 
         public void PauseRecording()
@@ -74,8 +81,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.Paused;
-            _alreadyRecordedTime = time;
+            _recordedTime = time;
             _recordStartTime = 0;
+            OnPauseRecording?.Invoke();
         }
 
         public void ResumeRecording()
@@ -88,17 +96,18 @@ namespace ArtNet.Editor.DmxRecorder
 
             _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             Status = RecordingStatus.Recording;
+            OnResumeRecording?.Invoke();
         }
 
         public int GetRecordingTime()
         {
             if (Status != RecordingStatus.Recording)
             {
-                return _alreadyRecordedTime;
+                return _recordedTime;
             }
 
             var currentRecordTime = (int) (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _recordStartTime);
-            return currentRecordTime + _alreadyRecordedTime;
+            return currentRecordTime + _recordedTime;
         }
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
@@ -124,42 +133,55 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            switch (RecorderSettings.RecordFormat)
+            var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
+            foreach (var setting in recorderSettings)
             {
-                case RecodeFormat.Binary:
-                    StoreBinary();
-                    break;
-                case RecodeFormat.AnimationClip:
-                    StoreAnimationClip();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (setting)
+                {
+                    case BinaryRecorderSettings binarySettings:
+                        StoreBinary(binarySettings);
+                        break;
+                    case AnimationRecorderSettings animationSettings:
+                        Store(animationSettings);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
-        private void StoreBinary()
+        private void StoreBinary(BinaryRecorderSettings settings)
         {
-            var binaryConfig = RecorderSettings.BinarySetting;
+            var directory = settings.OutputPath;
 
-            if (!Directory.Exists(binaryConfig.Directory))
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(binaryConfig.Directory);
+                Directory.CreateDirectory(directory);
             }
 
             var binary = RecordData.Serialize(_recordedDmx);
-
-            var path = binaryConfig.OutputPath;
+            var path = Path.Combine(directory, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.bytes");
             var exists = File.Exists(path);
             File.WriteAllBytes(path, binary);
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
         }
 
-        private void StoreAnimationClip()
+        private void Store(AnimationRecorderSettings settings)
         {
-            var animationClipConfig = RecorderSettings.AnimationClipSetting;
+            var directory = settings.OutputPath;
+            if (!directory.StartsWith("Assets"))
+            {
+                Debug.LogError("Output directory must be in the Assets folder");
+                return;
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             var timelineConverter = new TimelineConverter(_recordedDmx);
-            timelineConverter.SaveDmxTimelineClips(animationClipConfig.OutputAnimationClipAssetPath);
+            timelineConverter.SaveDmxTimelineClips(directory);
         }
     }
 }

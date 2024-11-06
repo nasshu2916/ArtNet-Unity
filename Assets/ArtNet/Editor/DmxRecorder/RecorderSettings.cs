@@ -1,136 +1,63 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public enum RecodeFormat
+    public abstract class RecorderSettings : ScriptableObject, ISerializationCallbackReceiver
     {
-        Binary = 0,
-        AnimationClip = 1,
-    }
+        private const int MaxPathLength = 259;
 
-    public class RecorderSettings : ScriptableObject
-    {
-        [SerializeField] private RecodeFormat _recordFormat;
+        [SerializeField] private string _outputPath;
+        [SerializeField] private bool _enabled = true;
 
-        private string _savePath;
+        protected internal abstract string Extension { get; }
+        protected internal abstract Texture Icon { get; }
 
-        public RecodeFormat RecordFormat => _recordFormat;
+        internal abstract string DefaultName { get; }
+        public string OutputPath => _outputPath;
 
-        public BinaryRecordSetting BinarySetting { get; } = new();
-        public AnimationClipRecordSetting AnimationClipSetting { get; } = new();
-
-        public static RecorderSettings GetOrNewGlobalSettings()
+        public bool Enabled
         {
-            var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", "DmxRecorderSettings.asset");
-            return Load(globalPath);
+            get => _enabled;
+            set => _enabled = value;
         }
 
-        private static RecorderSettings Load(string path)
+        protected internal virtual void GetErrors(List<string> errors)
         {
-            RecorderSettings settings;
-            try
+            if (string.IsNullOrEmpty(_outputPath))
             {
-                var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
-                settings = objs.FirstOrDefault(o => o is RecorderSettings) as RecorderSettings;
+                errors.Add("Save path is empty");
             }
-            catch (Exception e)
+            else if (_outputPath.Length > MaxPathLength)
             {
-                Debug.LogError($"Failed to load RecorderSettings: {e.Message}");
-                settings = null;
-            }
-
-            if (settings == null)
-            {
-                settings = CreateInstance<RecorderSettings>();
-                // Settings.hideFlags = HideFlags.HideAndDontSave;
-                settings.name = "DmxRecorderSettings";
-            }
-
-            settings._savePath = path;
-            return settings;
-        }
-
-        public void Save()
-        {
-            if (string.IsNullOrEmpty(_savePath)) return;
-
-            try
-            {
-                var directory = Path.GetDirectoryName(_savePath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
-
-                var objs = new Object[] { this };
-                InternalEditorUtility.SaveToSerializedFileAndForget(objs, _savePath, true);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to save RecorderSettings: {e.Message}");
+                errors.Add($"Save path is too long. Max length is {MaxPathLength}");
             }
         }
 
-        public void ChangeRecordFormat(RecodeFormat format)
+        protected internal virtual void GetWarnings(List<string> warnings)
         {
-            EditorUtility.SetDirty(this);
-            Undo.RecordObject(this, "Change Record Format");
-            if (_recordFormat == format) return;
-
-            _recordFormat = format;
-            Save();
         }
 
-        private IRecordSetting Setting => RecordFormat switch
-        {
-            RecodeFormat.Binary => BinarySetting,
-            RecodeFormat.AnimationClip => AnimationClipSetting,
-            _ => throw new System.NotImplementedException()
-        };
-
-        public bool Validate() => ValidateErrors().Count == 0;
-        public List<string> ValidateErrors() => Setting.ValidateErrors();
-    }
-
-    public class BinaryRecordSetting : IRecordSetting
-    {
-        private const string Extension = ".dmx";
-
-        public string Directory { get; set; }
-        public string FileName { get; set; }
-
-        public string OutputPath => $"{Directory}/{FileName}{Extension}";
-
-        public List<string> ValidateErrors()
+        protected internal virtual bool HasErrors()
         {
             var errors = new List<string>();
-            if (!ValidateDirectory()) errors.Add("Directory is not set");
-            if (!ValidateFileName()) errors.Add("FileName is not set");
-
-            return errors;
+            GetErrors(errors);
+            return errors.Count > 0;
         }
 
-        private bool ValidateDirectory() => !string.IsNullOrEmpty(Directory);
-        private bool ValidateFileName() => !string.IsNullOrEmpty(FileName);
-    }
-
-    public class AnimationClipRecordSetting : IRecordSetting
-    {
-        public string OutputAnimationClipAssetPath { get; set; } = "Assets/Recording";
-
-        public List<string> ValidateErrors()
+        protected internal virtual bool HasWarnings()
         {
-            return new List<string>();
+            var warnings = new List<string>();
+            GetWarnings(warnings);
+            return warnings.Count > 0;
         }
-    }
 
-    public interface IRecordSetting
-    {
-        public List<string> ValidateErrors();
+        internal virtual void OnValidate() { }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize() { OnBeforeSerialize(); }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() { OnAfterDeserialize(); }
+
+        protected virtual void OnBeforeSerialize() { }
+        protected virtual void OnAfterDeserialize() { }
     }
 }
