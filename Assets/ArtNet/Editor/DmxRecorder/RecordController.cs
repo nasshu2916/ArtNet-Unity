@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -131,7 +133,55 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            // TODO: Implement storing recorded data
+            var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
+            foreach (var setting in recorderSettings)
+            {
+                switch (setting)
+                {
+                    case BinaryRecorderSettings binarySettings:
+                        StoreBinary(binarySettings);
+                        break;
+                    case AnimationRecorderSettings animationSettings:
+                        Store(animationSettings);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        private void StoreBinary(BinaryRecorderSettings settings)
+        {
+            var directory = settings.OutputPath;
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var binary = RecordData.Serialize(_recordedDmx);
+            var path = Path.Combine(directory, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.bytes");
+            var exists = File.Exists(path);
+            File.WriteAllBytes(path, binary);
+            var message = exists ? "Data updated" : "Data stored";
+            Debug.Log($"ArtNet Recorder: {message} at {path}");
+        }
+
+        private void Store(AnimationRecorderSettings settings)
+        {
+            var directory = settings.OutputPath;
+            if (!directory.StartsWith("Assets"))
+            {
+                Debug.LogError("Output directory must be in the Assets folder");
+                return;
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            var timelineConverter = new TimelineConverter(_recordedDmx);
+            timelineConverter.SaveDmxTimelineClips(directory);
         }
     }
 }
