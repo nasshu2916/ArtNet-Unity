@@ -35,15 +35,10 @@ Button > Image {
 }
 
 #controllerButton > Button {
-    background-color: var(--unity-colors-button-background);
     width: 54px;
     height: 54px;
     padding: 4px;
     margin: 6px;
-}
-
-#controllerButton > Button.selected {
-    background-color: var(--unity-colors-button-background-pressed);
 }
 
 /* recorders panel */
