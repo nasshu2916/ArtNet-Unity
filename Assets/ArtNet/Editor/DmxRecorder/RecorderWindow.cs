@@ -61,7 +61,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void Update()
         {
-            if (IsRecording) _timeCode.text = _controller.TimeCode();
+            if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
         }
 
         private void RegisterCallbacks()
@@ -388,7 +388,22 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Clear();
             _playButton.Add(new Image { image = IconHelper.PlayButton });
             _stopButton.SetEnabled(false);
-            _timeCode.text = _controller.TimeCode();
+            _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+        }
+
+        private static string TimeCodeText(int time)
+        {
+            var hours = time / 3600000;
+            var minutes = time / 60000;
+            var seconds = time / 1000 % 60;
+            var milliseconds = time % 1000;
+            return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
+        }
+
+        private static string MspaceText(int value, int padding = 2, int mspace = 24)
+        {
+            var text = value.ToString().PadLeft(padding, '0');
+            return $"<mspace={mspace}em>{text}</mspace>";
         }
     }
 }

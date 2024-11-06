@@ -108,22 +108,6 @@ namespace ArtNet.Editor.DmxRecorder
             return currentRecordTime + _recordedTime;
         }
 
-        public string TimeCode()
-        {
-            var time = GetRecordingTime();
-            var hours = time / 3600000;
-            var minutes = time / 60000;
-            var seconds = time / 1000 % 60;
-            var milliseconds = time % 1000;
-            return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
-        }
-
-        private static string MspaceText(int value, int padding = 2)
-        {
-            var text = value.ToString().PadLeft(padding, '0');
-            return $"<mspace=24em>{text}</mspace>";
-        }
-
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
             if (Status != RecordingStatus.Recording) return;
