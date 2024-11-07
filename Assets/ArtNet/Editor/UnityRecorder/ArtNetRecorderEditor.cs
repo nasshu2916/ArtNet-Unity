@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEditor.Recorder;
 
 namespace ArtNet.UnityRecorder
@@ -6,5 +6,9 @@ namespace ArtNet.UnityRecorder
     [CustomEditor(typeof(ArtNetRecorderSettings))]
     public class ArtNetRecorderEditor : RecorderEditor
     {
+        protected override void FileTypeAndFormatGUI()
+        {
+            EditorGUILayout.LabelField("Format", "ArtNet Binary");
+        }
     }
 }

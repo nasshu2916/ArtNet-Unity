@@ -1,4 +1,4 @@
-﻿using UnityEditor.Recorder;
+using UnityEditor.Recorder;
 
 namespace ArtNet.UnityRecorder
 {
@@ -10,7 +10,7 @@ namespace ArtNet.UnityRecorder
 
         protected override void EndRecording(RecordingSession session)
         {
-            var settings = (ArtNetRecorderSettings)session.settings;
+            var settings = (ArtNetRecorderSettings) session.settings;
 
 
             base.EndRecording(session);

@@ -2,7 +2,8 @@
     "name": "ArtNet.UnityEditor",
     "rootNamespace": "",
     "references": [
-        "Unity.Recorder.Editor"
+        "Unity.Recorder.Editor",
+        "ArtNet"
     ],
     "includePlatforms": [
         "Editor"
