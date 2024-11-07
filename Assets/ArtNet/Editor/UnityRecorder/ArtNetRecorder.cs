@@ -1,4 +1,6 @@
-﻿namespace UnityEditor.Recorder
+﻿using UnityEditor.Recorder;
+
+namespace ArtNet.UnityRecorder
 {
     public class ArtNetRecorder : GenericRecorder<ArtNetRecorderSettings>
     {

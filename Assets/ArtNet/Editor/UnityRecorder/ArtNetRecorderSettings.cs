@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using UnityEditor.Recorder;
 using UnityEditor.Recorder.Input;
 using UnityEngine;
 
-namespace UnityEditor.Recorder
+namespace ArtNet.UnityRecorder
 {
     [RecorderSettings(typeof(ArtNetRecorder), "Art-Net")]
     public class ArtNetRecorderSettings : RecorderSettings
