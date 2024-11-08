@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEditor.Recorder;
 
-namespace ArtNet.UnityRecorder
+namespace ArtNet.Editor.UnityRecorder
 {
     [CustomEditor(typeof(ArtNetRecorderSettings))]
     public class ArtNetRecorderEditor : RecorderEditor

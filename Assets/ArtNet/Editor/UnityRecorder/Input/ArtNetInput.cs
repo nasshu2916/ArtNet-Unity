@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor.Recorder;
 using UnityEngine;
 
-namespace ArtNet.UnityRecorder.Input
+namespace ArtNet.Editor.UnityRecorder.Input
 {
     public class ArtNetInput : RecorderInput
     {

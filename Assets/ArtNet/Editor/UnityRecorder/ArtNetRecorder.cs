@@ -1,9 +1,9 @@
 using System.Linq;
-using ArtNet.UnityRecorder.Input;
+using ArtNet.Editor.UnityRecorder.Input;
 using UnityEditor.Recorder;
 using UnityEngine;
 
-namespace ArtNet.UnityRecorder
+namespace ArtNet.Editor.UnityRecorder
 {
     public class ArtNetRecorder : GenericRecorder<ArtNetRecorderSettings>
     {

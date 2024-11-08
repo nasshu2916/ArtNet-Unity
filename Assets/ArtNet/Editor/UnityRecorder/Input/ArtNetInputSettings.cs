@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Recorder;
 using UnityEngine;
 
-namespace ArtNet.UnityRecorder.Input
+namespace ArtNet.Editor.UnityRecorder.Input
 {
     [DisplayName("ArtNet")]
     [Serializable]

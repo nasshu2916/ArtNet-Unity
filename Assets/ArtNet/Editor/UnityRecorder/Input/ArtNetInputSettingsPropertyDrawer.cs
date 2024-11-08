@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ArtNet.UnityRecorder.Input
+namespace ArtNet.Editor.UnityRecorder.Input
 {
     [CustomPropertyDrawer(typeof(ArtNetInputSettings))]
     public class ArtNetInputSettingsPropertyDrawer : TargetedPropertyDrawer<ArtNetInputSettings>
