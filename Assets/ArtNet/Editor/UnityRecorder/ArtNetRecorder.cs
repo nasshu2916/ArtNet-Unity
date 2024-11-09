@@ -1,4 +1,5 @@
 using System.Linq;
+using ArtNet.Editor.DmxRecorder;
 using ArtNet.Editor.UnityRecorder.Input;
 using UnityEditor.Recorder;
 using UnityEngine;
@@ -27,6 +28,12 @@ namespace ArtNet.Editor.UnityRecorder
                 {
                     Debug.Log($"Universe {group.Key}, Frames: {group.Count()}");
                 }
+
+                settings.FileNameGenerator.CreateDirectory(session);
+                var absolutePath = settings.FileNameGenerator.BuildAbsolutePath(session);
+
+                var binary = RecordData.SerializeUniverseData(frames);
+                System.IO.File.WriteAllBytes(absolutePath, binary);
             }
 
             base.EndRecording(session);

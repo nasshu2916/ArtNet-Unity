@@ -10,10 +10,16 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public static class RecordData
     {
+        private enum DataType
+        {
+            ArtNet = 0,
+            Dmx = 1
+        }
+
         private const byte IdentifierLength = 4;
         private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
-        private static readonly byte[] ReservedBuffer = new byte[11];
-        private static byte Version = 0x01;
+        private static readonly byte[] ReservedBuffer = new byte[10];
+        private const byte Version = 0x01;
 
         public static byte[] Serialize(IReadOnlyList<(int time, DmxPacket packet)> dmxPackets)
         {
@@ -21,6 +27,7 @@ namespace ArtNet.Editor.DmxRecorder
             using var memoryStream = new MemoryStream();
             memoryStream.Write(Identifiers);
             memoryStream.WriteByte(Version);
+            memoryStream.WriteByte((byte) DataType.ArtNet);
             memoryStream.Write(ReservedBuffer);
 
             foreach (var (time, dmxPacket) in dmxPackets)
@@ -32,6 +39,27 @@ namespace ArtNet.Editor.DmxRecorder
                 memoryStream.Write(BitConverter.GetBytes(dmxPacket.Universe));
                 memoryStream.Write(BitConverter.GetBytes(dmxPacket.Length));
                 memoryStream.Write(dmxPacket.Dmx);
+            }
+
+            return memoryStream.ToArray();
+        }
+
+        public static byte[] SerializeUniverseData(List<UniverseData> universeData)
+        {
+            var sortedData = universeData.OrderBy(x => x.Time).ToList();
+            var startTime = sortedData.First().Time;
+            using var memoryStream = new MemoryStream();
+            memoryStream.Write(Identifiers);
+            memoryStream.WriteByte(Version);
+            memoryStream.WriteByte((byte) DataType.Dmx);
+            memoryStream.Write(ReservedBuffer);
+
+            foreach (var data in sortedData)
+            {
+                memoryStream.Write(BitConverter.GetBytes((float) data.Time - startTime));
+                memoryStream.Write(BitConverter.GetBytes(data.Universe));
+                memoryStream.Write(BitConverter.GetBytes(data.Values.Length));
+                memoryStream.Write(data.Values);
             }
 
             return memoryStream.ToArray();
@@ -49,7 +77,9 @@ namespace ArtNet.Editor.DmxRecorder
                 return null;
             }
 
-            var position = IdentifierLength + 1 + ReservedBuffer.Length;
+            var dataType = (DataType) data[IdentifierLength + 1];
+
+            var position = IdentifierLength + 2 + ReservedBuffer.Length;
             var result = new List<(int time, DmxPacket packet)>();
             while (position < dataLength - 10)
             {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ArtNet.Editor.DmxRecorder;
 using UnityEditor.Recorder;
 using UnityEngine;
 
@@ -8,22 +9,8 @@ namespace ArtNet.Editor.UnityRecorder.Input
     {
         internal class DmxRecorder
         {
-            internal class FrameData
-            {
-                internal double Time { get; }
-                internal uint Universe { get; }
-                internal byte[] Values { get; }
-
-                internal FrameData(double time, uint universe, byte[] values)
-                {
-                    Time = time;
-                    Universe = universe;
-                    Values = values;
-                }
-            }
-
             private readonly DmxManager _dmxManager;
-            internal List<FrameData> Frames { get; } = new();
+            internal List<UniverseData> Frames { get; } = new();
 
             public DmxRecorder(DmxManager dmxManager)
             {
@@ -36,7 +23,7 @@ namespace ArtNet.Editor.UnityRecorder.Input
                 foreach (var universe in universes)
                 {
                     var values = _dmxManager.DmxValues(universe);
-                    Frames.Add(new FrameData(time, universe, values));
+                    Frames.Add(new UniverseData(time, universe, values));
                 }
             }
         }
