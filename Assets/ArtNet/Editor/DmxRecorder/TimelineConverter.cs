@@ -61,7 +61,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         public List<(int time, DmxPacket packet)> ToDmxPackets()
         {
-            return Timelines.SelectMany(x => x.ToDmxPackets()).OrderBy(x => x.time).ToList();
+            return Timelines.SelectMany(x => x.ToDmxPackets()).OrderBy(x => x.time).Select(x => ((int) (x.time * 1000f), x
+                .packet)).ToList();
         }
 
         private static void SaveAsset<T>(T asset, string directory, string fileName) where T : UnityEngine.Object
@@ -85,8 +86,8 @@ namespace ArtNet.Editor.DmxRecorder
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 ChannelDmxFrameData[i] = packets.Where(x => x.packet.Dmx.Length > i)
-                    .Select(x => new DmxFrameData(x.time, x.packet.Dmx[i]))
-                    .OrderBy(x => x.Millisecond).ToList();
+                    .Select(x => new DmxFrameData(x.time / 1000f, x.packet.Dmx[i]))
+                    .OrderBy(x => x.Time).ToList();
             }
         }
 
@@ -110,17 +111,17 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public IEnumerable<int> AllFrameTimes()
+        public IEnumerable<float> AllFrameTimes()
         {
-            return ChannelDmxFrameData.SelectMany(x => x.Select(frameData => frameData.Millisecond)).Distinct();
+            return ChannelDmxFrameData.SelectMany(x => x.Select(frameData => frameData.Time)).Distinct();
         }
 
-        public byte FrameValue(int channel, int time)
+        public byte FrameValue(int channel, float time)
         {
             var dmxFrameData = ChannelDmxFrameData[channel];
 
             // If there is a frame data at the exact time, return it
-            foreach (var frameData in dmxFrameData.Where(frameData => frameData.Millisecond == time))
+            foreach (var frameData in dmxFrameData.Where(frameData => Mathf.Approximately(frameData.Time, time)))
             {
                 return frameData.Value;
             }
@@ -129,8 +130,8 @@ namespace ArtNet.Editor.DmxRecorder
             if (dmxFrameData.Count == 0) return 0;
 
             // if time is out of range, return the first or last value
-            if (time < dmxFrameData[0].Millisecond) return dmxFrameData[0].Value;
-            if (time > dmxFrameData[^1].Millisecond) return dmxFrameData[^1].Value;
+            if (time < dmxFrameData[0].Time) return dmxFrameData[0].Value;
+            if (time > dmxFrameData[^1].Time) return dmxFrameData[^1].Value;
 
             // return the estimated value from frames around the specified time.
 
@@ -139,7 +140,7 @@ namespace ArtNet.Editor.DmxRecorder
             var next = dmxFrameData[0];
             foreach (var frameData in dmxFrameData)
             {
-                if (frameData.Millisecond > time)
+                if (frameData.Time > time)
                 {
                     next = frameData;
                     break;
@@ -150,8 +151,8 @@ namespace ArtNet.Editor.DmxRecorder
 
             // Calculate the estimated value
             var prevDiff = next.Value - prev.Value;
-            var prevDiffTime = next.Millisecond - prev.Millisecond;
-            var timeDiff = time - prev.Millisecond;
+            var prevDiffTime = next.Time - prev.Time;
+            var timeDiff = time - prev.Time;
             return (byte) (prev.Value + (prevDiff * timeDiff / prevDiffTime));
         }
 
@@ -177,7 +178,7 @@ namespace ArtNet.Editor.DmxRecorder
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 var keyframes = ChannelDmxFrameData[i]
-                    .Select(data => new Keyframe(data.Millisecond / 1000f, data.Value)).ToArray();
+                    .Select(data => new Keyframe(data.Time, data.Value)).ToArray();
                 curves[i] = new AnimationCurve(keyframes);
             }
 
@@ -217,16 +218,16 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var prevDiff = current.Value - prev.Value;
             var nextDiff = next.Value - current.Value;
-            var prevDiffTime = current.Millisecond - prev.Millisecond;
-            var nextDiffTime = next.Millisecond - current.Millisecond;
+            var prevDiffTime = current.Time - prev.Time;
+            var nextDiffTime = next.Time - current.Time;
 
-            return Math.Abs((float) prevDiff / prevDiffTime - (float) nextDiff / nextDiffTime) <= tolerance;
+            return Math.Abs(prevDiff / prevDiffTime - nextDiff / nextDiffTime) <= tolerance;
         }
 
-        public IEnumerable<(int time, DmxPacket packet)> ToDmxPackets()
+        public IEnumerable<(float time, DmxPacket packet)> ToDmxPackets()
         {
             byte sequence = 0;
-            var packets = new List<(int time, DmxPacket packet)>();
+            var packets = new List<(float time, DmxPacket packet)>();
             var allFrameTimes = AllFrameTimes().OrderBy(x => x).ToList();
 
             foreach (var time in allFrameTimes)
@@ -255,12 +256,12 @@ namespace ArtNet.Editor.DmxRecorder
 
     public struct DmxFrameData
     {
-        public int Millisecond { get; }
+        public float Time { get; }
         public byte Value { get; }
 
-        public DmxFrameData(int millisecond, byte value)
+        public DmxFrameData(float time, byte value)
         {
-            Millisecond = millisecond;
+            Time = time;
             Value = value;
         }
     }
