@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ArtNet.Packets;
 using UnityEditor;
 using UnityEngine;
 
@@ -60,10 +59,9 @@ namespace ArtNet.Editor.DmxRecorder
             AssetDatabase.Refresh();
         }
 
-        public List<(int time, DmxPacket packet)> ToDmxPackets()
+        public List<UniverseData> ToUniverseData()
         {
-            return Timelines.SelectMany(x => x.ToDmxPackets()).OrderBy(x => x.time).Select(x => ((int) (x.time * 1000f), x
-                .packet)).ToList();
+            return Timelines.SelectMany(x => x.ToUniverseData()).OrderBy(x => x.Time).ToList();
         }
 
         private static void SaveAsset<T>(T asset, string directory, string fileName) where T : UnityEngine.Object
@@ -209,10 +207,9 @@ namespace ArtNet.Editor.DmxRecorder
             return Math.Abs(prevDiff / prevDiffTime - nextDiff / nextDiffTime) <= tolerance;
         }
 
-        public IEnumerable<(float time, DmxPacket packet)> ToDmxPackets()
+        public IEnumerable<UniverseData> ToUniverseData()
         {
-            byte sequence = 0;
-            var packets = new List<(float time, DmxPacket packet)>();
+            var universeData = new List<UniverseData>();
             var allFrameTimes = AllFrameTimes().OrderBy(x => x).ToList();
 
             foreach (var time in allFrameTimes)
@@ -223,19 +220,10 @@ namespace ArtNet.Editor.DmxRecorder
                     dmx[i] = FrameValue(i, time);
                 }
 
-                var packet = new DmxPacket { Sequence = sequence, Universe = (ushort) Universe, Dmx = dmx };
-                packets.Add((time, packet));
-                if (sequence >= 255)
-                {
-                    sequence = 0;
-                }
-                else
-                {
-                    sequence++;
-                }
+                universeData.Add(new UniverseData(time, (uint) Universe, dmx));
             }
 
-            return packets;
+            return universeData;
         }
     }
 

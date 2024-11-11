@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ArtNet.Packets;
 using UnityEditor;
 using UnityEngine;
 
@@ -81,7 +83,29 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var timelineConverter = new TimelineConverter(artNetDmxClip);
-            var dmxPackets = timelineConverter.ToDmxPackets();
+            var universeDataList = timelineConverter.ToUniverseData();
+            var dmxPackets = new List<(int, DmxPacket)>();
+            byte sequence = 0;
+            foreach (var universeData in universeDataList)
+            {
+                var packet = new DmxPacket
+                {
+                    Sequence = sequence++,
+                    Universe = (ushort) universeData.Universe,
+                    Dmx = universeData.Values
+                };
+                dmxPackets.Add(((int) (universeData.Time * 1000f), packet)); ;
+
+                if (sequence >= 255)
+                {
+                    sequence = 0;
+                }
+                else
+                {
+                    sequence++;
+                }
+            }
+
             var storeData = RecordData.Serialize(dmxPackets);
 
 
