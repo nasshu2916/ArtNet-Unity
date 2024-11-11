@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ArtNet.Packets;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,21 +10,28 @@ namespace ArtNet.Editor.DmxRecorder
     {
         public List<TimelineUniverse> Timelines { get; } = new();
 
-        public TimelineConverter(IReadOnlyCollection<(int time, DmxPacket packet)> packets)
+        public TimelineConverter(IEnumerable<UniverseData> universeData)
         {
-            var groupedUniversePackets = packets.GroupBy(x => x.packet.Universe);
+            var groupedUniverseData = universeData.GroupBy(x => x.Universe);
 
-            foreach (var group in groupedUniversePackets)
+            foreach (var group in groupedUniverseData)
             {
-                Timelines.Add(new TimelineUniverse(group.Key, group.ToList()));
+                Timelines.Add(new TimelineUniverse((int) group.Key, group.ToList()));
             }
         }
 
-        public TimelineConverter(DmxTimelineSetting dmxTimelineSetting)
+        public TimelineConverter(AnimationClip clip)
         {
-            foreach (var timelineElement in dmxTimelineSetting.DmxTimelines)
+            var curveBindings = AnimationUtility.GetCurveBindings(clip);
+            var universePaths = curveBindings.Select(x => x.path).Distinct();
+            var universeRegex = new System.Text.RegularExpressions.Regex(@"Universe(\d+)");
+            foreach (var universePath in universePaths)
             {
-                Timelines.Add(new TimelineUniverse(timelineElement.Universe, timelineElement.DmxTimelineClip));
+                var match = universeRegex.Match(universePath);
+                if (match.Success == false) continue;
+
+                var universe = int.Parse(match.Groups[1].Value);
+                Timelines.Add(new TimelineUniverse(universe, clip));
             }
         }
 
@@ -36,32 +42,26 @@ namespace ArtNet.Editor.DmxRecorder
                 System.IO.Directory.CreateDirectory(directory);
             }
 
-            var dmxTimelines = new List<DmxTimeline>(Timelines.Count);
+            var clip = new AnimationClip { name = "ArtNetDmx" };
             foreach (var timelineUniverse in Timelines)
             {
                 var universe = timelineUniverse.Universe;
                 timelineUniverse.ThinOutUnchangedFrames();
-                var clip = timelineUniverse.ToAnimationClip();
-                SaveAsset(clip, directory, $"Universe{universe}.anim");
-
-                var timelineElement = new DmxTimeline
+                var curves = timelineUniverse.AnimationCurves();
+                for (var i = 0; i < curves.Length; i++)
                 {
-                    DmxTimelineClip = clip,
-                    Universe = universe
-                };
-                dmxTimelines.Add(timelineElement);
+                    if (curves[i].keys.Length == 0) continue;
+                    clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curves[i]);
+                }
             }
-
-            var dmxTimelineAsset = ScriptableObject.CreateInstance<DmxTimelineSetting>();
-            dmxTimelineAsset.DmxTimelines = dmxTimelines;
-            SaveAsset(dmxTimelineAsset, directory, "DmxTimeline.asset");
+            SaveAsset(clip, directory, "ArtNetDmx.anim");
 
             AssetDatabase.Refresh();
         }
 
-        public List<(int time, DmxPacket packet)> ToDmxPackets()
+        public List<UniverseData> ToUniverseData()
         {
-            return Timelines.SelectMany(x => x.ToDmxPackets()).OrderBy(x => x.time).ToList();
+            return Timelines.SelectMany(x => x.ToUniverseData()).OrderBy(x => x.Time).ToList();
         }
 
         private static void SaveAsset<T>(T asset, string directory, string fileName) where T : UnityEngine.Object
@@ -77,16 +77,16 @@ namespace ArtNet.Editor.DmxRecorder
         public int Universe { get; }
         private List<DmxFrameData>[] ChannelDmxFrameData { get; }
 
-        public TimelineUniverse(int universe, IReadOnlyCollection<(int time, DmxPacket packet)> packets)
+        public TimelineUniverse(int groupKey, IReadOnlyCollection<UniverseData> universeData)
         {
-            Universe = universe;
+            Universe = groupKey;
             ChannelDmxFrameData = new List<DmxFrameData>[512];
 
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
-                ChannelDmxFrameData[i] = packets.Where(x => x.packet.Dmx.Length > i)
-                    .Select(x => new DmxFrameData(x.time, x.packet.Dmx[i]))
-                    .OrderBy(x => x.Millisecond).ToList();
+                ChannelDmxFrameData[i] = universeData.Where(x => x.Values.Length > i)
+                    .Select(x => new DmxFrameData((float) x.Time, x.Values[i]))
+                    .OrderBy(x => x.Time).ToList();
             }
         }
 
@@ -110,17 +110,17 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public IEnumerable<int> AllFrameTimes()
+        public IEnumerable<float> AllFrameTimes()
         {
-            return ChannelDmxFrameData.SelectMany(x => x.Select(frameData => frameData.Millisecond)).Distinct();
+            return ChannelDmxFrameData.SelectMany(x => x.Select(frameData => frameData.Time)).Distinct();
         }
 
-        public byte FrameValue(int channel, int time)
+        public byte FrameValue(int channel, float time)
         {
             var dmxFrameData = ChannelDmxFrameData[channel];
 
             // If there is a frame data at the exact time, return it
-            foreach (var frameData in dmxFrameData.Where(frameData => frameData.Millisecond == time))
+            foreach (var frameData in dmxFrameData.Where(frameData => Mathf.Approximately(frameData.Time, time)))
             {
                 return frameData.Value;
             }
@@ -129,8 +129,8 @@ namespace ArtNet.Editor.DmxRecorder
             if (dmxFrameData.Count == 0) return 0;
 
             // if time is out of range, return the first or last value
-            if (time < dmxFrameData[0].Millisecond) return dmxFrameData[0].Value;
-            if (time > dmxFrameData[^1].Millisecond) return dmxFrameData[^1].Value;
+            if (time < dmxFrameData[0].Time) return dmxFrameData[0].Value;
+            if (time > dmxFrameData[^1].Time) return dmxFrameData[^1].Value;
 
             // return the estimated value from frames around the specified time.
 
@@ -139,7 +139,7 @@ namespace ArtNet.Editor.DmxRecorder
             var next = dmxFrameData[0];
             foreach (var frameData in dmxFrameData)
             {
-                if (frameData.Millisecond > time)
+                if (frameData.Time > time)
                 {
                     next = frameData;
                     break;
@@ -150,34 +150,18 @@ namespace ArtNet.Editor.DmxRecorder
 
             // Calculate the estimated value
             var prevDiff = next.Value - prev.Value;
-            var prevDiffTime = next.Millisecond - prev.Millisecond;
-            var timeDiff = time - prev.Millisecond;
+            var prevDiffTime = next.Time - prev.Time;
+            var timeDiff = time - prev.Time;
             return (byte) (prev.Value + (prevDiff * timeDiff / prevDiffTime));
         }
 
-        public AnimationClip ToAnimationClip()
-        {
-            var curves = ConvertAnimationCurves();
-            var clip = new AnimationClip
-            {
-                name = $"Universe{Universe}"
-            };
-            for (var i = 0; i < curves.Length; i++)
-            {
-                if (curves[i].keys.Length == 0) continue;
-                clip.SetCurve("", typeof(DmxData), $"Ch{i + 1:D3}", curves[i]);
-            }
-
-            return clip;
-        }
-
-        private AnimationCurve[] ConvertAnimationCurves()
+        public AnimationCurve[] AnimationCurves()
         {
             var curves = new AnimationCurve[ChannelDmxFrameData.Length];
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 var keyframes = ChannelDmxFrameData[i]
-                    .Select(data => new Keyframe(data.Millisecond / 1000f, data.Value)).ToArray();
+                    .Select(data => new Keyframe(data.Time, data.Value)).ToArray();
                 curves[i] = new AnimationCurve(keyframes);
             }
 
@@ -217,16 +201,15 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var prevDiff = current.Value - prev.Value;
             var nextDiff = next.Value - current.Value;
-            var prevDiffTime = current.Millisecond - prev.Millisecond;
-            var nextDiffTime = next.Millisecond - current.Millisecond;
+            var prevDiffTime = current.Time - prev.Time;
+            var nextDiffTime = next.Time - current.Time;
 
-            return Math.Abs((float) prevDiff / prevDiffTime - (float) nextDiff / nextDiffTime) <= tolerance;
+            return Math.Abs(prevDiff / prevDiffTime - nextDiff / nextDiffTime) <= tolerance;
         }
 
-        public IEnumerable<(int time, DmxPacket packet)> ToDmxPackets()
+        public IEnumerable<UniverseData> ToUniverseData()
         {
-            byte sequence = 0;
-            var packets = new List<(int time, DmxPacket packet)>();
+            var universeData = new List<UniverseData>();
             var allFrameTimes = AllFrameTimes().OrderBy(x => x).ToList();
 
             foreach (var time in allFrameTimes)
@@ -237,30 +220,21 @@ namespace ArtNet.Editor.DmxRecorder
                     dmx[i] = FrameValue(i, time);
                 }
 
-                var packet = new DmxPacket { Sequence = sequence, Universe = (ushort) Universe, Dmx = dmx };
-                packets.Add((time, packet));
-                if (sequence >= 255)
-                {
-                    sequence = 0;
-                }
-                else
-                {
-                    sequence++;
-                }
+                universeData.Add(new UniverseData(time, (uint) Universe, dmx));
             }
 
-            return packets;
+            return universeData;
         }
     }
 
     public struct DmxFrameData
     {
-        public int Millisecond { get; }
+        public float Time { get; }
         public byte Value { get; }
 
-        public DmxFrameData(int millisecond, byte value)
+        public DmxFrameData(float time, byte value)
         {
-            Millisecond = millisecond;
+            Time = time;
             Value = value;
         }
     }

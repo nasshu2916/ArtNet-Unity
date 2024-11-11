@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using ArtNet.Packets;
 using UnityEditor;
 using UnityEngine;
 
@@ -47,7 +50,12 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var bytes = binary.bytes;
-            TimelineConverter timelineConverter = new(RecordData.Deserialize(bytes));
+            var packets = RecordData.Deserialize(bytes);
+            var universeData = packets.Select(packet => new UniverseData(packet.time / 1000f, packet.packet.Universe,
+                packet
+                .packet.Dmx));
+
+            TimelineConverter timelineConverter = new(universeData);
             timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory);
 
             Debug.Log("Conversion complete");
@@ -67,17 +75,37 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var timelineSettingPath = convertAnim.OutputDirectory + "/DmxTimeline.asset";
-            var dmxTimelineSetting = AssetDatabase.LoadAssetAtPath(timelineSettingPath, typeof(DmxTimelineSetting)) as DmxTimelineSetting;
-            if (dmxTimelineSetting is null)
+            var timelineSettingPath = convertAnim.OutputDirectory + "/ArtNetDmx.anim";
+            if (AssetDatabase.LoadAssetAtPath(timelineSettingPath, typeof(AnimationClip)) is not AnimationClip artNetDmxClip)
             {
                 Debug.LogError("DmxTimelineSetting is null");
                 return;
             }
 
-            Debug.Log($"ArtNet Recorder: {dmxTimelineSetting.DmxTimelines.Count} timelines found");
-            var timelineConverter = new TimelineConverter(dmxTimelineSetting);
-            var dmxPackets = timelineConverter.ToDmxPackets();
+            var timelineConverter = new TimelineConverter(artNetDmxClip);
+            var universeDataList = timelineConverter.ToUniverseData();
+            var dmxPackets = new List<(int, DmxPacket)>();
+            byte sequence = 0;
+            foreach (var universeData in universeDataList)
+            {
+                var packet = new DmxPacket
+                {
+                    Sequence = sequence++,
+                    Universe = (ushort) universeData.Universe,
+                    Dmx = universeData.Values
+                };
+                dmxPackets.Add(((int) (universeData.Time * 1000f), packet)); ;
+
+                if (sequence >= 255)
+                {
+                    sequence = 0;
+                }
+                else
+                {
+                    sequence++;
+                }
+            }
+
             var storeData = RecordData.Serialize(dmxPackets);
 
 
