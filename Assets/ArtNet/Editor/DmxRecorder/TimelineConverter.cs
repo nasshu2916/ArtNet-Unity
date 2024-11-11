@@ -50,8 +50,10 @@ namespace ArtNet.Editor.DmxRecorder
                 var curves = timelineUniverse.AnimationCurves();
                 for (var i = 0; i < curves.Length; i++)
                 {
-                    if (curves[i].keys.Length == 0) continue;
-                    clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curves[i]);
+                    var curve = curves[i];
+                    if (curve.keys.Length == 0) continue;
+
+                    clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curve);
                 }
             }
             SaveAsset(clip, directory, "ArtNetDmx.anim");
@@ -162,7 +164,14 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 var keyframes = ChannelDmxFrameData[i]
                     .Select(data => new Keyframe(data.Time, data.Value)).ToArray();
-                curves[i] = new AnimationCurve(keyframes);
+                var curve = new AnimationCurve(keyframes);
+                for (var j = 0; j < curve.keys.Length; j++)
+                {
+                    AnimationUtility.SetKeyLeftTangentMode(curve, j, AnimationUtility.TangentMode.Constant);
+                    AnimationUtility.SetKeyRightTangentMode(curve, j, AnimationUtility.TangentMode.Constant);
+                }
+
+                curves[i] = curve;
             }
 
             return curves;
