@@ -180,7 +180,9 @@ namespace ArtNet.Editor.DmxRecorder
             {
                 Directory.CreateDirectory(directory);
             }
-            var timelineConverter = new TimelineConverter(_recordedDmx);
+            var universeData = _recordedDmx.Select(packet => new UniverseData(packet.Item1 / 1000f, packet.Item2
+                .Universe, packet.Item2.Dmx));
+            var timelineConverter = new TimelineConverter(universeData);
             timelineConverter.SaveDmxTimelineClips(directory);
         }
     }

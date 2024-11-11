@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -47,7 +48,12 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var bytes = binary.bytes;
-            TimelineConverter timelineConverter = new(RecordData.Deserialize(bytes));
+            var packets = RecordData.Deserialize(bytes);
+            var universeData = packets.Select(packet => new UniverseData(packet.time / 1000f, packet.packet.Universe,
+                packet
+                .packet.Dmx));
+
+            TimelineConverter timelineConverter = new(universeData);
             timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory);
 
             Debug.Log("Conversion complete");

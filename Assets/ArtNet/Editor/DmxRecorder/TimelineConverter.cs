@@ -11,13 +11,13 @@ namespace ArtNet.Editor.DmxRecorder
     {
         public List<TimelineUniverse> Timelines { get; } = new();
 
-        public TimelineConverter(IReadOnlyCollection<(int time, DmxPacket packet)> packets)
+        public TimelineConverter(IEnumerable<UniverseData> universeData)
         {
-            var groupedUniversePackets = packets.GroupBy(x => x.packet.Universe);
+            var groupedUniverseData = universeData.GroupBy(x => x.Universe);
 
-            foreach (var group in groupedUniversePackets)
+            foreach (var group in groupedUniverseData)
             {
-                Timelines.Add(new TimelineUniverse(group.Key, group.ToList()));
+                Timelines.Add(new TimelineUniverse((int) group.Key, group.ToList()));
             }
         }
 
@@ -78,15 +78,15 @@ namespace ArtNet.Editor.DmxRecorder
         public int Universe { get; }
         private List<DmxFrameData>[] ChannelDmxFrameData { get; }
 
-        public TimelineUniverse(int universe, IReadOnlyCollection<(int time, DmxPacket packet)> packets)
+        public TimelineUniverse(int groupKey, IReadOnlyCollection<UniverseData> universeData)
         {
-            Universe = universe;
+            Universe = groupKey;
             ChannelDmxFrameData = new List<DmxFrameData>[512];
 
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
-                ChannelDmxFrameData[i] = packets.Where(x => x.packet.Dmx.Length > i)
-                    .Select(x => new DmxFrameData(x.time / 1000f, x.packet.Dmx[i]))
+                ChannelDmxFrameData[i] = universeData.Where(x => x.Values.Length > i)
+                    .Select(x => new DmxFrameData((float) x.Time, x.Values[i]))
                     .OrderBy(x => x.Time).ToList();
             }
         }
