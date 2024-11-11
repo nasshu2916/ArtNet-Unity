@@ -21,11 +21,18 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public TimelineConverter(DmxTimelineSetting dmxTimelineSetting)
+        public TimelineConverter(AnimationClip clip)
         {
-            foreach (var timelineElement in dmxTimelineSetting.DmxTimelines)
+            var curveBindings = AnimationUtility.GetCurveBindings(clip);
+            var universePaths = curveBindings.Select(x => x.path).Distinct();
+            var universeRegex = new System.Text.RegularExpressions.Regex(@"Universe(\d+)");
+            foreach (var universePath in universePaths)
             {
-                Timelines.Add(new TimelineUniverse(timelineElement.Universe, timelineElement.DmxTimelineClip));
+                var match = universeRegex.Match(universePath);
+                if (match.Success == false) continue;
+
+                var universe = int.Parse(match.Groups[1].Value);
+                Timelines.Add(new TimelineUniverse(universe, clip));
             }
         }
 
@@ -36,25 +43,19 @@ namespace ArtNet.Editor.DmxRecorder
                 System.IO.Directory.CreateDirectory(directory);
             }
 
-            var dmxTimelines = new List<DmxTimeline>(Timelines.Count);
+            var clip = new AnimationClip { name = "ArtNetDmx" };
             foreach (var timelineUniverse in Timelines)
             {
                 var universe = timelineUniverse.Universe;
                 timelineUniverse.ThinOutUnchangedFrames();
-                var clip = timelineUniverse.ToAnimationClip();
-                SaveAsset(clip, directory, $"Universe{universe}.anim");
-
-                var timelineElement = new DmxTimeline
+                var curves = timelineUniverse.AnimationCurves();
+                for (var i = 0; i < curves.Length; i++)
                 {
-                    DmxTimelineClip = clip,
-                    Universe = universe
-                };
-                dmxTimelines.Add(timelineElement);
+                    if (curves[i].keys.Length == 0) continue;
+                    clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curves[i]);
+                }
             }
-
-            var dmxTimelineAsset = ScriptableObject.CreateInstance<DmxTimelineSetting>();
-            dmxTimelineAsset.DmxTimelines = dmxTimelines;
-            SaveAsset(dmxTimelineAsset, directory, "DmxTimeline.asset");
+            SaveAsset(clip, directory, "ArtNetDmx.anim");
 
             AssetDatabase.Refresh();
         }
@@ -156,23 +157,7 @@ namespace ArtNet.Editor.DmxRecorder
             return (byte) (prev.Value + (prevDiff * timeDiff / prevDiffTime));
         }
 
-        public AnimationClip ToAnimationClip()
-        {
-            var curves = ConvertAnimationCurves();
-            var clip = new AnimationClip
-            {
-                name = $"Universe{Universe}"
-            };
-            for (var i = 0; i < curves.Length; i++)
-            {
-                if (curves[i].keys.Length == 0) continue;
-                clip.SetCurve("", typeof(DmxData), $"Ch{i + 1:D3}", curves[i]);
-            }
-
-            return clip;
-        }
-
-        private AnimationCurve[] ConvertAnimationCurves()
+        public AnimationCurve[] AnimationCurves()
         {
             var curves = new AnimationCurve[ChannelDmxFrameData.Length];
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)

@@ -73,16 +73,14 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var timelineSettingPath = convertAnim.OutputDirectory + "/DmxTimeline.asset";
-            var dmxTimelineSetting = AssetDatabase.LoadAssetAtPath(timelineSettingPath, typeof(DmxTimelineSetting)) as DmxTimelineSetting;
-            if (dmxTimelineSetting is null)
+            var timelineSettingPath = convertAnim.OutputDirectory + "/ArtNetDmx.anim";
+            if (AssetDatabase.LoadAssetAtPath(timelineSettingPath, typeof(AnimationClip)) is not AnimationClip artNetDmxClip)
             {
                 Debug.LogError("DmxTimelineSetting is null");
                 return;
             }
 
-            Debug.Log($"ArtNet Recorder: {dmxTimelineSetting.DmxTimelines.Count} timelines found");
-            var timelineConverter = new TimelineConverter(dmxTimelineSetting);
+            var timelineConverter = new TimelineConverter(artNetDmxClip);
             var dmxPackets = timelineConverter.ToDmxPackets();
             var storeData = RecordData.Serialize(dmxPackets);
 
