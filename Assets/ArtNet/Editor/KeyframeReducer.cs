@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ArtNet.Editor
@@ -10,19 +10,16 @@ namespace ArtNet.Editor
         {
             if (keys.Count <= 2) return keys;
 
-            var keep = new bool[keys.Count];
-            keep[0] = true;
-            keep[keys.Count - 1] = true;
-
-            RDP(keys, 0, keys.Count - 1, errorThreshold * errorThreshold, keep);
-            return keys.Where((t, i) => keep[i]);
+            var thresholdSquared = errorThreshold * errorThreshold;
+            return Rdm(keys, 0, keys.Count - 1, thresholdSquared);
         }
 
-        private static void RDP(List<Keyframe> keys, int startIndex, int endIndex, float threshold, bool[] keep)
+        private static List<Keyframe> Rdm(List<Keyframe> keys, int startIndex, int endIndex, float threshold)
         {
             var maxDistance = 0f;
             var index = startIndex;
 
+            // 最大距離点を探索
             for (var i = startIndex + 1; i < endIndex; i++)
             {
                 var distance = PerpendicularDistanceSquared(keys[i], keys[startIndex], keys[endIndex]);
@@ -32,11 +29,20 @@ namespace ArtNet.Editor
                 maxDistance = distance;
             }
 
-            if (maxDistance <= threshold) return;
+            // 最大距離が閾値未満なら直線を返す
+            if (maxDistance < threshold)
+            {
+                return new List<Keyframe> { keys[startIndex], keys[endIndex] };
+            }
 
-            keep[index] = true;
-            RDP(keys, startIndex, index, threshold, keep);
-            RDP(keys, index, endIndex, threshold, keep);
+            var result1 = Rdm(keys, startIndex, index, threshold);
+            var result2 = Rdm(keys, index, endIndex, threshold);
+
+            // 重複を除く
+            result1.RemoveAt(result1.Count - 1);
+            result1.AddRange(result2);
+
+            return result1;
         }
 
         /// <summary>
