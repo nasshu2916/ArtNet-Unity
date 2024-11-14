@@ -13,25 +13,27 @@ namespace ArtNet.Editor
             _threshold = errorThreshold * errorThreshold;
         }
 
-        public List<Keyframe> Reduce(List<Keyframe> keys)
+        public List<Keyframe> Reduce(ReadOnlySpan<Keyframe> keys)
         {
-            if (keys.Count <= 2) return keys;
-
-            return Rdm(keys, 0, keys.Count - 1);
+            return Rdm(keys, 0, keys.Length - 1);
         }
 
-        private List<Keyframe> Rdm(List<Keyframe> keys, int startIndex, int endIndex)
+        private List<Keyframe> Rdm(ReadOnlySpan<Keyframe> keys, int startIndex, int endIndex)
         {
-            var maxDistance = 0f;
-            var index = startIndex;
+            if (endIndex - startIndex < 2)
+            {
+                return new List<Keyframe> { keys[startIndex], keys[endIndex] };
+            }
 
-            // 最大距離点を探索
+            // 最大距離のKeyframeを探索
+            var maxDistance = 0f;
+            var maxIndex = startIndex;
             for (var i = startIndex + 1; i < endIndex; i++)
             {
                 var distance = PerpendicularDistanceSquared(keys[i], keys[startIndex], keys[endIndex]);
                 if (distance <= maxDistance) continue;
 
-                index = i;
+                maxIndex = i;
                 maxDistance = distance;
             }
 
@@ -41,10 +43,11 @@ namespace ArtNet.Editor
                 return new List<Keyframe> { keys[startIndex], keys[endIndex] };
             }
 
-            var result1 = Rdm(keys, startIndex, index);
-            var result2 = Rdm(keys, index, endIndex);
+            // 最大距離の点で再帰的に処理
+            var result1 = Rdm(keys, startIndex, maxIndex);
+            var result2 = Rdm(keys, maxIndex, endIndex);
 
-            // 重複を除く
+            // 重複を取り除いて結合
             result1.RemoveAt(result1.Count - 1);
             result1.AddRange(result2);
 
