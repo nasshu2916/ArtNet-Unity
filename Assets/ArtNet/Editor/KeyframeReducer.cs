@@ -14,7 +14,7 @@ namespace ArtNet.Editor
             keep[0] = true;
             keep[keys.Count - 1] = true;
 
-            RDP(keys, 0, keys.Count - 1, errorThreshold, keep);
+            RDP(keys, 0, keys.Count - 1, errorThreshold * errorThreshold, keep);
             return keys.Where((t, i) => keep[i]);
         }
 
@@ -25,7 +25,7 @@ namespace ArtNet.Editor
 
             for (var i = startIndex + 1; i < endIndex; i++)
             {
-                var distance = PointDistance(keys[i], keys[startIndex], keys[endIndex]);
+                var distance = PerpendicularDistanceSquared(keys[i], keys[startIndex], keys[endIndex]);
                 if (distance <= maxDistance) continue;
 
                 index = i;
@@ -39,27 +39,25 @@ namespace ArtNet.Editor
             RDP(keys, index, endIndex, threshold, keep);
         }
 
-        private static float PointDistance(Keyframe point, Keyframe startPoint, Keyframe endPoint)
+        /// <summary>
+        /// 垂線距離の2乗を計算
+        /// </summary>
+        private static float PerpendicularDistanceSquared(Keyframe point, Keyframe startPoint, Keyframe endPoint)
         {
             var dx = endPoint.time - startPoint.time;
             var dy = endPoint.value - startPoint.value;
 
-            var magnitude = dx * dx + dy * dy;
-            if (magnitude > 0.0001f)
+            var denominator = dx * dx + dy * dy;
+
+            if (denominator < 1e-6f)
             {
-                magnitude = Mathf.Sqrt(magnitude);
-                dx /= magnitude;
-                dy /= magnitude;
+                var psx = point.time - startPoint.time;
+                var psy = point.value - startPoint.value;
+                return psx * psx + psy * psy;
             }
 
-            var pvx = point.time - startPoint.time;
-            var pvy = point.value - startPoint.value;
-
-            var dot = dx * pvx + dy * pvy;
-            var ax = pvx - dot * dx;
-            var ay = pvy - dot * dy;
-
-            return ax * ax + ay * ay;
+            var numerator = dy * point.time - dx * point.value + endPoint.time * startPoint.value - endPoint.value * startPoint.time;
+            return (numerator * numerator) / denominator;
         }
     }
 }
