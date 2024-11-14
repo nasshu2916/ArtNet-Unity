@@ -1,20 +1,26 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace ArtNet.Editor
 {
-    public static class KeyframeReducer
+    public class KeyframeReducer
     {
-        public static IEnumerable<Keyframe> Reduce(List<Keyframe> keys, float errorThreshold)
+        private readonly float _threshold;
+
+        public KeyframeReducer(float errorThreshold)
+        {
+            _threshold = errorThreshold * errorThreshold;
+        }
+
+        public List<Keyframe> Reduce(List<Keyframe> keys)
         {
             if (keys.Count <= 2) return keys;
 
-            var thresholdSquared = errorThreshold * errorThreshold;
-            return Rdm(keys, 0, keys.Count - 1, thresholdSquared);
+            return Rdm(keys, 0, keys.Count - 1);
         }
 
-        private static List<Keyframe> Rdm(List<Keyframe> keys, int startIndex, int endIndex, float threshold)
+        private List<Keyframe> Rdm(List<Keyframe> keys, int startIndex, int endIndex)
         {
             var maxDistance = 0f;
             var index = startIndex;
@@ -30,13 +36,13 @@ namespace ArtNet.Editor
             }
 
             // 最大距離が閾値未満なら直線を返す
-            if (maxDistance < threshold)
+            if (maxDistance < _threshold)
             {
                 return new List<Keyframe> { keys[startIndex], keys[endIndex] };
             }
 
-            var result1 = Rdm(keys, startIndex, index, threshold);
-            var result2 = Rdm(keys, index, endIndex, threshold);
+            var result1 = Rdm(keys, startIndex, index);
+            var result2 = Rdm(keys, index, endIndex);
 
             // 重複を除く
             result1.RemoveAt(result1.Count - 1);
