@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace ArtNet.Editor
 {
-    public class KeyframeReducer
+    public class RamerDouglasPeucker
     {
         private readonly float _threshold;
 
-        public KeyframeReducer(float errorThreshold)
+        public RamerDouglasPeucker(float errorThreshold)
         {
             _threshold = errorThreshold * errorThreshold;
         }
 
         public List<Keyframe> Reduce(ReadOnlySpan<Keyframe> keys)
         {
-            return Rdm(keys, 0, keys.Length - 1);
+            return Execute(keys, 0, keys.Length - 1);
         }
 
-        private List<Keyframe> Rdm(ReadOnlySpan<Keyframe> keys, int startIndex, int endIndex)
+        private List<Keyframe> Execute(ReadOnlySpan<Keyframe> keys, int startIndex, int endIndex)
         {
             if (endIndex - startIndex < 2)
             {
@@ -44,8 +44,8 @@ namespace ArtNet.Editor
             }
 
             // 最大距離の点で再帰的に処理
-            var result1 = Rdm(keys, startIndex, maxIndex);
-            var result2 = Rdm(keys, maxIndex, endIndex);
+            var result1 = Execute(keys, startIndex, maxIndex);
+            var result2 = Execute(keys, maxIndex, endIndex);
 
             // 重複を取り除いて結合
             result1.RemoveAt(result1.Count - 1);
