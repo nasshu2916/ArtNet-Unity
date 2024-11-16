@@ -182,38 +182,8 @@ namespace ArtNet.Editor.DmxRecorder
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 var dmxFrameData = ChannelDmxFrameData[i];
-                if (dmxFrameData.Count == 0) continue;
-
-                var latest = dmxFrameData[0];
-                var newDmxFrameData = new List<KeyFrameData> { dmxFrameData[0] };
-
-                for (var j = 1; j < dmxFrameData.Count - 1; j++)
-                {
-                    var current = dmxFrameData[j];
-                    var next = dmxFrameData[j + 1];
-                    if (IsOmittedFrame(latest, current, next)) continue;
-
-                    latest = current;
-                    newDmxFrameData.Add(dmxFrameData[j]);
-                }
-
-                newDmxFrameData.Add(dmxFrameData[^1]);
-                ChannelDmxFrameData[i] = newDmxFrameData;
+                ChannelDmxFrameData[i] = KeyFrameReducer.Reduce(dmxFrameData);
             }
-        }
-
-        private static bool IsOmittedFrame(
-            KeyFrameData prev,
-            KeyFrameData current,
-            KeyFrameData next,
-            float tolerance = 0.01f)
-        {
-            var prevDiff = current.Value - prev.Value;
-            var nextDiff = next.Value - current.Value;
-            var prevDiffTime = current.Time - prev.Time;
-            var nextDiffTime = next.Time - current.Time;
-
-            return Math.Abs(prevDiff / prevDiffTime - nextDiff / nextDiffTime) <= tolerance;
         }
 
         public IEnumerable<UniverseData> ToUniverseData()
