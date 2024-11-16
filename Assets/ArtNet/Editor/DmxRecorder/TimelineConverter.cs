@@ -77,17 +77,17 @@ namespace ArtNet.Editor.DmxRecorder
     public class TimelineUniverse
     {
         public int Universe { get; }
-        private List<DmxFrameData>[] ChannelDmxFrameData { get; }
+        private List<KeyFrameData>[] ChannelDmxFrameData { get; }
 
         public TimelineUniverse(int groupKey, IReadOnlyCollection<UniverseData> universeData)
         {
             Universe = groupKey;
-            ChannelDmxFrameData = new List<DmxFrameData>[512];
+            ChannelDmxFrameData = new List<KeyFrameData>[512];
 
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 ChannelDmxFrameData[i] = universeData.Where(x => x.Values.Length > i)
-                    .Select(x => new DmxFrameData((float) x.Time, x.Values[i]))
+                    .Select(x => new KeyFrameData((float) x.Time, x.Values[i]))
                     .OrderBy(x => x.Time).ToList();
             }
         }
@@ -96,7 +96,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             Universe = universe;
             var curveBindings = AnimationUtility.GetCurveBindings(clip);
-            ChannelDmxFrameData = new List<DmxFrameData>[512];
+            ChannelDmxFrameData = new List<KeyFrameData>[512];
             for (var i = 0; i < ChannelDmxFrameData.Length; i++)
             {
                 var propertyName = $"Ch{i + 1:D3}";
@@ -108,7 +108,7 @@ namespace ArtNet.Editor.DmxRecorder
 
                 if (curve is null) continue;
 
-                ChannelDmxFrameData[i] = curve.keys.Select(x => new DmxFrameData((int) (x.time * 1000), (byte) x.value)).ToList();
+                ChannelDmxFrameData[i] = curve.keys.Select(x => new KeyFrameData((int) (x.time * 1000), (byte) x.value)).ToList();
             }
         }
 
@@ -185,7 +185,7 @@ namespace ArtNet.Editor.DmxRecorder
                 if (dmxFrameData.Count == 0) continue;
 
                 var latest = dmxFrameData[0];
-                var newDmxFrameData = new List<DmxFrameData> { dmxFrameData[0] };
+                var newDmxFrameData = new List<KeyFrameData> { dmxFrameData[0] };
 
                 for (var j = 1; j < dmxFrameData.Count - 1; j++)
                 {
@@ -203,9 +203,9 @@ namespace ArtNet.Editor.DmxRecorder
         }
 
         private static bool IsOmittedFrame(
-            DmxFrameData prev,
-            DmxFrameData current,
-            DmxFrameData next,
+            KeyFrameData prev,
+            KeyFrameData current,
+            KeyFrameData next,
             float tolerance = 0.01f)
         {
             var prevDiff = current.Value - prev.Value;
@@ -233,18 +233,6 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             return universeData;
-        }
-    }
-
-    public struct DmxFrameData
-    {
-        public float Time { get; }
-        public byte Value { get; }
-
-        public DmxFrameData(float time, byte value)
-        {
-            Time = time;
-            Value = value;
         }
     }
 }
