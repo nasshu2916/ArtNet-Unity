@@ -15,8 +15,7 @@ namespace ArtNet.Editor
             for (var i = 1; i < keyFrameData.Count - 1; i++)
             {
                 var current = keyFrameData[i];
-                var next = keyFrameData[i + 1];
-                if (IsOmittedFrame(latest, current, next)) continue;
+                if (latest.Value == current.Value) continue;
 
                 newDmxFrameData.Add(current);
                 latest = current;
@@ -24,20 +23,6 @@ namespace ArtNet.Editor
 
             newDmxFrameData.Add(keyFrameData[^1]);
             return newDmxFrameData;
-        }
-
-        private static bool IsOmittedFrame(
-            KeyFrameData prev,
-            KeyFrameData current,
-            KeyFrameData next,
-            float tolerance = 0.01f)
-        {
-            var prevDiffValue = current.Value - prev.Value;
-            var prevDiffTime = current.Time - prev.Time;
-            var nextDiffValue = next.Value - current.Value;
-            var nextDiffTime = next.Time - current.Time;
-
-            return Math.Abs(prevDiffValue / prevDiffTime - nextDiffValue / nextDiffTime) <= tolerance;
         }
     }
 }
