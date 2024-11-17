@@ -8,14 +8,39 @@ namespace ArtNet.Editor.UnityRecorder
     [RecorderSettings(typeof(ArtNetRecorder), "Art-Net")]
     public class ArtNetRecorderSettings : RecorderSettings
     {
-        [SerializeField] private ArtNetInputSettings _artNetInputSettings = new();
+        public enum ArtNetRecorderOutputFormat
+        {
+            Binary,
+            AnimationClip
+        }
 
-        protected override string Extension => "dmx";
+        [SerializeField] private ArtNetInputSettings _artNetInputSettings = new();
 
         public ArtNetInputSettings ArtNetInputSettings => _artNetInputSettings;
         public override IEnumerable<RecorderInputSettings> InputsSettings
         {
             get { yield return _artNetInputSettings; }
+        }
+
+        [SerializeField] private ArtNetRecorderOutputFormat _outputFormat = ArtNetRecorderOutputFormat.Binary;
+
+        public ArtNetRecorderOutputFormat OutputFormat
+        {
+            get => _outputFormat;
+            set => _outputFormat = value;
+        }
+
+        protected override string Extension
+        {
+            get
+            {
+                return _outputFormat switch
+                {
+                    ArtNetRecorderOutputFormat.Binary => "dmx",
+                    ArtNetRecorderOutputFormat.AnimationClip => "anim",
+                    _ => throw new System.ArgumentOutOfRangeException()
+                };
+            }
         }
 
         public ArtNetRecorderSettings()
