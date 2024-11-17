@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Editor.DmxRecorder;
 using ArtNet.Editor.UnityRecorder.Input;
+using UnityEditor;
 using UnityEditor.Recorder;
 using UnityEngine;
 
@@ -31,12 +33,42 @@ namespace ArtNet.Editor.UnityRecorder
 
                 settings.FileNameGenerator.CreateDirectory(session);
                 var absolutePath = settings.FileNameGenerator.BuildAbsolutePath(session);
+                absolutePath = FileNameGenerator.SanitizePath(absolutePath);
 
-                var binary = RecordData.SerializeUniverseData(frames);
-                System.IO.File.WriteAllBytes(absolutePath, binary);
+                switch (settings.OutputFormat)
+                {
+                    case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.Binary:
+                        BinaryWrite(frames, absolutePath);
+                        break;
+                    case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.AnimationClip:
+                        AnimationClipWrite(frames, absolutePath);
+                        break;
+                    default:
+                        throw new System.ArgumentOutOfRangeException();
+
+                }
+
+                base.EndRecording(session);
             }
+        }
 
-            base.EndRecording(session);
+        private static void BinaryWrite(List<UniverseData> frames, string absolutePath)
+        {
+            var binary = RecordData.SerializeUniverseData(frames);
+            System.IO.File.WriteAllBytes(absolutePath, binary);
+        }
+
+        private static void AnimationClipWrite(List<UniverseData> frames, string absolutePath)
+        {
+            var clip = new AnimationClip();
+            var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
+
+            AssetDatabase.CreateAsset(clip, clipName);
+            var timelineConverter = new TimelineConverter(frames);
+            timelineConverter.SaveToClip(clip);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 }

@@ -48,7 +48,7 @@ namespace ArtNet.Editor.UnityRecorder
             FileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObject"), GameObjectNameResolver);
             FileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObjectScene"), GameObjectSceneNameResolver);
 
-            FileNameGenerator.ForceAssetsFolder = false;
+            FileNameGenerator.ForceAssetsFolder = true;
             FileNameGenerator.Root = OutputPath.Root.AssetsFolder;
             FileNameGenerator.FileName = "artnet_dmx_" + DefaultWildcard.Take;
         }
