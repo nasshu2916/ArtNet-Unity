@@ -1,3 +1,5 @@
+using System;
+
 namespace ArtNet.Editor.DmxRecorder
 {
     public class UniverseData
@@ -6,11 +8,11 @@ namespace ArtNet.Editor.DmxRecorder
         public uint Universe { get; }
         public byte[] Values { get; }
 
-        public UniverseData(double time, uint universe, byte[] values)
+        public UniverseData(double time, uint universe, ReadOnlySpan<byte> values)
         {
             Time = time;
             Universe = universe;
-            Values = values;
+            Values = values.ToArray();
         }
     }
 }

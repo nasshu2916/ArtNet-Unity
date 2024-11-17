@@ -35,14 +35,8 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public void SaveDmxTimelineClips(string directory)
+        public void SaveToClip(AnimationClip clip)
         {
-            if (System.IO.Directory.Exists(directory) == false)
-            {
-                System.IO.Directory.CreateDirectory(directory);
-            }
-
-            var clip = new AnimationClip { name = "ArtNetDmx" };
             foreach (var timelineUniverse in Timelines)
             {
                 var universe = timelineUniverse.Universe;
@@ -56,21 +50,27 @@ namespace ArtNet.Editor.DmxRecorder
                     clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curve);
                 }
             }
-            SaveAsset(clip, directory, "ArtNetDmx.anim");
+        }
 
+        public void SaveDmxTimelineClips(string directory)
+        {
+            if (System.IO.Directory.Exists(directory) == false)
+            {
+                System.IO.Directory.CreateDirectory(directory);
+            }
+
+            var clip = new AnimationClip { name = "ArtNetDmx" };
+            SaveToClip(clip);
+
+            var path = $"{directory}/ArtNetDmx.anim";
+            AssetDatabase.CreateAsset(clip, path);
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
         public List<UniverseData> ToUniverseData()
         {
             return Timelines.SelectMany(x => x.ToUniverseData()).OrderBy(x => x.Time).ToList();
-        }
-
-        private static void SaveAsset<T>(T asset, string directory, string fileName) where T : UnityEngine.Object
-        {
-            var path = $"{directory}/{fileName}";
-            AssetDatabase.CreateAsset(asset, path);
-            AssetDatabase.SaveAssets();
         }
     }
 
