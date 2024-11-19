@@ -9,7 +9,6 @@ namespace ArtNet.Editor.DmxRecorder
         private const int MaxPathLength = 259;
 
         [SerializeField] private bool _enabled = true;
-        [SerializeField] private string _outputPath; // TODO: FileGenerator を使うようにする
         [SerializeField] protected FileGenerator _fileGenerator;
         [SerializeField] private int _take = 1;
 
@@ -17,7 +16,7 @@ namespace ArtNet.Editor.DmxRecorder
         protected internal abstract Texture Icon { get; }
 
         internal abstract string DefaultName { get; }
-        public string OutputPath => _outputPath;
+        public string OutputPath => FileGenerator.AbsolutePath();
 
         public bool Enabled
         {
@@ -44,11 +43,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected internal virtual void GetErrors(List<string> errors)
         {
-            if (string.IsNullOrEmpty(_outputPath))
+            if (string.IsNullOrEmpty(FileGenerator.FileName))
             {
                 errors.Add("Save path is empty");
             }
-            else if (_outputPath.Length > MaxPathLength)
+            else if (FileGenerator.FileName.Length > MaxPathLength)
             {
                 errors.Add($"Save path is too long. Max length is {MaxPathLength}");
             }
