@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +8,10 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private const int MaxPathLength = 259;
 
-        [SerializeField] private string _outputPath;
         [SerializeField] private bool _enabled = true;
+        [SerializeField] private string _outputPath; // TODO: FileGenerator を使うようにする
+        [SerializeField] protected FileGenerator _fileGenerator;
+        [SerializeField] private int _take = 1;
 
         protected internal abstract string Extension { get; }
         protected internal abstract Texture Icon { get; }
@@ -20,6 +23,23 @@ namespace ArtNet.Editor.DmxRecorder
         {
             get => _enabled;
             set => _enabled = value;
+        }
+
+        public FileGenerator FileGenerator => _fileGenerator;
+
+        public int Take
+        {
+            get => _take;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException($"The take number must be positive");
+                _take = value;
+            }
+        }
+
+        protected RecorderSettings()
+        {
+            _fileGenerator = new FileGenerator(this);
         }
 
         protected internal virtual void GetErrors(List<string> errors)
@@ -52,7 +72,10 @@ namespace ArtNet.Editor.DmxRecorder
             return warnings.Count > 0;
         }
 
-        internal virtual void OnValidate() { }
+        internal virtual void OnValidate()
+        {
+            _take = Mathf.Max(0, _take);
+        }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize() { OnBeforeSerialize(); }
         void ISerializationCallbackReceiver.OnAfterDeserialize() { OnAfterDeserialize(); }

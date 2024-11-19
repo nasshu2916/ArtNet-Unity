@@ -8,6 +8,11 @@ namespace ArtNet.Editor.DmxRecorder
     [CustomEditor(typeof(RecorderSettings), true)]
     public class RecorderSettingsEditor : UnityEditor.Editor
     {
+        private static class Styles
+        {
+            internal static readonly GUIContent TakeNumberLabel = new("Take Number", "Value that the Recorder uses to number the recordings. It increases by one after each recording.");
+        }
+
         internal event Action OnRecorderValidated;
 
         public override void OnInspectorGUI()
@@ -21,8 +26,14 @@ namespace ArtNet.Editor.DmxRecorder
             DrawHeader("Output File");
             EditorGUILayout.Separator();
 
-            var outputName = serializedObject.FindProperty("_outputPath");
-            EditorGUILayout.PropertyField(outputName);
+            var fileNameGenerator = serializedObject.FindProperty("_fileGenerator");
+            EditorGUILayout.PropertyField(fileNameGenerator, GUIContent.none);
+
+            EditorGUILayout.Space();
+            EditorGUI.BeginChangeCheck();
+
+            var take = serializedObject.FindProperty("_take");
+            EditorGUILayout.PropertyField(take, Styles.TakeNumberLabel);
 
             EditorGUILayout.Separator();
 
