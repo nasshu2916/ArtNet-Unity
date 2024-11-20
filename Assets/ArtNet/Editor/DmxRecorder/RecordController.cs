@@ -147,43 +147,28 @@ namespace ArtNet.Editor.DmxRecorder
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+                setting.Take++;
             }
         }
 
         private void StoreBinary(BinaryRecorderSettings settings)
         {
-            var directory = settings.OutputPath;
-
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            settings.FileGenerator.CreateDirectory();
 
             var binary = RecordData.Serialize(_recordedDmx);
-            var path = Path.Combine(directory, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.bytes");
-            var exists = File.Exists(path);
+            var path = settings.OutputAbsolutePath;
             File.WriteAllBytes(path, binary);
-            var message = exists ? "Data updated" : "Data stored";
-            Debug.Log($"ArtNet Recorder: {message} at {path}");
         }
 
         private void Store(AnimationRecorderSettings settings)
         {
-            var directory = settings.OutputPath;
-            if (!directory.StartsWith("Assets"))
-            {
-                Debug.LogError("Output directory must be in the Assets folder");
-                return;
-            }
+            settings.FileGenerator.CreateDirectory();
+            var path = settings.OutputAssetPath;
 
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
             var universeData = _recordedDmx.Select(packet => new UniverseData(packet.Item1 / 1000f, packet.Item2
                 .Universe, packet.Item2.Dmx));
             var timelineConverter = new TimelineConverter(universeData);
-            timelineConverter.SaveDmxTimelineClips(directory);
+            timelineConverter.SaveDmxTimelineClips(path);
         }
     }
 }

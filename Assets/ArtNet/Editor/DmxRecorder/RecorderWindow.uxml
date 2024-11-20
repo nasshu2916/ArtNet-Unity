@@ -13,7 +13,9 @@
                 <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addRecorderLabel" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="recorderSettingsPanel" class="Panel" style="width: 100%;" />
+        <ui:ScrollView style="flex-grow: 1;">
+            <ui:VisualElement name="recorderSettingsPanel" class="Panel" style="width: 100%;" />
+        </ui:ScrollView>
     </ui:VisualElement>
     <ui:VisualElement name="footer">
         <ui:Label name="footerStatusLabel" />

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,14 +8,16 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private const int MaxPathLength = 259;
 
-        [SerializeField] private string _outputPath;
         [SerializeField] private bool _enabled = true;
+        [SerializeField] protected FileGenerator _fileGenerator;
+        [SerializeField] private int _take = 1;
 
         protected internal abstract string Extension { get; }
         protected internal abstract Texture Icon { get; }
 
         internal abstract string DefaultName { get; }
-        public string OutputPath => _outputPath;
+        public string OutputAbsolutePath => FileGenerator.AbsolutePath();
+        public string OutputAssetPath => FileGenerator.AssetsRelativePath();
 
         public bool Enabled
         {
@@ -22,13 +25,30 @@ namespace ArtNet.Editor.DmxRecorder
             set => _enabled = value;
         }
 
+        public FileGenerator FileGenerator => _fileGenerator;
+
+        public int Take
+        {
+            get => _take;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException($"The take number must be positive");
+                _take = value;
+            }
+        }
+
+        protected RecorderSettings()
+        {
+            _fileGenerator = new FileGenerator(this);
+        }
+
         protected internal virtual void GetErrors(List<string> errors)
         {
-            if (string.IsNullOrEmpty(_outputPath))
+            if (string.IsNullOrEmpty(FileGenerator.FileName))
             {
                 errors.Add("Save path is empty");
             }
-            else if (_outputPath.Length > MaxPathLength)
+            else if (FileGenerator.FileName.Length > MaxPathLength)
             {
                 errors.Add($"Save path is too long. Max length is {MaxPathLength}");
             }
@@ -52,7 +72,10 @@ namespace ArtNet.Editor.DmxRecorder
             return warnings.Count > 0;
         }
 
-        internal virtual void OnValidate() { }
+        internal virtual void OnValidate()
+        {
+            _take = Mathf.Max(0, _take);
+        }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize() { OnBeforeSerialize(); }
         void ISerializationCallbackReceiver.OnAfterDeserialize() { OnAfterDeserialize(); }

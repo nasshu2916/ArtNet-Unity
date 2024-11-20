@@ -2,7 +2,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace ArtNet.Editor.UnityRecorder.Input
+namespace ArtNet.Editor.DmxRecorder
 {
     public class TargetedPropertyDrawer<T> : PropertyDrawer where T : class
     {

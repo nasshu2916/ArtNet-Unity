@@ -52,17 +52,11 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public void SaveDmxTimelineClips(string directory)
+        public void SaveDmxTimelineClips(string path)
         {
-            if (System.IO.Directory.Exists(directory) == false)
-            {
-                System.IO.Directory.CreateDirectory(directory);
-            }
-
             var clip = new AnimationClip { name = "ArtNetDmx" };
             SaveToClip(clip);
 
-            var path = $"{directory}/ArtNetDmx.anim";
             AssetDatabase.CreateAsset(clip, path);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

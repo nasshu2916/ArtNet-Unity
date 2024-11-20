@@ -74,6 +74,7 @@ EditableLabel > Label {
 
 #recorderSettingsPanel {
     padding: 6px 18px;
+    border-bottom-width: 0;
 }
 
 /* footer */
