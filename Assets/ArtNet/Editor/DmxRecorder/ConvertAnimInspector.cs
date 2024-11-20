@@ -56,7 +56,7 @@ namespace ArtNet.Editor.DmxRecorder
                 .packet.Dmx));
 
             TimelineConverter timelineConverter = new(universeData);
-            timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory);
+            timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory + "/ArtNetDmx.anim");
 
             Debug.Log("Conversion complete");
         }

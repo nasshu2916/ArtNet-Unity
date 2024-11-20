@@ -16,7 +16,8 @@ namespace ArtNet.Editor.DmxRecorder
         protected internal abstract Texture Icon { get; }
 
         internal abstract string DefaultName { get; }
-        public string OutputPath => FileGenerator.AbsolutePath();
+        public string OutputAbsolutePath => FileGenerator.AbsolutePath();
+        public string OutputAssetPath => FileGenerator.AssetsRelativePath();
 
         public bool Enabled
         {

@@ -133,13 +133,24 @@ namespace ArtNet.Editor.DmxRecorder
             return OutputDirectory() + OutputFileName();
         }
 
+        public string AssetsRelativePath()
+        {
+            var path = OutputDirectoryPath();
+            return "Assets/" + path + OutputFileName();
+        }
+
         public string OutputDirectory()
+        {
+            var path = OutputDirectoryPath();
+            return Application.dataPath + Path.DirectorySeparatorChar + path;
+        }
+
+        private string OutputDirectoryPath()
         {
             var path = ApplyWildcards(Directory);
             if (!string.IsNullOrEmpty(path) && !path.EndsWith("/"))
                 path += "/";
-
-            return Application.dataPath + Path.DirectorySeparatorChar + path;
+            return path;
         }
 
         public string OutputFileName()
@@ -149,7 +160,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void CreateDirectory()
         {
-            var path = ApplyWildcards(Directory);
+            var path = OutputDirectory();
             if (!string.IsNullOrEmpty(path) && !System.IO.Directory.Exists(path))
                 System.IO.Directory.CreateDirectory(path);
         }
