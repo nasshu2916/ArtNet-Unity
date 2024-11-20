@@ -147,6 +147,7 @@ namespace ArtNet.Editor.DmxRecorder
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+                setting.Take++;
             }
         }
 
