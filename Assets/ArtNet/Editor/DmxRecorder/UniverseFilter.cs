@@ -9,14 +9,26 @@ namespace ArtNet.Editor.DmxRecorder
     [Serializable]
     public class UniverseFilter
     {
-        [SerializeField] private bool _enabled = true;
-        [SerializeField] private string _filterText = "";
-
         private const string SplitPattern = @"[\s,]+";
         private const string FilterRangePattern = @"^\d+[-~]\d+$";
 
+        [SerializeField] private bool _enabled = true;
+        [SerializeField] private string _filterText = "";
+
+        private bool _cacheEnabled;
+        private List<int> _cachedFilterUniverseList = new();
+
         public bool Enabled { get => _enabled; set => _enabled = value; }
-        public string FilterText { get => _filterText; set => _filterText = value; }
+
+        public string FilterText
+        {
+            get => _filterText;
+            set
+            {
+                _cacheEnabled = false;
+                _filterText = value;
+            }
+        }
 
         public bool IsInvalidFilterText()
         {
@@ -28,6 +40,12 @@ namespace ArtNet.Editor.DmxRecorder
         private bool ParseFilterText(out List<int> universeList)
         {
             universeList = new List<int>();
+            if (_cacheEnabled)
+            {
+                universeList = new List<int>(_cachedFilterUniverseList);
+                return true;
+            }
+
             var result = new HashSet<int>();
             var filterParts = Regex.Split(FilterText, SplitPattern).Where(s => !string.IsNullOrWhiteSpace(s));
 
@@ -58,6 +76,8 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             universeList = result.OrderBy(x => x).ToList();
+            _cachedFilterUniverseList = new List<int>(universeList);
+            _cacheEnabled = true;
             return true;
         }
     }
