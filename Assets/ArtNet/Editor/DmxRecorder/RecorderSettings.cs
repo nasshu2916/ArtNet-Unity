@@ -9,6 +9,7 @@ namespace ArtNet.Editor.DmxRecorder
         private const int MaxPathLength = 259;
 
         [SerializeField] private bool _enabled = true;
+        [SerializeField] protected UniverseFilter _universeFilter;
         [SerializeField] protected FileGenerator _fileGenerator;
         [SerializeField] private int _take = 1;
 
@@ -44,6 +45,22 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected internal virtual void GetErrors(List<string> errors)
         {
+            if (_universeFilter.Enabled)
+            {
+                if (_universeFilter.InvalidFilterTextFormat())
+                {
+                    errors.Add("Invalid universe filter text format");
+                }
+                else if (_universeFilter.ParseFilterText(out var universeList) == false)
+                {
+                    errors.Add("Invalid universe filter text");
+                }
+                else if (universeList.Count == 0)
+                {
+                    errors.Add("Universe filter is empty");
+                }
+            }
+
             if (string.IsNullOrEmpty(FileGenerator.FileName))
             {
                 errors.Add("Save path is empty");

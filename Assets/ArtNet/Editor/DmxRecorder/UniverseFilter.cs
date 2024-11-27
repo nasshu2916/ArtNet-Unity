@@ -11,8 +11,9 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private const string SplitPattern = @"[\s,]+";
         private const string FilterRangePattern = @"^\d+[-~]\d+$";
+        private Regex _invalidFilterTextRegex = new(@"[^\d\s,-]");
 
-        [SerializeField] private bool _enabled = true;
+        [SerializeField] private bool _enabled;
         [SerializeField] private string _filterText = "";
 
         private bool _cacheEnabled;
@@ -30,14 +31,25 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public bool IsInvalidFilterText()
+        public bool InvalidFilterTextFormat()
         {
-            var result = ParseFilterText(out var universeList);
-            if (result == false) return true;
-            return universeList.Count == 0;
+            return _invalidFilterTextRegex.IsMatch(FilterText);
         }
 
-        private bool ParseFilterText(out List<int> universeList)
+        public bool IsMatch(int universe)
+        {
+            if (_enabled == false) return true;
+
+            return GetUniverseList().Contains(universe);
+        }
+
+        public List<int> GetUniverseList()
+        {
+            ParseFilterText(out var universeList);
+            return universeList;
+        }
+
+        public bool ParseFilterText(out List<int> universeList)
         {
             universeList = new List<int>();
             if (_cacheEnabled)
