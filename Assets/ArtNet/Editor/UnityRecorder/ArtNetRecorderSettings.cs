@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using ArtNet.Editor.DmxRecorder;
 using ArtNet.Editor.UnityRecorder.Input;
 using UnityEditor.Recorder;
 using UnityEngine;
+using DefaultWildcard = UnityEditor.Recorder.DefaultWildcard;
+using RecorderSettings = UnityEditor.Recorder.RecorderSettings;
 
 namespace ArtNet.Editor.UnityRecorder
 {
@@ -23,6 +26,7 @@ namespace ArtNet.Editor.UnityRecorder
         }
 
         [SerializeField] private ArtNetRecorderOutputFormat _outputFormat = ArtNetRecorderOutputFormat.Binary;
+        [SerializeField] private UniverseFilter _universeFilter = new();
 
         public ArtNetRecorderOutputFormat OutputFormat
         {
@@ -42,6 +46,8 @@ namespace ArtNet.Editor.UnityRecorder
                 };
             }
         }
+
+        public UniverseFilter UniverseFilter => _universeFilter;
 
         public ArtNetRecorderSettings()
         {
@@ -68,6 +74,7 @@ namespace ArtNet.Editor.UnityRecorder
         protected override void GetErrors(List<string> errors)
         {
             base.GetErrors(errors);
+            _universeFilter.GetErrors(errors);
 
             if (ArtNetInputSettings.GameObject == null)
                 errors.Add("No assigned game object to record");
