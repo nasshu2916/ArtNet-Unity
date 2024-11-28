@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -9,6 +10,7 @@ namespace ArtNet.Editor.DmxRecorder
         private const int MaxPathLength = 259;
 
         [SerializeField] private bool _enabled = true;
+        [SerializeField] protected UniverseFilter _universeFilter = new();
         [SerializeField] protected FileGenerator _fileGenerator;
         [SerializeField] private int _take = 1;
 
@@ -26,6 +28,7 @@ namespace ArtNet.Editor.DmxRecorder
         }
 
         public FileGenerator FileGenerator => _fileGenerator;
+        public UniverseFilter UniverseFilter => _universeFilter;
 
         public int Take
         {
@@ -44,6 +47,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected internal virtual void GetErrors(List<string> errors)
         {
+            _universeFilter.GetErrors(errors);
+
             if (string.IsNullOrEmpty(FileGenerator.FileName))
             {
                 errors.Add("Save path is empty");

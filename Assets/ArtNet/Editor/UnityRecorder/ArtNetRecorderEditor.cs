@@ -7,7 +7,7 @@ namespace ArtNet.Editor.UnityRecorder
     [CustomEditor(typeof(ArtNetRecorderSettings))]
     public class ArtNetRecorderEditor : RecorderEditor
     {
-        private SerializedProperty _outputFormat;
+        private SerializedProperty _outputFormat, _universeFilter;
 
         private static class Styles
         {
@@ -22,6 +22,15 @@ namespace ArtNet.Editor.UnityRecorder
                 return;
 
             _outputFormat = serializedObject.FindProperty("_outputFormat");
+            _universeFilter = serializedObject.FindProperty("_universeFilter");
+        }
+
+        protected override void ExtraOptionsGUI()
+        {
+            base.ExtraOptionsGUI();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(_universeFilter, Styles.FormatLabel);
         }
 
         protected override void FileTypeAndFormatGUI()

@@ -35,13 +35,14 @@ namespace ArtNet.Editor.UnityRecorder
                 var absolutePath = settings.FileNameGenerator.BuildAbsolutePath(session);
                 absolutePath = FileNameGenerator.SanitizePath(absolutePath);
 
+                var filteredFrames = FilterFrames(frames, settings.UniverseFilter);
                 switch (settings.OutputFormat)
                 {
                     case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.Binary:
-                        BinaryWrite(frames, absolutePath);
+                        BinaryWrite(filteredFrames, absolutePath);
                         break;
                     case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.AnimationClip:
-                        AnimationClipWrite(frames, absolutePath);
+                        AnimationClipWrite(filteredFrames, absolutePath);
                         break;
                     default:
                         throw new System.ArgumentOutOfRangeException();
@@ -50,6 +51,11 @@ namespace ArtNet.Editor.UnityRecorder
 
                 base.EndRecording(session);
             }
+        }
+
+        private static List<UniverseData> FilterFrames(List<UniverseData> frames, UniverseFilter filter)
+        {
+            return frames.Where(f => filter.IsMatch((int) f.Universe)).ToList();
         }
 
         private static void BinaryWrite(List<UniverseData> frames, string absolutePath)

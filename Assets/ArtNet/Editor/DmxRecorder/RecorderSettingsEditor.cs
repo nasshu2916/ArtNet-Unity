@@ -26,11 +26,14 @@ namespace ArtNet.Editor.DmxRecorder
             DrawHeader("Output File");
             EditorGUILayout.Separator();
 
+            var universeFilter = serializedObject.FindProperty("_universeFilter");
+            EditorGUILayout.PropertyField(universeFilter, GUIContent.none);
+            EditorGUILayout.Space();
+
             var fileNameGenerator = serializedObject.FindProperty("_fileGenerator");
             EditorGUILayout.PropertyField(fileNameGenerator, GUIContent.none);
 
             EditorGUILayout.Space();
-            EditorGUI.BeginChangeCheck();
 
             var take = serializedObject.FindProperty("_take");
             EditorGUILayout.PropertyField(take, Styles.TakeNumberLabel);
