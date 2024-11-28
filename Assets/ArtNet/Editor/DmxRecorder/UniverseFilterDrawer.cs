@@ -9,7 +9,7 @@ namespace ArtNet.Editor.DmxRecorder
         private static class Styles
         {
             internal static readonly GUIContent UniverseFilterLabel = new("Universe Filter", "Filter the universes to record");
-            internal static readonly GUIContent FilterTextInfo = new("Enter the universes to record. Example: 1-3, 5, 7-9");
+            internal static readonly GUIContent FilterTextInfo = new("Enter the universes to record. Example: 0-2, 4, 7-9");
         }
 
         private UniverseFilter _target;

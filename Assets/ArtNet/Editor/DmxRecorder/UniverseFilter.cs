@@ -36,6 +36,28 @@ namespace ArtNet.Editor.DmxRecorder
             return _invalidFilterTextRegex.IsMatch(FilterText);
         }
 
+        public void GetErrors(List<string> errors)
+        {
+            if (Enabled == false) return;
+
+            if (InvalidFilterTextFormat())
+            {
+                errors.Add("Invalid universe filter text format");
+            }
+            else if (ParseFilterText(out var universeList) == false)
+            {
+                errors.Add("Invalid universe filter text");
+            }
+            else if (universeList.Count == 0)
+            {
+                errors.Add("Universe filter is empty");
+            }
+            else if (universeList.Any(u => u is < 0 or > 0x7FFF))
+            {
+                errors.Add("Universe filter contains invalid universe numbers. Valid range is 0-32767");
+            }
+        }
+
         public bool IsMatch(int universe)
         {
             if (_enabled == false) return true;
