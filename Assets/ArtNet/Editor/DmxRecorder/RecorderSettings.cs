@@ -27,6 +27,7 @@ namespace ArtNet.Editor.DmxRecorder
         }
 
         public FileGenerator FileGenerator => _fileGenerator;
+        public UniverseFilter UniverseFilter => _universeFilter;
 
         public int Take
         {

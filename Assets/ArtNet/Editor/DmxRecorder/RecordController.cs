@@ -136,13 +136,14 @@ namespace ArtNet.Editor.DmxRecorder
             var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
+                var recordedDmx = FilterDmxPackets(_recordedDmx, setting.UniverseFilter);
                 switch (setting)
                 {
                     case BinaryRecorderSettings binarySettings:
-                        StoreBinary(binarySettings);
+                        StoreBinary(recordedDmx, binarySettings);
                         break;
                     case AnimationRecorderSettings animationSettings:
-                        Store(animationSettings);
+                        StoreAnimation(recordedDmx, animationSettings);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -151,21 +152,35 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        private void StoreBinary(BinaryRecorderSettings settings)
+        private static List<(int, DmxPacket)> FilterDmxPackets(List<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
+        {
+            if (!universeFilter.Enabled) return recordedDmx;
+
+            var filteredDmx = new List<(int, DmxPacket)>();
+            foreach (var (time, packet) in recordedDmx)
+            {
+                if (universeFilter.IsMatch(packet.Universe)) continue;
+                filteredDmx.Add((time, packet));
+            }
+
+            return filteredDmx;
+        }
+
+        private static void StoreBinary(IReadOnlyList<(int time, DmxPacket packet)> recordDmx, BinaryRecorderSettings settings)
         {
             settings.FileGenerator.CreateDirectory();
 
-            var binary = RecordData.Serialize(_recordedDmx);
+            var binary = RecordData.Serialize(recordDmx);
             var path = settings.OutputAbsolutePath;
             File.WriteAllBytes(path, binary);
         }
 
-        private void Store(AnimationRecorderSettings settings)
+        private static void StoreAnimation(IReadOnlyList<(int, DmxPacket)> recordDmx, AnimationRecorderSettings settings)
         {
             settings.FileGenerator.CreateDirectory();
             var path = settings.OutputAssetPath;
 
-            var universeData = _recordedDmx.Select(packet => new UniverseData(packet.Item1 / 1000f, packet.Item2
+            var universeData = recordDmx.Select(packet => new UniverseData(packet.Item1 / 1000f, packet.Item2
                 .Universe, packet.Item2.Dmx));
             var timelineConverter = new TimelineConverter(universeData);
             timelineConverter.SaveDmxTimelineClips(path);
