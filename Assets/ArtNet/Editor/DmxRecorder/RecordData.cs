@@ -14,7 +14,7 @@ namespace ArtNet.Editor.DmxRecorder
         private static readonly byte[] ReservedBuffer = new byte[11];
         private const byte Version = 0x02;
 
-        public static byte[] SerializePackets(IReadOnlyList<(int time, DmxPacket packet)> dmxPackets)
+        public static byte[] SerializePackets(IEnumerable<(int time, DmxPacket packet)> dmxPackets)
         {
             var universeData = dmxPackets.Select(packet =>
                 new UniverseData(packet.time / 1000f, packet.packet.Universe, packet.packet.Dmx));
@@ -34,9 +34,10 @@ namespace ArtNet.Editor.DmxRecorder
             foreach (var data in sortedData)
             {
                 memoryStream.Write(BitConverter.GetBytes((float) data.Time - startTime));
-                memoryStream.Write(BitConverter.GetBytes((ushort) data.Universe));
-                memoryStream.Write(BitConverter.GetBytes((ushort) data.Values.Length));
-                memoryStream.Write(data.Values);
+                memoryStream.Write(BitConverter.GetBytes(data.Universe));
+                var length = data.Length;
+                memoryStream.Write(BitConverter.GetBytes(length));
+                memoryStream.Write(data.Values[..length]);
             }
 
             return memoryStream.ToArray();
