@@ -5,24 +5,33 @@ namespace ArtNet
 {
     public partial class DmxData : MonoBehaviour
     {
-        private int[] _dmxValues = new int[512];
+        private byte[] _dmxValues = new byte[512];
 
-        public int this[int index]
+        public byte this[int index]
         {
-            get => _dmxValues[index];
+            get
+            {
+                if (index is >= 0 and < 512)
+                {
+                    return _dmxValues[index];
+                }
+                return 0;
+            }
             set
             {
-                var newValue = value;
-                newValue = Math.Clamp(newValue, 0, 255);
-                _dmxValues[index] = newValue;
-                if (index is >= 1 and <= 512)
+                if (index is >= 0 and < 512)
                 {
-                    GetType().GetField($"Ch{index:D3}").SetValue(this, newValue);
+                    _dmxValues[index] = value;
+                    GetType().GetField($"Ch{(index + 1):D3}").SetValue(this, value);
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException("DMX channel must be between 0 and 511");
                 }
             }
         }
 
-        public int[] DmxValues
+        public byte[] DmxValues
         {
             get => _dmxValues;
             set => _dmxValues = value;
