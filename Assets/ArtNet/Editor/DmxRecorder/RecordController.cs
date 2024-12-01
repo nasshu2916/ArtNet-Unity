@@ -170,7 +170,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             settings.FileGenerator.CreateDirectory();
 
-            var binary = RecordData.Serialize(recordDmx);
+            var binary = RecordData.SerializePackets(recordDmx);
             var path = settings.OutputAbsolutePath;
             File.WriteAllBytes(path, binary);
         }

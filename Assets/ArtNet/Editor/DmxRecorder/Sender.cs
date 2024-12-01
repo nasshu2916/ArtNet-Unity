@@ -46,7 +46,19 @@ namespace ArtNet.Editor.DmxRecorder
 
             SenderSettings.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
-            DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.time).ToList();
+            var universeData = RecordData.Deserialize(data).OrderBy(x => x.Time).ToList();
+            byte sequence = 0;
+            foreach (var dataPacket in universeData)
+            {
+                var packet = new DmxPacket
+                {
+                    Universe = (ushort)dataPacket.Universe,
+                    Dmx = dataPacket.Values,
+                    Sequence = sequence
+                };
+                DmxPackets.Add((Mathf.RoundToInt((float)(dataPacket.Time * 1000f)), packet));
+                sequence = sequence == byte.MaxValue ? (byte) 0 : (byte) (sequence + 1);
+            }
             MaxTime = DmxPackets.Max(x => x.time);
         }
 
