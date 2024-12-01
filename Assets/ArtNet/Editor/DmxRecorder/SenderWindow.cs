@@ -133,12 +133,6 @@ namespace ArtNet.Editor.DmxRecorder
                 }
             });
 
-            var sendRecordSequenceToggle = root.Q<Toggle>("sendRecordSequenceToggle");
-            sendRecordSequenceToggle.RegisterValueChangedCallback(evt =>
-            {
-                _sender.SenderSettings.IsRecordSequence = evt.newValue;
-            });
-
             var sendSpeedSlider = root.Q<Slider>("sendSpeed");
             var sendSpeedDropdown = root.Q<DropdownField>("sendSpeedDropdown");
             sendSpeedDropdown.choices.Clear();
