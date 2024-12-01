@@ -11,6 +11,7 @@ namespace ArtNet
 {
     partial class DmxData
     {
+#if UNITY_EDITOR
         #region DmxChannels field
 
 <# for (var i = 1; i <= 512 ; i++) {#>
@@ -18,5 +19,6 @@ namespace ArtNet
 <# } #>
 
         #endregion
+#endif
    }
 }

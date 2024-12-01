@@ -9,6 +9,7 @@ namespace ArtNet
 {
     partial class DmxData
     {
+#if UNITY_EDITOR
         #region DmxChannels field
 
         [SerializeField][Range(0, 255)] private int Ch001;
@@ -525,5 +526,6 @@ namespace ArtNet
         [SerializeField][Range(0, 255)] private int Ch512;
 
         #endregion
+#endif
    }
 }
