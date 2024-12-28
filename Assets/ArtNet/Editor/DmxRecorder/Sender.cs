@@ -54,7 +54,7 @@ namespace ArtNet.Editor.DmxRecorder
                     Universe = dataPacket.Universe,
                     Dmx = dataPacket.Values
                 };
-                DmxPackets.Add((Mathf.RoundToInt((float)(dataPacket.Time * 1000f)), packet));
+                DmxPackets.Add((Mathf.RoundToInt((float) (dataPacket.Time * 1000f)), packet));
             }
             MaxTime = DmxPackets.Max(x => x.time);
         }
