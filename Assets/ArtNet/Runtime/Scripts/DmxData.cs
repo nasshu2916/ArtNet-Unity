@@ -1,31 +1,81 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace ArtNet
 {
     public partial class DmxData : MonoBehaviour
     {
-        private int[] _dmxValues = new int[512];
+        private readonly byte[] _dmxValues = new byte[512];
+#if UNITY_EDITOR
+        private readonly Dictionary<int, FieldInfo> _fieldCache = new();
+#endif
 
-        public int this[int index]
+        public byte this[int index]
         {
-            get => _dmxValues[index];
+            get
+            {
+                if (index is >= 0 and < 512)
+                {
+                    return _dmxValues[index];
+                }
+
+                return 0;
+            }
             set
             {
-                var newValue = value;
-                newValue = Math.Clamp(newValue, 0, 255);
-                _dmxValues[index] = newValue;
-                if (index is >= 1 and <= 512)
+                if (index is >= 0 and < 512)
                 {
-                    GetType().GetField($"Ch{index:D3}").SetValue(this, newValue);
+                    _dmxValues[index] = value;
+#if UNITY_EDITOR
+                    var field = GetField(index);
+                    if (field != null)
+                    {
+                        field.SetValue(this, value);
+                    }
+#endif
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException("DMX channel must be between 0 and 511");
                 }
             }
         }
 
-        public int[] DmxValues
+#if UNITY_EDITOR
+        private void OnValidate()
         {
-            get => _dmxValues;
-            set => _dmxValues = value;
+            for (var i = 0; i < 512; i++)
+            {
+                var fieldName = $"Ch{(i + 1):D3}";
+                var field = GetField(i);
+
+                if (field != null)
+                {
+                    var fieldValue = (int) field.GetValue(this);
+                    if (fieldValue == _dmxValues[i]) continue;
+                    _dmxValues[i] = (byte) fieldValue;
+                }
+                else
+                {
+                    Debug.LogWarning($"Field {fieldName} not found");
+                }
+            }
         }
+
+        private FieldInfo GetField(int index)
+        {
+            var fieldName = $"Ch{(index + 1):D3}";
+            if (_fieldCache.TryGetValue(index, out var field))
+            {
+                return field;
+            }
+
+            field = GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            _fieldCache[index] = field;
+            return field;
+        }
+#endif
     }
 }

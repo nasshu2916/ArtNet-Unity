@@ -50,10 +50,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var bytes = binary.bytes;
-            var packets = RecordData.Deserialize(bytes);
-            var universeData = packets.Select(packet => new UniverseData(packet.time / 1000f, packet.packet.Universe,
-                packet
-                .packet.Dmx));
+            var universeData = RecordData.Deserialize(bytes);
 
             TimelineConverter timelineConverter = new(universeData);
             timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory + "/ArtNetDmx.anim");
@@ -106,7 +103,7 @@ namespace ArtNet.Editor.DmxRecorder
                 }
             }
 
-            var storeData = RecordData.Serialize(dmxPackets);
+            var storeData = RecordData.SerializePackets(dmxPackets);
 
 
             var path = convertAnim.OutputDirectory + "/DmxPackets.bytes";

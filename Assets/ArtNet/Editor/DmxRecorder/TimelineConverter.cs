@@ -102,7 +102,8 @@ namespace ArtNet.Editor.DmxRecorder
 
                 if (curve is null) continue;
 
-                ChannelDmxFrameData[i] = curve.keys.Select(x => new KeyFrameData((int) (x.time * 1000), (byte) x.value)).ToList();
+                ChannelDmxFrameData[i] = curve.keys.Select(x => new KeyFrameData((int) (x.time * 1000), (byte) x.value))
+                    .ToList();
             }
         }
 
@@ -193,7 +194,7 @@ namespace ArtNet.Editor.DmxRecorder
                     dmx[i] = FrameValue(i, time);
                 }
 
-                universeData.Add(new UniverseData(time, (uint) Universe, dmx));
+                universeData.Add(new UniverseData(time, (ushort) Universe, dmx));
             }
 
             return universeData;

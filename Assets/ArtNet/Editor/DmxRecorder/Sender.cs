@@ -46,7 +46,16 @@ namespace ArtNet.Editor.DmxRecorder
 
             SenderSettings.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
-            DmxPackets = RecordData.Deserialize(data).OrderBy(x => x.time).ToList();
+            var universeData = RecordData.Deserialize(data).OrderBy(x => x.Time).ToList();
+            foreach (var dataPacket in universeData)
+            {
+                var packet = new DmxPacket
+                {
+                    Universe = dataPacket.Universe,
+                    Dmx = dataPacket.Values
+                };
+                DmxPackets.Add((Mathf.RoundToInt((float) (dataPacket.Time * 1000f)), packet));
+            }
             MaxTime = DmxPackets.Max(x => x.time);
         }
 
@@ -98,17 +107,10 @@ namespace ArtNet.Editor.DmxRecorder
         private void SendDmx(DmxPacket packet)
         {
             var universe = packet.Universe;
-            if (!SenderSettings.IsRecordSequence)
-            {
-                var sequence = _sequenceMap.GetValueOrDefault(universe, (byte) 0);
-                sequence = sequence == byte.MaxValue ? (byte) 0 : (byte) (sequence + 1);
-                packet.Sequence = sequence;
-                _sequenceMap[universe] = sequence;
-            }
-            else
-            {
-                _sequenceMap[universe] = packet.Sequence;
-            }
+            var sequence = _sequenceMap.GetValueOrDefault(universe, (byte) 0);
+            sequence = sequence == byte.MaxValue ? (byte) 0 : (byte) (sequence + 1);
+            packet.Sequence = sequence;
+            _sequenceMap[universe] = sequence;
 
             var data = packet.ToByteArray();
             _udpSender.Send(data, SenderSettings.Ip);

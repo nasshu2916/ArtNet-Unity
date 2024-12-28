@@ -19,7 +19,6 @@ namespace ArtNet.Editor.DmxRecorder
         public string LoadFilePath { get => _loadFilePath; set => _loadFilePath = value; }
         public IPAddress Ip { get => IPAddress.Parse(_ip); set => _ip = value.ToString(); }
         public bool IsLoop { get => _isLoop; set => _isLoop = value; }
-        public bool IsRecordSequence { get => _isRecordSequence; set => _isRecordSequence = value; }
         public float Speed { get => _speed; set => _speed = value; }
 
         private string _savePath;
