@@ -60,7 +60,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         public bool IsMatch(int universe)
         {
-            if (_enabled == false) return true;
+            if (Enabled == false) return true;
 
             return GetUniverseList().Contains(universe);
         }
