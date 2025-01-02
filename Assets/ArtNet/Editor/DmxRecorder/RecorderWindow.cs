@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -201,6 +202,19 @@ namespace ArtNet.Editor.DmxRecorder
                         EditorGUILayout.BeginHorizontal();
                         var recorderName = editor.target.GetType().Name;
                         EditorGUILayout.LabelField("Recorder Type", ObjectNames.NicifyVariableName(recorderName));
+
+                        if (GUILayout.Button(IconHelper.PresetIcon, new GUIStyle("iconButton") { fixedWidth = 20f }))
+                        {
+                            var settings = editor.target as RecorderSettings;
+
+                            if (settings != null)
+                            {
+                                var presetReceiver = CreateInstance<PresetRecorder>();
+                                presetReceiver.Init(settings, Repaint);
+
+                                PresetSelector.ShowSelector(settings, null, true, presetReceiver);
+                            }
+                        }
 
                         EditorGUILayout.EndHorizontal();
                         EditorGUILayout.Separator();

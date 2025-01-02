@@ -87,5 +87,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected virtual void OnBeforeSerialize() { }
         protected virtual void OnAfterDeserialize() { }
+        public virtual void OnAfterDuplicate() { }
     }
 }
