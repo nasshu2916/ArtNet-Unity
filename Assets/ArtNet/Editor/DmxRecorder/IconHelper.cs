@@ -15,6 +15,7 @@ namespace ArtNet.Editor.DmxRecorder
         public static Texture PreMatQuad => Icon("PreMatQuad@2x", true);
         public static Texture PauseButton => Icon("PauseButton@2x", true);
         public static Texture FolderOpen => Icon("FolderOpened Icon");
+        public static Texture PresetIcon => Icon("Preset.Context", true);
 
         internal static Texture Icon(string iconPath, bool provideDarkModel = false)
         {
