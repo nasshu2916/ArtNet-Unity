@@ -57,23 +57,42 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnDisable()
         {
-            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
-        }
-
-        private void Update()
-        {
-            if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+            UnregisterCallbacks();
         }
 
         private void RegisterCallbacks()
         {
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.update += OnUpdate;
+        }
+
+        private void UnregisterCallbacks()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.update -= OnUpdate;
         }
 
         private void OnUndoRedoPerformed()
         {
             ReloadRecorderSettings();
             SaveAndRepaint();
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+            {
+                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+                ReloadRecorderSettings();
+                Repaint();
+            }
+        }
+
+        private void OnUpdate()
+        {
+            if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
         }
 
         private void ReloadRecorderSettings()
