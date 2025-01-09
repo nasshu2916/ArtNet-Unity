@@ -92,23 +92,37 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnUpdate()
         {
-            if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
-
-            var recordButtonsEnabled = true;
-            if (_controller == null)
+            switch (_controller.Status)
             {
-                recordButtonsEnabled = false;
+                case RecordingStatus.Recording:
+                    _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+                    break;
+                case RecordingStatus.Paused:
+                    break;
+                case RecordingStatus.None:
+                    OnUpdateRecordButton();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
+        }
+
+        private void OnUpdateRecordButton()
+        {
+            var recorderSettings = _controller.Settings.RecorderSettings;
+            if (recorderSettings.All(x => !x.Enabled))
             {
-                var recorderSettings = _controller.Settings.RecorderSettings;
-                if (recorderSettings.All(x => !x.Enabled) || recorderSettings.Any(x => x.HasErrors()))
-                {
-                    recordButtonsEnabled = false;
-                }
+                SetRecordButtonEnabled(false, "No recorders enabled");
+                return;
             }
 
-            SetRecordButtonEnabled(recordButtonsEnabled);
+            if (recorderSettings.Any(x => x.Enabled && x.HasErrors()))
+            {
+                SetRecordButtonEnabled(false, "Some recorders have errors");
+                return;
+            }
+
+            SetRecordButtonEnabled(true);
         }
 
         private void ReloadRecorderSettings()
@@ -167,11 +181,11 @@ namespace ArtNet.Editor.DmxRecorder
 
             _playButton = visualElement.Q<Button>("playButton");
             _playButton.clicked += OnPlayButtonClicked;
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
 
             _stopButton = visualElement.Q<Button>("stopButton");
             _stopButton.clicked += OnStopButtonClicked;
-            _stopButton.Add(new Image { image = IconHelper.PreMatQuad });
+            _stopButton.style.backgroundImage = (StyleBackground) IconHelper.PreMatQuad;
             _stopButton.SetEnabled(false);
 
             // RecordersPanel の作成
@@ -418,8 +432,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("recording");
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PauseButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PauseButton;
             _stopButton.SetEnabled(true);
             SetSettingPanelEnabled(false);
         }
@@ -428,24 +441,23 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("paused");
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
             _stopButton.SetEnabled(true);
         }
 
         private void OnFinishRecording()
         {
             _timeCode.ClearClassList();
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
             SetSettingPanelEnabled(true);
         }
 
-        private void SetRecordButtonEnabled(bool enabled)
+        private void SetRecordButtonEnabled(bool enabled, string tooltip = null)
         {
             _playButton.SetEnabled(enabled);
+            _playButton.tooltip = tooltip;
         }
 
         private void SetSettingPanelEnabled(bool enabled)
