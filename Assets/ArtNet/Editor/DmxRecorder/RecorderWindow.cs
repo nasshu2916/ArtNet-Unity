@@ -32,7 +32,6 @@ namespace ArtNet.Editor.DmxRecorder
         private RecorderItem _selectedRecorderItem;
 
         private RecordController _controller;
-        private RecordControllerSettings _controllerSettings;
 
         private Label _timeCode;
         private Button _playButton, _stopButton;
@@ -114,10 +113,10 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void ReloadRecorderSettings()
         {
-            if (_controllerSettings == null)
+            if (_controller?.Settings == null)
                 return;
 
-            var recorderItems = _controllerSettings.RecorderSettings.Select(CreateRecorderItem).ToArray();
+            var recorderItems = _controller.Settings.RecorderSettings.Select(CreateRecorderItem).ToArray();
             foreach (var recorderItem in recorderItems)
                 recorderItem.UpdateState();
 
@@ -126,8 +125,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SaveAndRepaint()
         {
-            if (_controllerSettings != null)
-                _controllerSettings.Save();
+            if (_controller.Settings != null)
+                _controller.Settings.Save();
 
             Repaint();
         }
@@ -206,7 +205,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SetRecordControllerSettings(RecordControllerSettings settings)
         {
-            _controllerSettings = settings;
             _controller = new RecordController(settings);
             _controller.OnStartRecording += OnStartRecording;
             _controller.OnPauseRecording += OnPauseRecording;
@@ -263,7 +261,7 @@ namespace ArtNet.Editor.DmxRecorder
                         if (EditorGUI.EndChangeCheck() || EditorUtility.IsDirty(_selectedRecorderItem.Settings))
                         {
                             // data changed
-                            _controllerSettings.Save();
+                            _controller.Settings.Save();
                             _selectedRecorderItem.UpdateState();
                         }
                     }
@@ -325,7 +323,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private RecorderItem CreateRecorderItem(RecorderSettings recorderSettings)
         {
-            var recorderItem = new RecorderItem(_controllerSettings, recorderSettings);
+            var recorderItem = new RecorderItem(_controller.Settings, recorderSettings);
             recorderItem.OnEnableStateChanged += enabled =>
             {
                 if (enabled)
@@ -352,7 +350,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             recorder.name = UniqueRecorderName(recorderName);
             recorder.Enabled = enabled;
-            _controllerSettings.AddRecorderSettings(recorder);
+            _controller.Settings.AddRecorderSettings(recorder);
 
             var item = CreateRecorderItem(recorder);
             _recorderList.Add(item);
@@ -370,7 +368,7 @@ namespace ArtNet.Editor.DmxRecorder
         private void DeleteRecorder(RecorderItem item)
         {
             var settings = item.Settings;
-            _controllerSettings.RemoveRecorderSettings(settings);
+            _controller.Settings.RemoveRecorderSettings(settings);
             _recorderList.Remove(item);
         }
 
@@ -382,7 +380,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private string UniqueRecorderName(string recorderName)
         {
-            var existingNames = _controllerSettings.RecorderSettings.Select(settings => settings.name).ToArray();
+            var existingNames = _controller.Settings.RecorderSettings.Select(settings => settings.name).ToArray();
             return ObjectNames.GetUniqueName(existingNames, recorderName);
         }
 
