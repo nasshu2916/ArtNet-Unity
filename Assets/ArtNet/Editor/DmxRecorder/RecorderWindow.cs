@@ -27,11 +27,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         private static IEnumerable<Type> _cachedRecorderTypes;
 
+        private VisualElement _addNewRecordPanel, _recorderSettingsPanel;
         private RecorderList _recorderList;
         private RecorderItem _selectedRecorderItem;
 
         private RecordController _controller;
-        private RecordControllerSettings _controllerSettings;
 
         private Label _timeCode;
         private Button _playButton, _stopButton;
@@ -57,17 +57,21 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnDisable()
         {
-            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
-        }
-
-        private void Update()
-        {
-            if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+            UnregisterCallbacks();
         }
 
         private void RegisterCallbacks()
         {
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.update += OnUpdate;
+        }
+
+        private void UnregisterCallbacks()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.update -= OnUpdate;
         }
 
         private void OnUndoRedoPerformed()
@@ -76,12 +80,57 @@ namespace ArtNet.Editor.DmxRecorder
             SaveAndRepaint();
         }
 
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+            {
+                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+                ReloadRecorderSettings();
+                Repaint();
+            }
+        }
+
+        private void OnUpdate()
+        {
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+                    break;
+                case RecordingStatus.Paused:
+                    break;
+                case RecordingStatus.None:
+                    OnUpdateRecordButton();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void OnUpdateRecordButton()
+        {
+            var recorderSettings = _controller.Settings.RecorderSettings;
+            if (recorderSettings.All(x => !x.Enabled))
+            {
+                SetRecordButtonEnabled(false, "No recorders enabled");
+                return;
+            }
+
+            if (recorderSettings.Any(x => x.Enabled && x.HasErrors()))
+            {
+                SetRecordButtonEnabled(false, "Some recorders have errors");
+                return;
+            }
+
+            SetRecordButtonEnabled(true);
+        }
+
         private void ReloadRecorderSettings()
         {
-            if (_controllerSettings == null)
+            if (_controller?.Settings == null)
                 return;
 
-            var recorderItems = _controllerSettings.RecorderSettings.Select(CreateRecorderItem).ToArray();
+            var recorderItems = _controller.Settings.RecorderSettings.Select(CreateRecorderItem).ToArray();
             foreach (var recorderItem in recorderItems)
                 recorderItem.UpdateState();
 
@@ -90,8 +139,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SaveAndRepaint()
         {
-            if (_controllerSettings != null)
-                _controllerSettings.Save();
+            if (_controller.Settings != null)
+                _controller.Settings.Save();
 
             Repaint();
         }
@@ -132,18 +181,18 @@ namespace ArtNet.Editor.DmxRecorder
 
             _playButton = visualElement.Q<Button>("playButton");
             _playButton.clicked += OnPlayButtonClicked;
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
 
             _stopButton = visualElement.Q<Button>("stopButton");
             _stopButton.clicked += OnStopButtonClicked;
-            _stopButton.Add(new Image { image = IconHelper.PreMatQuad });
+            _stopButton.style.backgroundImage = (StyleBackground) IconHelper.PreMatQuad;
             _stopButton.SetEnabled(false);
 
             // RecordersPanel の作成
             var recordersPanel = visualElement.Q<VisualElement>("recordersPanel");
 
-            var addRecorderLabel = visualElement.Q<Label>("addRecorderLabel");
-            addRecorderLabel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
+            _addNewRecordPanel = visualElement.Q<Label>("addRecorderLabel");
+            _addNewRecordPanel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
             _recorderList = new RecorderList
             {
                 name = "recorderList",
@@ -156,10 +205,11 @@ namespace ArtNet.Editor.DmxRecorder
             _recorderList.OnContextMenu += ShowRecorderContextMenu;
             recordersPanel.Add(_recorderList);
 
-            var recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
-            recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
+            _recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
+            _recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
 
             SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+            SetSettingPanelEnabled(!DisableEditRecordSettings());
         }
 
         private bool DisableEditRecordSettings()
@@ -169,7 +219,6 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SetRecordControllerSettings(RecordControllerSettings settings)
         {
-            _controllerSettings = settings;
             _controller = new RecordController(settings);
             _controller.OnStartRecording += OnStartRecording;
             _controller.OnPauseRecording += OnPauseRecording;
@@ -226,7 +275,7 @@ namespace ArtNet.Editor.DmxRecorder
                         if (EditorGUI.EndChangeCheck() || EditorUtility.IsDirty(_selectedRecorderItem.Settings))
                         {
                             // data changed
-                            _controllerSettings.Save();
+                            _controller.Settings.Save();
                             _selectedRecorderItem.UpdateState();
                         }
                     }
@@ -241,11 +290,12 @@ namespace ArtNet.Editor.DmxRecorder
         private void ShowRecorderContextMenu()
         {
             var menu = new GenericMenu();
+            var isDisabled = DisableEditRecordSettings();
 
             foreach (var type in _cachedRecorderTypes)
             {
                 var context = new GUIContent(type.Name);
-                if (DisableEditRecordSettings())
+                if (isDisabled)
                 {
                     menu.AddDisabledItem(context);
                 }
@@ -287,7 +337,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private RecorderItem CreateRecorderItem(RecorderSettings recorderSettings)
         {
-            var recorderItem = new RecorderItem(_controllerSettings, recorderSettings);
+            var recorderItem = new RecorderItem(_controller.Settings, recorderSettings);
             recorderItem.OnEnableStateChanged += enabled =>
             {
                 if (enabled)
@@ -314,7 +364,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             recorder.name = UniqueRecorderName(recorderName);
             recorder.Enabled = enabled;
-            _controllerSettings.AddRecorderSettings(recorder);
+            _controller.Settings.AddRecorderSettings(recorder);
 
             var item = CreateRecorderItem(recorder);
             _recorderList.Add(item);
@@ -332,7 +382,7 @@ namespace ArtNet.Editor.DmxRecorder
         private void DeleteRecorder(RecorderItem item)
         {
             var settings = item.Settings;
-            _controllerSettings.RemoveRecorderSettings(settings);
+            _controller.Settings.RemoveRecorderSettings(settings);
             _recorderList.Remove(item);
         }
 
@@ -344,7 +394,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private string UniqueRecorderName(string recorderName)
         {
-            var existingNames = _controllerSettings.RecorderSettings.Select(settings => settings.name).ToArray();
+            var existingNames = _controller.Settings.RecorderSettings.Select(settings => settings.name).ToArray();
             return ObjectNames.GetUniqueName(existingNames, recorderName);
         }
 
@@ -382,27 +432,38 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("recording");
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PauseButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PauseButton;
             _stopButton.SetEnabled(true);
+            SetSettingPanelEnabled(false);
         }
 
         private void OnPauseRecording()
         {
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("paused");
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
             _stopButton.SetEnabled(true);
         }
 
         private void OnFinishRecording()
         {
             _timeCode.ClearClassList();
-            _playButton.Clear();
-            _playButton.Add(new Image { image = IconHelper.PlayButton });
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+            SetSettingPanelEnabled(true);
+        }
+
+        private void SetRecordButtonEnabled(bool enabled, string tooltip = null)
+        {
+            _playButton.SetEnabled(enabled);
+            _playButton.tooltip = tooltip;
+        }
+
+        private void SetSettingPanelEnabled(bool enabled)
+        {
+            _addNewRecordPanel.SetEnabled(enabled);
+            _recorderSettingsPanel.SetEnabled(enabled);
         }
 
         private static string TimeCodeText(int time)

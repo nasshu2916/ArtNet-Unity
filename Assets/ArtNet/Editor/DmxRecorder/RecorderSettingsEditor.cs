@@ -14,6 +14,16 @@ namespace ArtNet.Editor.DmxRecorder
         }
 
         internal event Action OnRecorderValidated;
+        private SerializedProperty _universeFilter, _fileGenerator, _take;
+
+        public void OnEnable()
+        {
+            if (target == null) return;
+
+            _universeFilter = serializedObject.FindProperty("_universeFilter");
+            _fileGenerator = serializedObject.FindProperty("_fileGenerator");
+            _take = serializedObject.FindProperty("_take");
+        }
 
         public override void OnInspectorGUI()
         {
@@ -26,17 +36,14 @@ namespace ArtNet.Editor.DmxRecorder
             DrawHeader("Output File");
             EditorGUILayout.Separator();
 
-            var universeFilter = serializedObject.FindProperty("_universeFilter");
-            EditorGUILayout.PropertyField(universeFilter, GUIContent.none);
+            EditorGUILayout.PropertyField(_universeFilter, GUIContent.none);
             EditorGUILayout.Space();
 
-            var fileNameGenerator = serializedObject.FindProperty("_fileGenerator");
-            EditorGUILayout.PropertyField(fileNameGenerator, GUIContent.none);
+            EditorGUILayout.PropertyField(_fileGenerator, GUIContent.none);
 
             EditorGUILayout.Space();
 
-            var take = serializedObject.FindProperty("_take");
-            EditorGUILayout.PropertyField(take, Styles.TakeNumberLabel);
+            EditorGUILayout.PropertyField(_take, Styles.TakeNumberLabel);
 
             EditorGUILayout.Separator();
 
