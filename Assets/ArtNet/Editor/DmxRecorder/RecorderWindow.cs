@@ -27,6 +27,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private static IEnumerable<Type> _cachedRecorderTypes;
 
+        private VisualElement _addNewRecordPanel, _recorderSettingsPanel;
         private RecorderList _recorderList;
         private RecorderItem _selectedRecorderItem;
 
@@ -161,8 +162,8 @@ namespace ArtNet.Editor.DmxRecorder
             // RecordersPanel の作成
             var recordersPanel = visualElement.Q<VisualElement>("recordersPanel");
 
-            var addRecorderLabel = visualElement.Q<Label>("addRecorderLabel");
-            addRecorderLabel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
+            _addNewRecordPanel = visualElement.Q<Label>("addRecorderLabel");
+            _addNewRecordPanel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
             _recorderList = new RecorderList
             {
                 name = "recorderList",
@@ -175,10 +176,11 @@ namespace ArtNet.Editor.DmxRecorder
             _recorderList.OnContextMenu += ShowRecorderContextMenu;
             recordersPanel.Add(_recorderList);
 
-            var recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
-            recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
+            _recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
+            _recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
 
             SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+            SetEnabledControl(true);
         }
 
         private bool DisableEditRecordSettings()
@@ -404,6 +406,7 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Clear();
             _playButton.Add(new Image { image = IconHelper.PauseButton });
             _stopButton.SetEnabled(true);
+            SetEnabledControl(false);
         }
 
         private void OnPauseRecording()
@@ -422,6 +425,13 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Add(new Image { image = IconHelper.PlayButton });
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+            SetEnabledControl(true);
+        }
+
+        private void SetEnabledControl(bool enabled)
+        {
+            _addNewRecordPanel.SetEnabled(enabled);
+            _recorderSettingsPanel.SetEnabled(enabled);
         }
 
         private static string TimeCodeText(int time)
