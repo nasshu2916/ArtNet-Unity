@@ -94,6 +94,22 @@ namespace ArtNet.Editor.DmxRecorder
         private void OnUpdate()
         {
             if (IsRecording) _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+
+            var recordButtonsEnabled = true;
+            if (_controller == null)
+            {
+                recordButtonsEnabled = false;
+            }
+            else
+            {
+                var recorderSettings = _controller.Settings.RecorderSettings;
+                if (recorderSettings.All(x => !x.Enabled) || recorderSettings.Any(x => x.HasErrors()))
+                {
+                    recordButtonsEnabled = false;
+                }
+            }
+
+            SetRecordButtonEnabled(recordButtonsEnabled);
         }
 
         private void ReloadRecorderSettings()
@@ -180,7 +196,7 @@ namespace ArtNet.Editor.DmxRecorder
             _recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
 
             SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
-            SetEnabledControl(true);
+            SetSettingPanelEnabled(!DisableEditRecordSettings());
         }
 
         private bool DisableEditRecordSettings()
@@ -262,11 +278,12 @@ namespace ArtNet.Editor.DmxRecorder
         private void ShowRecorderContextMenu()
         {
             var menu = new GenericMenu();
+            var isDisabled = DisableEditRecordSettings();
 
             foreach (var type in _cachedRecorderTypes)
             {
                 var context = new GUIContent(type.Name);
-                if (DisableEditRecordSettings())
+                if (isDisabled)
                 {
                     menu.AddDisabledItem(context);
                 }
@@ -406,7 +423,7 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Clear();
             _playButton.Add(new Image { image = IconHelper.PauseButton });
             _stopButton.SetEnabled(true);
-            SetEnabledControl(false);
+            SetSettingPanelEnabled(false);
         }
 
         private void OnPauseRecording()
@@ -425,10 +442,15 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.Add(new Image { image = IconHelper.PlayButton });
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
-            SetEnabledControl(true);
+            SetSettingPanelEnabled(true);
         }
 
-        private void SetEnabledControl(bool enabled)
+        private void SetRecordButtonEnabled(bool enabled)
+        {
+            _playButton.SetEnabled(enabled);
+        }
+
+        private void SetSettingPanelEnabled(bool enabled)
         {
             _addNewRecordPanel.SetEnabled(enabled);
             _recorderSettingsPanel.SetEnabled(enabled);
