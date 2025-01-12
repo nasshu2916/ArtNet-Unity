@@ -81,6 +81,9 @@ EditableLabel > Label {
 
 #footer {
     padding: 6px;
-    flex-direction: row;
     justify-content: space-between;
+}
+
+#footerMessages > .StatusMessage {
+    flex-direction: row;
 }
