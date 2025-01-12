@@ -208,8 +208,44 @@ namespace ArtNet.Editor.DmxRecorder
             _recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
             _recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
 
+            var footerMessages = visualElement.Q<VisualElement>("footerMessages");
+            footerMessages.Add(new IMGUIContainer(StatusMessagesGUI));
+
             SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
             SetSettingPanelEnabled(!DisableEditRecordSettings());
+        }
+
+        private void StatusMessagesGUI()
+        {
+            var activeRecorders = _controller.Settings.RecorderSettings.Where(x => x.Enabled).ToArray();
+
+            if (activeRecorders.Length == 0)
+            {
+                ShowMessageInStatusBar("No active recorder", MessageType.Warning);
+                return;
+            }
+
+            if (activeRecorders.Any(x => x.HasErrors()))
+            {
+                ShowMessageInStatusBar("Some recorders have errors", MessageType.Error);
+                return;
+            }
+
+
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    ShowMessageInStatusBar("Recording", MessageType.Info);
+                    break;
+                case RecordingStatus.Paused:
+                    ShowMessageInStatusBar("Paused", MessageType.Warning);
+                    break;
+                case RecordingStatus.None:
+                    ShowMessageInStatusBar("Ready", MessageType.Info);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private bool DisableEditRecordSettings()
@@ -464,6 +500,30 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _addNewRecordPanel.SetEnabled(enabled);
             _recorderSettingsPanel.SetEnabled(enabled);
+        }
+
+        private static void ShowMessageInStatusBar(string msg, MessageType messageType)
+        {
+            var rect = EditorGUILayout.GetControlRect();
+
+            if (messageType != MessageType.None)
+            {
+                var iconRect = rect;
+                iconRect.width = iconRect.height;
+
+                var icon = messageType switch
+                {
+                    MessageType.Error => IconHelper.ErrorIcon,
+                    MessageType.Warning => IconHelper.WarningIcon,
+                    MessageType.Info => IconHelper.InfoIcon,
+                    _ => null
+                };
+
+                GUI.DrawTexture(iconRect, icon);
+                rect.xMin = iconRect.xMax + 5.0f;
+            }
+
+            GUI.Label(rect, msg);
         }
 
         private static string TimeCodeText(int time)

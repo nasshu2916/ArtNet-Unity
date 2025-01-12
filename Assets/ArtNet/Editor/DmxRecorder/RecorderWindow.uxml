@@ -18,6 +18,6 @@
         </ui:ScrollView>
     </ui:VisualElement>
     <ui:VisualElement name="footer">
-        <ui:Label name="footerStatusLabel" />
+        <ui:VisualElement name="footerMessages" style="min-height: 16px; max-height: 64px;" />
     </ui:VisualElement>
 </ui:UXML>
