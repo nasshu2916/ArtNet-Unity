@@ -11,6 +11,7 @@ namespace ArtNet.Editor.DmxRecorder
         private readonly TextField _textField;
 
         private bool _isEditing;
+        private bool _isEditable = true;
 
         public Action<string> OnValueChanged;
         private Focusable _previouslyFocused;
@@ -37,6 +38,11 @@ namespace ArtNet.Editor.DmxRecorder
             _label.SetEnabled(value);
         }
 
+        internal void SetEditable(bool value)
+        {
+            _isEditable = value;
+        }
+
         private void SetValueAndNotify(string newValue)
         {
             if (EqualityComparer<string>.Default.Equals(_label.text, newValue))
@@ -51,8 +57,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         internal void StartEditing()
         {
-            if (_isEditing)
-                return;
+            if (_isEditing || !_isEditable) return;
 
             _isEditing = true;
             _textField.value = _label.text;
@@ -64,8 +69,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void ApplyEditing()
         {
-            if (!_isEditing)
-                return;
+            if (!_isEditing) return;
 
             SetValueAndNotify(_textField.text);
 
@@ -76,8 +80,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void CancelEditing()
         {
-            if (!_isEditing)
-                return;
+            if (!_isEditing) return;
 
             _isEditing = false;
             Remove(_textField);

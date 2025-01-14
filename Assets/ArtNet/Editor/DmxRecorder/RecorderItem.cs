@@ -192,6 +192,12 @@ namespace ArtNet.Editor.DmxRecorder
             OnEnableStateChanged?.Invoke(value);
         }
 
+        public void SetReadOnly(bool value)
+        {
+            _editableLabel.SetEditable(!value);
+            _toggle.SetEnabled(!value);
+        }
+
         public void StartRenaming()
         {
             _editableLabel.StartEditing();
