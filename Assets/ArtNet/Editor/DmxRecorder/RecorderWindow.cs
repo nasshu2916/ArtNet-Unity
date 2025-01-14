@@ -235,13 +235,13 @@ namespace ArtNet.Editor.DmxRecorder
             switch (_controller.Status)
             {
                 case RecordingStatus.Recording:
-                    ShowMessageInStatusBar("Recording", MessageType.Info);
+                    ShowMessageInStatusBar("Recording", MessageType.None);
                     break;
                 case RecordingStatus.Paused:
-                    ShowMessageInStatusBar("Paused", MessageType.Warning);
+                    ShowMessageInStatusBar("Paused", MessageType.None);
                     break;
                 case RecordingStatus.None:
-                    ShowMessageInStatusBar("Ready", MessageType.Info);
+                    ShowMessageInStatusBar("Ready", MessageType.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
