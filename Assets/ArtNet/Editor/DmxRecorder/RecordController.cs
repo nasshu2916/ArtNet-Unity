@@ -19,13 +19,14 @@ namespace ArtNet.Editor.DmxRecorder
     public class RecordController
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private int _recordedTime;
 
         private List<(int, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
 
         public RecordControllerSettings Settings { get; }
+        public int RecordedTime { get; private set; }
+
         public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
 
         public RecordController(RecordControllerSettings settings)
@@ -47,7 +48,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             _recordedDmx = new List<(int, DmxPacket)>();
-            _recordedTime = 0;
+            RecordedTime = 0;
             Status = RecordingStatus.Recording;
             _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             _receiver.StartReceive();
@@ -64,7 +65,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.None;
-            _recordedTime = time;
+            RecordedTime = time;
 
             _receiver.StopReceive();
             StoreDmxPacket();
@@ -81,7 +82,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.Paused;
-            _recordedTime = time;
+            RecordedTime = time;
             _recordStartTime = 0;
             OnPauseRecording?.Invoke();
         }
@@ -103,11 +104,11 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Recording)
             {
-                return _recordedTime;
+                return RecordedTime;
             }
 
             var currentRecordTime = (int) (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _recordStartTime);
-            return currentRecordTime + _recordedTime;
+            return currentRecordTime + RecordedTime;
         }
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
