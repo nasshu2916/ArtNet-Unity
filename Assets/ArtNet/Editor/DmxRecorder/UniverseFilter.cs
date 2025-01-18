@@ -36,6 +36,13 @@ namespace ArtNet.Editor.DmxRecorder
             return _invalidFilterTextRegex.IsMatch(FilterText);
         }
 
+        public bool Invalid()
+        {
+            var errors = new List<string>();
+            GetErrors(errors);
+            return errors.Count > 0;
+        }
+
         public void GetErrors(List<string> errors)
         {
             if (Enabled == false) return;

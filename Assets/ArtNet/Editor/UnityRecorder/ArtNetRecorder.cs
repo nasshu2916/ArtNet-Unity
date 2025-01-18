@@ -53,8 +53,10 @@ namespace ArtNet.Editor.UnityRecorder
             }
         }
 
-        private static List<UniverseData> FilterFrames(List<UniverseData> frames, UniverseFilter filter)
+        private static List<UniverseData> FilterFrames(IReadOnlyList<UniverseData> frames, UniverseFilter filter)
         {
+            if (filter.Enabled == false || filter.Invalid()) return frames.ToList();
+
             var filterUniverse = filter.FilterUniverse();
             return frames.Where(f => filterUniverse.Contains(f.Universe)).ToList();
         }

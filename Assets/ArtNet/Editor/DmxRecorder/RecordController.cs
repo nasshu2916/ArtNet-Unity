@@ -153,9 +153,9 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        private static List<(int, DmxPacket)> FilterDmxPackets(List<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
+        private static List<(int, DmxPacket)> FilterDmxPackets(IReadOnlyList<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
         {
-            if (!universeFilter.Enabled) return recordedDmx;
+            if (!universeFilter.Enabled || universeFilter.Invalid()) return recordedDmx.ToList();
             var filterUniverse = universeFilter.FilterUniverse();
 
             var filteredDmx = new List<(int, DmxPacket)>();
