@@ -55,7 +55,8 @@ namespace ArtNet.Editor.UnityRecorder
 
         private static List<UniverseData> FilterFrames(List<UniverseData> frames, UniverseFilter filter)
         {
-            return frames.Where(f => filter.IsMatch((int) f.Universe)).ToList();
+            var filterUniverse = filter.FilterUniverse();
+            return frames.Where(f => filterUniverse.Contains(f.Universe)).ToList();
         }
 
         private static void BinaryWrite(List<UniverseData> frames, string absolutePath)

@@ -50,7 +50,9 @@ namespace ArtNet.Editor.DmxRecorder
                 FilterText = filterText
             };
             Assert.IsTrue(universeFilter.ParseFilterText(out var universeList));
-            CollectionAssert.AreEqual(expected, universeList);
+            var sortedList = new List<int>(universeList);
+            sortedList.Sort();
+            CollectionAssert.AreEqual(expected, sortedList);
         }
     }
 }

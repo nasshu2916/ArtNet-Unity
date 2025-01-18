@@ -156,12 +156,15 @@ namespace ArtNet.Editor.DmxRecorder
         private static List<(int, DmxPacket)> FilterDmxPackets(List<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
         {
             if (!universeFilter.Enabled) return recordedDmx;
+            var filterUniverse = universeFilter.FilterUniverse();
 
             var filteredDmx = new List<(int, DmxPacket)>();
             foreach (var (time, packet) in recordedDmx)
             {
-                if (universeFilter.IsMatch(packet.Universe)) continue;
-                filteredDmx.Add((time, packet));
+                if (filterUniverse.Contains(packet.Universe))
+                {
+                    filteredDmx.Add((time, packet));
+                }
             }
 
             return filteredDmx;
