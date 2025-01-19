@@ -2,25 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ArtNet.Packets;
 using UnityEngine;
 
-namespace ArtNet.Editor.DmxRecorder
+namespace ArtNet.Editor.DmxRecorder.IO
 {
-    public static class RecordData
+    public static class BinaryDmx
     {
         private const byte IdentifierLength = 4;
         private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
         private static readonly byte[] ReservedBuffer = new byte[11];
         private const byte Version = 0x02;
 
-        public static byte[] SerializePackets(IEnumerable<(int time, DmxPacket packet)> dmxPackets)
+        public static void Export(IEnumerable<UniverseData> universeData, string path)
         {
-            var universeData = dmxPackets.Select(packet =>
-                new UniverseData(packet.time / 1000f, packet.packet.Universe, packet.packet.Dmx));
-
-            return SerializeUniverseData(universeData);
+            var binary = SerializeUniverseData(universeData);
+            File.WriteAllBytes(path, binary);
         }
+
 
         public static byte[] SerializeUniverseData(IEnumerable<UniverseData> universeData)
         {

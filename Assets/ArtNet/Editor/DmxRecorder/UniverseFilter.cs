@@ -11,13 +11,13 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private const string SplitPattern = @"[\s,]+";
         private const string FilterRangePattern = @"^\d+[-~]\d+$";
+        private const string RangePattern = @"[-~]";
         private Regex _invalidFilterTextRegex = new(@"[^\d\s,-]");
 
         [SerializeField] private bool _enabled;
         [SerializeField] private string _filterText = "";
 
-        private bool _cacheEnabled;
-        private List<int> _cachedFilterUniverseList = new();
+        private HashSet<int> _cachedFilterUniverses;
 
         public bool Enabled { get => _enabled; set => _enabled = value; }
 
@@ -26,7 +26,7 @@ namespace ArtNet.Editor.DmxRecorder
             get => _filterText;
             set
             {
-                _cacheEnabled = false;
+                _cachedFilterUniverses = null;
                 _filterText = value;
             }
         }
@@ -34,6 +34,13 @@ namespace ArtNet.Editor.DmxRecorder
         public bool InvalidFilterTextFormat()
         {
             return _invalidFilterTextRegex.IsMatch(FilterText);
+        }
+
+        public bool Invalid()
+        {
+            var errors = new List<string>();
+            GetErrors(errors);
+            return errors.Count > 0;
         }
 
         public void GetErrors(List<string> errors)
@@ -58,60 +65,61 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public bool IsMatch(int universe)
+        public HashSet<int> FilterUniverse()
         {
-            if (Enabled == false) return true;
-
-            return GetUniverseList().Contains(universe);
-        }
-
-        public List<int> GetUniverseList()
-        {
-            ParseFilterText(out var universeList);
-            return universeList;
-        }
-
-        public bool ParseFilterText(out List<int> universeList)
-        {
-            universeList = new List<int>();
-            if (_cacheEnabled)
+            if (_cachedFilterUniverses != null)
             {
-                universeList = new List<int>(_cachedFilterUniverseList);
+                return _cachedFilterUniverses;
+            }
+
+            var result = ParseFilterText(out var universeList);
+            return result == false ? new HashSet<int>() : universeList;
+        }
+
+        public IEnumerable<T> Filter<T>(IEnumerable<T> frames, Func<T, int> universeSelector)
+        {
+            if (Enabled == false || Invalid()) return frames;
+
+            var filterUniverse = FilterUniverse();
+            return frames.Where(f => filterUniverse.Contains(universeSelector(f)));
+        }
+
+        public bool ParseFilterText(out HashSet<int> universes)
+        {
+            if (_cachedFilterUniverses is not null)
+            {
+                universes = _cachedFilterUniverses;
                 return true;
             }
 
-            var result = new HashSet<int>();
+            universes = new HashSet<int>();
             var filterParts = Regex.Split(FilterText, SplitPattern).Where(s => !string.IsNullOrWhiteSpace(s));
 
             foreach (var part in filterParts)
             {
+                // 数値のみの場合
                 if (int.TryParse(part, out var singleNumber))
                 {
-                    result.Add(singleNumber);
+                    universes.Add(singleNumber);
                     continue;
                 }
 
-                if (Regex.IsMatch(part, FilterRangePattern))
+                // 範囲以外の文字列が含まれている場合は false を返す
+                if (!Regex.IsMatch(part, FilterRangePattern)) return false;
+
+                var rangeParts = Regex.Split(part, RangePattern).Select(int.Parse).ToArray();
+                if (rangeParts.Length != 2) return false;
+
+                var start = rangeParts[0];
+                var end = rangeParts[1];
+                if (start > end)
                 {
-                    var rangeParts = Regex.Split(part, @"[-~]").Select(int.Parse).ToArray();
-                    if (rangeParts.Length != 2) return false;
-
-                    var start = rangeParts[0];
-                    var end = rangeParts[1];
-                    if (start > end)
-                    {
-                        (start, end) = (end, start);
-                    }
-                    result.UnionWith(Enumerable.Range(start, end - start + 1));
-                    continue;
+                    (start, end) = (end, start);
                 }
-
-                return false;
+                universes.UnionWith(Enumerable.Range(start, end - start + 1));
             }
 
-            universeList = result.OrderBy(x => x).ToList();
-            _cachedFilterUniverseList = new List<int>(universeList);
-            _cacheEnabled = true;
+            _cachedFilterUniverses = universes;
             return true;
         }
     }

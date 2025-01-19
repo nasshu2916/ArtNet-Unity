@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Editor.DmxRecorder;
+using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Editor.UnityRecorder.Input;
-using UnityEditor;
 using UnityEditor.Recorder;
 using UnityEngine;
 
@@ -35,7 +35,7 @@ namespace ArtNet.Editor.UnityRecorder
                 var absolutePath = settings.FileNameGenerator.BuildAbsolutePath(session);
                 absolutePath = FileNameGenerator.SanitizePath(absolutePath);
 
-                var filteredFrames = FilterFrames(frames, settings.UniverseFilter);
+                var filteredFrames = settings.UniverseFilter.Filter(frames, f => f.Universe);
                 switch (settings.OutputFormat)
                 {
                     case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.Binary:
@@ -46,35 +46,21 @@ namespace ArtNet.Editor.UnityRecorder
                         break;
                     default:
                         throw new System.ArgumentOutOfRangeException();
-
                 }
 
                 base.EndRecording(session);
             }
         }
 
-        private static List<UniverseData> FilterFrames(List<UniverseData> frames, UniverseFilter filter)
+        private static void BinaryWrite(IEnumerable<UniverseData> frames, string absolutePath)
         {
-            return frames.Where(f => filter.IsMatch((int) f.Universe)).ToList();
+            BinaryDmx.Export(frames, absolutePath);
         }
 
-        private static void BinaryWrite(List<UniverseData> frames, string absolutePath)
+        private static void AnimationClipWrite(IEnumerable<UniverseData> frames, string absolutePath)
         {
-            var binary = RecordData.SerializeUniverseData(frames);
-            System.IO.File.WriteAllBytes(absolutePath, binary);
-        }
-
-        private static void AnimationClipWrite(List<UniverseData> frames, string absolutePath)
-        {
-            var clip = new AnimationClip();
-            var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
-
-            AssetDatabase.CreateAsset(clip, clipName);
-            var timelineConverter = new TimelineConverter(frames);
-            timelineConverter.SaveToClip(clip);
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            var assetsPath = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
+            AnimationClipDmx.Export(frames, assetsPath);
         }
     }
 }

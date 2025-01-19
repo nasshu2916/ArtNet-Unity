@@ -1,4 +1,5 @@
 using System;
+using ArtNet.Editor.DmxRecorder.Util;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -190,6 +191,12 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             OnEnableStateChanged?.Invoke(value);
+        }
+
+        public void SetReadOnly(bool value)
+        {
+            _editableLabel.SetEditable(!value);
+            _toggle.SetEnabled(!value);
         }
 
         public void StartRenaming()

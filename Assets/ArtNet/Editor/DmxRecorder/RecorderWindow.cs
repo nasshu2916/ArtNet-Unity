@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ArtNet.Editor.DmxRecorder.Util;
 using UnityEditor;
 using UnityEditor.Presets;
 using UnityEngine;
@@ -471,6 +472,7 @@ namespace ArtNet.Editor.DmxRecorder
             _playButton.style.backgroundImage = (StyleBackground) IconHelper.PauseButton;
             _stopButton.SetEnabled(true);
             SetSettingPanelEnabled(false);
+            _recorderList.Items.ForEach(x => x.SetReadOnly(true));
         }
 
         private void OnPauseRecording()
@@ -488,6 +490,7 @@ namespace ArtNet.Editor.DmxRecorder
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
             SetSettingPanelEnabled(true);
+            _recorderList.Items.ForEach(x => x.SetReadOnly(false));
         }
 
         private void SetRecordButtonEnabled(bool enabled, string tooltip = null)

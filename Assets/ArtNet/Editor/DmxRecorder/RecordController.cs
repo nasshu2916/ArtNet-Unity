@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using ArtNet.Enums;
@@ -19,13 +18,14 @@ namespace ArtNet.Editor.DmxRecorder
     public class RecordController
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private int _recordedTime;
 
         private List<(int, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
 
         public RecordControllerSettings Settings { get; }
+        public int RecordedTime { get; private set; }
+
         public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
 
         public RecordController(RecordControllerSettings settings)
@@ -47,7 +47,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             _recordedDmx = new List<(int, DmxPacket)>();
-            _recordedTime = 0;
+            RecordedTime = 0;
             Status = RecordingStatus.Recording;
             _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             _receiver.StartReceive();
@@ -64,7 +64,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.None;
-            _recordedTime = time;
+            RecordedTime = time;
 
             _receiver.StopReceive();
             StoreDmxPacket();
@@ -81,7 +81,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var time = GetRecordingTime();
             Status = RecordingStatus.Paused;
-            _recordedTime = time;
+            RecordedTime = time;
             _recordStartTime = 0;
             OnPauseRecording?.Invoke();
         }
@@ -103,11 +103,11 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Recording)
             {
-                return _recordedTime;
+                return RecordedTime;
             }
 
             var currentRecordTime = (int) (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _recordStartTime);
-            return currentRecordTime + _recordedTime;
+            return currentRecordTime + RecordedTime;
         }
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
@@ -136,54 +136,12 @@ namespace ArtNet.Editor.DmxRecorder
             var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
-                var recordedDmx = FilterDmxPackets(_recordedDmx, setting.UniverseFilter);
-                switch (setting)
-                {
-                    case BinaryRecorderSettings binarySettings:
-                        StoreBinary(recordedDmx, binarySettings);
-                        break;
-                    case AnimationRecorderSettings animationSettings:
-                        StoreAnimation(recordedDmx, animationSettings);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe)
+                    .Select(x => new UniverseData(x.Item1 / 1000f, x.Item2.Universe, x.Item2.Dmx));
+
+                setting.StoreUniverseData(universeData);
                 setting.Take++;
             }
-        }
-
-        private static List<(int, DmxPacket)> FilterDmxPackets(List<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
-        {
-            if (!universeFilter.Enabled) return recordedDmx;
-
-            var filteredDmx = new List<(int, DmxPacket)>();
-            foreach (var (time, packet) in recordedDmx)
-            {
-                if (universeFilter.IsMatch(packet.Universe)) continue;
-                filteredDmx.Add((time, packet));
-            }
-
-            return filteredDmx;
-        }
-
-        private static void StoreBinary(IReadOnlyList<(int time, DmxPacket packet)> recordDmx, BinaryRecorderSettings settings)
-        {
-            settings.FileGenerator.CreateDirectory();
-
-            var binary = RecordData.SerializePackets(recordDmx);
-            var path = settings.OutputAbsolutePath;
-            File.WriteAllBytes(path, binary);
-        }
-
-        private static void StoreAnimation(IReadOnlyList<(int, DmxPacket)> recordDmx, AnimationRecorderSettings settings)
-        {
-            settings.FileGenerator.CreateDirectory();
-            var path = settings.OutputAssetPath;
-
-            var universeData = recordDmx.Select(packet => new UniverseData(packet.Item1 / 1000f, packet.Item2
-                .Universe, packet.Item2.Dmx));
-            var timelineConverter = new TimelineConverter(universeData);
-            timelineConverter.SaveDmxTimelineClips(path);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Packets;
 using UnityEditor;
 using UnityEngine;
@@ -50,10 +51,10 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var bytes = binary.bytes;
-            var universeData = RecordData.Deserialize(bytes);
+            var universeData = BinaryDmx.Deserialize(bytes);
 
-            TimelineConverter timelineConverter = new(universeData);
-            timelineConverter.SaveDmxTimelineClips(convertAnim.OutputDirectory + "/ArtNetDmx.anim");
+            var output = convertAnim.OutputDirectory + "/ArtNetDmx.anim";
+            AnimationClipDmx.Export(universeData, output);
 
             Debug.Log("Conversion complete");
         }
@@ -103,12 +104,13 @@ namespace ArtNet.Editor.DmxRecorder
                 }
             }
 
-            var storeData = RecordData.SerializePackets(dmxPackets);
-
+            var dmxUniverseData = dmxPackets.Select(packet =>
+                new UniverseData(packet.Item1 / 1000f, packet.Item2.Universe, packet.Item2.Dmx)).ToList();
 
             var path = convertAnim.OutputDirectory + "/DmxPackets.bytes";
             var exists = File.Exists(path);
-            File.WriteAllBytes(path, storeData);
+            BinaryDmx.Export(dmxUniverseData, path);
+
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
             Debug.Log("Conversion complete");

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Packets;
 using UnityEngine;
 using Random = System.Random;
@@ -46,7 +47,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             SenderSettings.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
-            var universeData = RecordData.Deserialize(data).OrderBy(x => x.Time).ToList();
+            var universeData = BinaryDmx.Deserialize(data).OrderBy(x => x.Time).ToList();
             foreach (var dataPacket in universeData)
             {
                 var packet = new DmxPacket

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -88,5 +87,7 @@ namespace ArtNet.Editor.DmxRecorder
         protected virtual void OnBeforeSerialize() { }
         protected virtual void OnAfterDeserialize() { }
         public virtual void OnAfterDuplicate() { }
+
+        public abstract void StoreUniverseData(IEnumerable<UniverseData> universeData);
     }
 }
