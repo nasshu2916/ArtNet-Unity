@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace ArtNet.Editor.DmxRecorder
+namespace ArtNet.Editor.DmxRecorder.IO
 {
     public class TimelineConverter
     {
@@ -50,16 +49,6 @@ namespace ArtNet.Editor.DmxRecorder
                     clip.SetCurve($"Universe{universe}", typeof(DmxData), $"Ch{i + 1:D3}", curve);
                 }
             }
-        }
-
-        public void SaveDmxTimelineClips(string path)
-        {
-            var clip = new AnimationClip { name = "ArtNetDmx" };
-            SaveToClip(clip);
-
-            AssetDatabase.CreateAsset(clip, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
         }
 
         public List<UniverseData> ToUniverseData()

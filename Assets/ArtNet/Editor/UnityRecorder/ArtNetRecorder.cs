@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Editor.DmxRecorder;
+using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Editor.UnityRecorder.Input;
-using UnityEditor;
 using UnityEditor.Recorder;
 using UnityEngine;
 
@@ -53,31 +53,23 @@ namespace ArtNet.Editor.UnityRecorder
             }
         }
 
-        private static List<UniverseData> FilterFrames(IReadOnlyList<UniverseData> frames, UniverseFilter filter)
+        private static IEnumerable<UniverseData> FilterFrames(IEnumerable<UniverseData> frames, UniverseFilter filter)
         {
-            if (filter.Enabled == false || filter.Invalid()) return frames.ToList();
+            if (filter.Enabled == false || filter.Invalid()) return frames;
 
             var filterUniverse = filter.FilterUniverse();
-            return frames.Where(f => filterUniverse.Contains(f.Universe)).ToList();
+            return frames.Where(f => filterUniverse.Contains(f.Universe));
         }
 
-        private static void BinaryWrite(List<UniverseData> frames, string absolutePath)
+        private static void BinaryWrite(IEnumerable<UniverseData> frames, string absolutePath)
         {
-            var binary = RecordData.SerializeUniverseData(frames);
-            System.IO.File.WriteAllBytes(absolutePath, binary);
+            BinaryDmx.Export(frames, absolutePath);
         }
 
-        private static void AnimationClipWrite(List<UniverseData> frames, string absolutePath)
+        private static void AnimationClipWrite(IEnumerable<UniverseData> frames, string absolutePath)
         {
-            var clip = new AnimationClip();
-            var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
-
-            AssetDatabase.CreateAsset(clip, clipName);
-            var timelineConverter = new TimelineConverter(frames);
-            timelineConverter.SaveToClip(clip);
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            var assetsPath = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
+            AnimationClipDmx.Export(frames, assetsPath);
         }
     }
 }
