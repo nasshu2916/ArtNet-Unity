@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using UnityEngine;
@@ -138,37 +136,12 @@ namespace ArtNet.Editor.DmxRecorder
             var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
-                var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe).
-                    Select(x => new UniverseData(x.Item1 / 1000f, x.Item2.Universe, x.Item2.Dmx));
-                switch (setting)
-                {
-                    case BinaryRecorderSettings binarySettings:
-                        StoreBinary(universeData, binarySettings);
-                        break;
-                    case AnimationRecorderSettings animationSettings:
-                        StoreAnimation(universeData, animationSettings);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe)
+                    .Select(x => new UniverseData(x.Item1 / 1000f, x.Item2.Universe, x.Item2.Dmx));
+
+                setting.StoreUniverseData(universeData);
                 setting.Take++;
             }
-        }
-
-        private static void StoreBinary(IEnumerable<UniverseData> universeData, BinaryRecorderSettings settings)
-        {
-            settings.FileGenerator.CreateDirectory();
-            var path = settings.OutputAbsolutePath;
-
-            BinaryDmx.Export(universeData, path);
-        }
-
-        private static void StoreAnimation(IEnumerable<UniverseData> universeData, AnimationRecorderSettings settings)
-        {
-            settings.FileGenerator.CreateDirectory();
-            var path = settings.OutputAssetPath;
-
-            AnimationClipDmx.Export(universeData, path);
         }
     }
 }
