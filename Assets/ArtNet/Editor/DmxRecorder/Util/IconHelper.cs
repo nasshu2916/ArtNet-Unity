@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace ArtNet.Editor.DmxRecorder
+namespace ArtNet.Editor.DmxRecorder.Util
 {
     public static class IconHelper
     {

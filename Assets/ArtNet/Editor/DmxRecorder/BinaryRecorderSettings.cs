@@ -1,3 +1,4 @@
+using ArtNet.Editor.DmxRecorder.Util;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
