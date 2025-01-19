@@ -76,6 +76,14 @@ namespace ArtNet.Editor.DmxRecorder
             return result == false ? new HashSet<int>() : universeList;
         }
 
+        public IEnumerable<T> Filter<T>(IEnumerable<T> frames, Func<T, int> universeSelector)
+        {
+            if (Enabled == false || Invalid()) return frames;
+
+            var filterUniverse = FilterUniverse();
+            return frames.Where(f => filterUniverse.Contains(universeSelector(f)));
+        }
+
         public bool ParseFilterText(out HashSet<int> universes)
         {
             if (_cachedFilterUniverses is not null)

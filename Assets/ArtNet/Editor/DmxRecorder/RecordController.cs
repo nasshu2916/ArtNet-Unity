@@ -138,8 +138,8 @@ namespace ArtNet.Editor.DmxRecorder
             var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
-                var universeData = FilterDmxPackets(_recordedDmx, setting.UniverseFilter).Select(packet =>
-                    new UniverseData(packet.Item1 / 1000f, packet.Item2.Universe, packet.Item2.Dmx));
+                var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe).
+                    Select(x => new UniverseData(x.Item1 / 1000f, x.Item2.Universe, x.Item2.Dmx));
                 switch (setting)
                 {
                     case BinaryRecorderSettings binarySettings:
@@ -153,23 +153,6 @@ namespace ArtNet.Editor.DmxRecorder
                 }
                 setting.Take++;
             }
-        }
-
-        private static List<(int, DmxPacket)> FilterDmxPackets(IReadOnlyList<(int, DmxPacket)> recordedDmx, UniverseFilter universeFilter)
-        {
-            if (!universeFilter.Enabled || universeFilter.Invalid()) return recordedDmx.ToList();
-            var filterUniverse = universeFilter.FilterUniverse();
-
-            var filteredDmx = new List<(int, DmxPacket)>();
-            foreach (var (time, packet) in recordedDmx)
-            {
-                if (filterUniverse.Contains(packet.Universe))
-                {
-                    filteredDmx.Add((time, packet));
-                }
-            }
-
-            return filteredDmx;
         }
 
         private static void StoreBinary(IEnumerable<UniverseData> universeData, BinaryRecorderSettings settings)
