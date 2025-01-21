@@ -164,7 +164,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var skinStyleSheet = EditorGUIUtility.isProSkin ? _darkStyleSheet : _lightStyleSheet;
-            if (_darkStyleSheet == null)
+            if (skinStyleSheet == null)
             {
                 Debug.LogError("SkinStyleSheet is null");
                 return;
