@@ -78,9 +78,9 @@ namespace ArtNet.Editor.DmxRecorder
         {
             EditorUtility.SetDirty(this);
             Undo.RegisterCompleteObjectUndo(this, "Add Recorder Settings");
-            if (!_recorderSettings.Contains(settings))
+            if (!RecorderSettings.Contains(settings))
             {
-                _recorderSettings.Add(settings);
+                RecorderSettings.Add(settings);
             }
 
             Save();
@@ -88,11 +88,11 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void RemoveRecorderSettings(RecorderSettings settings)
         {
-            if (!_recorderSettings.Contains(settings)) return;
+            if (!RecorderSettings.Contains(settings)) return;
 
             EditorUtility.SetDirty(this);
             Undo.RegisterCompleteObjectUndo(this, "Remove Recorder Settings");
-            _recorderSettings.Remove(settings);
+            RecorderSettings.Remove(settings);
             Undo.DestroyObjectImmediate(settings);
             Save();
         }

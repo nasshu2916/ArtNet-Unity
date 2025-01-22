@@ -23,14 +23,14 @@ namespace ArtNet.Editor.DmxRecorder
 
         private long _recordStartTime;
 
-        public RecordControllerSettings Settings { get; }
+        public RecordControllerSettings ControllerSettings { get; }
         public int RecordedTime { get; private set; }
 
         public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
 
-        public RecordController(RecordControllerSettings settings)
+        public RecordController(RecordControllerSettings controllerSettings)
         {
-            Settings = settings;
+            ControllerSettings = controllerSettings;
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
 
@@ -133,7 +133,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
+            var recorderSettings = ControllerSettings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
                 var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe)
