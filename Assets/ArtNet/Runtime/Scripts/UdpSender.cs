@@ -5,18 +5,11 @@ namespace ArtNet
 {
     public class UdpSender
     {
-        private Socket _socket;
+        private readonly Socket _socket = new(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-        public UdpSender(int port)
+        public void Send(byte[] data, IPAddress ip, int port)
         {
-            Port = port;
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        }
-        public int Port { get; }
-
-        public void Send(byte[] data, IPAddress ip)
-        {
-            _socket.SendTo(data, new IPEndPoint(ip, Port));
+            _socket.SendTo(data, new IPEndPoint(ip, port));
         }
     }
 }

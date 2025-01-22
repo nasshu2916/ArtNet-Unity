@@ -2,11 +2,11 @@
 {
     public class PlayController
     {
-        public PlayControllerSettings Settings { get; }
+        public PlayControllerSetting ControllerSetting { get; }
 
-        public PlayController(PlayControllerSettings settings)
+        public PlayController(PlayControllerSetting controllerSetting)
         {
-            Settings = settings;
+            ControllerSetting = controllerSetting;
         }
     }
 }

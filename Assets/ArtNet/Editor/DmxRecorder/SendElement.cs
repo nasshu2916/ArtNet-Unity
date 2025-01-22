@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    [Serializable]
-    public class SendElement
+    public class SendElement : ScriptableObject
     {
         [SerializeField] private string _ip = "127.0.0.1";
         [SerializeField] private int _port = ArtNetReceiver.ArtNetPort;

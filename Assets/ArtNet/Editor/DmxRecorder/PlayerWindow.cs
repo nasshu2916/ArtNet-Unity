@@ -11,12 +11,7 @@ namespace ArtNet.Editor.DmxRecorder
         [SerializeField] private StyleSheet _styleSheet;
         [SerializeField] private StyleSheet _darkStyleSheet, _lightStyleSheet;
 
-        private readonly Sender _sender = new();
-
-        private bool _isAnyChange;
-        private bool _isPlaying;
-
-        private int _lastTime;
+        private PlayController _controller;
 
         private string _senderFilePath;
         private ProgressBar _senderProgressBar;
@@ -98,19 +93,6 @@ namespace ArtNet.Editor.DmxRecorder
             playButton.Add(playButtonImage);
             playButton.clicked += () =>
             {
-                if (_sender.IsPlaying)
-                {
-                    _sender.Stop();
-                }
-                else
-                {
-                    _sender.Play();
-                }
-            };
-            _sender.ChangedPlaying += isPlaying =>
-            {
-                _isPlaying = isPlaying;
-                _isAnyChange = true;
             };
 
             _senderTimeLabel = root.Q<Label>("playTimeLabel");
@@ -118,29 +100,40 @@ namespace ArtNet.Editor.DmxRecorder
             _senderTimeSlider.RegisterValueChangedCallback((evt) =>
             {
                 var time = (int) evt.newValue;
-                _sender.ChangePlayTime(time);
+                // _controller.ChangePlayTime(time);
                 _senderTimeLabel.text = TimeText(time);
             });
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
 
-            _sender.TimeChanged += OnTimeChanged;
+            SetPlayControllerSettings(PlayControllerSetting.GetOrNewGlobalSetting());
+        }
+
+        private void SetPlayControllerSettings(PlayControllerSetting setting)
+        {
+            _controller = new PlayController(setting);
+            // _controller.OnStartRecording += OnStartRecording;
+            // _controller.OnPauseRecording += OnPauseRecording;
+            // _controller.OnStopRecording += OnFinishRecording;
+            // _controller.OnResumeRecording += OnStartRecording;
+            //
+            // ReloadPlayerSettings();
         }
 
         private void LoadDmxFile(string path)
         {
-            _sender.Load(path);
-
-            var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
-
-            var maxSeconds = _sender.MaxTime / 1000;
-            var minutes = maxSeconds / 60;
-            var seconds = maxSeconds % 60;
-            maxTimeLabel.text = $"{minutes}:{seconds:D2}";
-            var maxValue = _sender.MaxTime;
-
-            _senderTimeSlider.highValue = maxValue;
-            _senderProgressBar.highValue = maxValue;
+            // _sender.Load(path);
+            //
+            // var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
+            //
+            // var maxSeconds = _sender.MaxTime / 1000;
+            // var minutes = maxSeconds / 60;
+            // var seconds = maxSeconds % 60;
+            // maxTimeLabel.text = $"{minutes}:{seconds:D2}";
+            // var maxValue = _sender.MaxTime;
+            //
+            // _senderTimeSlider.highValue = maxValue;
+            // _senderProgressBar.highValue = maxValue;
         }
 
         private static string TimeText(int time)
@@ -149,12 +142,6 @@ namespace ArtNet.Editor.DmxRecorder
             var seconds = time / 1000 % 60;
             var milliseconds = time % 1000;
             return $"{minutes}:{seconds:D2}.{milliseconds:D3}";
-        }
-
-        private void OnTimeChanged(int time)
-        {
-            _lastTime = time;
-            _isAnyChange = true;
         }
     }
 }

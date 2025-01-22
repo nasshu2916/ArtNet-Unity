@@ -85,7 +85,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (state == PlayModeStateChange.EnteredEditMode)
             {
-                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
                 ReloadRecorderSettings();
                 Repaint();
             }
@@ -212,7 +212,7 @@ namespace ArtNet.Editor.DmxRecorder
             var footerMessages = visualElement.Q<VisualElement>("footerMessages");
             footerMessages.Add(new IMGUIContainer(StatusMessagesGUI));
 
-            SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+            SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
             SetSettingPanelEnabled(!DisableEditRecordSettings());
         }
 

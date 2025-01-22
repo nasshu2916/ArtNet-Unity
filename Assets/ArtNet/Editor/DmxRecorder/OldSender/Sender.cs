@@ -16,7 +16,7 @@ namespace ArtNet.Editor.DmxRecorder
         public delegate void OnChangedPlaying(bool isPlaying);
         public delegate void OnTimeChanged(int time);
         private readonly Dictionary<int, byte> _sequenceMap = new();
-        private readonly UdpSender _udpSender = new(ArtNetReceiver.ArtNetPort);
+        private readonly UdpSender _udpSender = new();
         private CancellationTokenSource _cancellationTokenSource;
         private Task _task;
 
@@ -114,7 +114,7 @@ namespace ArtNet.Editor.DmxRecorder
             _sequenceMap[universe] = sequence;
 
             var data = packet.ToByteArray();
-            _udpSender.Send(data, SenderSettings.Ip);
+            _udpSender.Send(data, SenderSettings.Ip, ArtNetReceiver.ArtNetPort);
         }
 
         private void IsPlayingChanged(bool isPlaying)

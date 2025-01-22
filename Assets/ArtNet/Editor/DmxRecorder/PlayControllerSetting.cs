@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public class PlayControllerSettings : ScriptableObject, ISerializationCallbackReceiver
+    public class PlayControllerSetting : ControllerSettingBase
     {
         [SerializeField] private List<SendElement> _sendElements = new();
         [SerializeField] private bool _isLoop;
@@ -19,7 +19,20 @@ namespace ArtNet.Editor.DmxRecorder
             return _sendElements.Where(e => e.IsEnabled).Select(e => e.EndPoint);
         }
 
-        public void OnBeforeSerialize() { }
-        public void OnAfterDeserialize() { }
+        public static PlayControllerSetting GetOrNewGlobalSetting()
+        {
+            return GetOrNewGlobalSetting<PlayControllerSetting>("DmxPlayerSettings");
+        }
+
+        protected override Object[] SaveObjects()
+        {
+            var sendElementsCopy = _sendElements.ToArray();
+            var objs = new Object[sendElementsCopy.Length + 1];
+            objs[0] = this;
+
+            for (var i = 0; i < sendElementsCopy.Length; ++i)
+                objs[i + 1] = sendElementsCopy[i];
+            return objs;
+        }
     }
 }
