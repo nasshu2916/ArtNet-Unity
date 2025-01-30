@@ -1,19 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
     public class PlayControllerSetting : ControllerSettingBase
     {
-        [SerializeField] private List<SendElement> _sendElements = new();
+        [SerializeField, NotNull, ItemNotNull] private List<SendElement> _sendElements = new();
         [SerializeField] private bool _isLoop;
         [SerializeField] private float _speed = 1;
 
         public bool IsLoop { get => _isLoop; set => _isLoop = value; }
         public float Speed { get => _speed; set => _speed = value; }
 
+        [NotNull, ItemNotNull]
         public IEnumerable<EndPoint> SendEndPoints()
         {
             return _sendElements.Where(e => e.IsEnabled).Select(e => e.EndPoint);

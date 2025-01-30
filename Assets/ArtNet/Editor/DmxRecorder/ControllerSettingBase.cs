@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -12,19 +13,21 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected abstract UnityEngine.Object[] SaveObjects();
 
-        protected static T GetOrNewGlobalSetting<T>(string name) where T : ControllerSettingBase, new()
+        [NotNull]
+        protected static T GetOrNewGlobalSetting<T>([NotNull] string name) where T : ControllerSettingBase, new()
         {
             var globalPath = Path.Combine(Application.dataPath, "..", "Library", "ArtNet", $"{name}.asset");
-            return Load<T>(globalPath, name);
+            return LoadOrNew<T>(globalPath, name);
         }
 
-        private static T Load<T>(string path, string defaultName) where T : ControllerSettingBase
+        [NotNull]
+        private static T LoadOrNew<T>(string path, [NotNull] string defaultName) where T : ControllerSettingBase
         {
             T setting;
             try
             {
                 var objs = InternalEditorUtility.LoadSerializedFileAndForget(path);
-                setting = objs.FirstOrDefault(o => o is T) as T;
+                setting = objs?.FirstOrDefault(o => o is T) as T;
             }
             catch (Exception e)
             {
@@ -34,7 +37,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             if (setting == null)
             {
-                setting = CreateInstance<T>();
+                setting = CreateInstance<T>()!;
                 // setting.hideFlags = HideFlags.HideAndDontSave;
                 setting.name = defaultName;
             }
