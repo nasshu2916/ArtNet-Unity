@@ -1,4 +1,4 @@
-﻿using ArtNet.Editor.DmxRecorder.Util;
+using ArtNet.Editor.DmxRecorder.Util;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -74,9 +74,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             var selectPlayFileButton = root.Q<Button>("selectPlayFileButton");
             selectPlayFileButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("Folder Icon").image
-                }
+            {
+                image = EditorGUIUtility.IconContent("Folder Icon").image
+            }
             );
             selectPlayFileButton.clicked += () =>
             {
