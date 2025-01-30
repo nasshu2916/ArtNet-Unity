@@ -36,5 +36,19 @@ namespace ArtNet.Editor.DmxRecorder
                 objs[i + 1] = sendElementsCopy[i];
             return objs;
         }
+
+        public int CalcDeltaTime(int deltaTime)
+        {
+            var addTime = deltaTime * Speed;
+            var addTimeInt = (int) addTime;
+
+            // float の端数をランダムで追加
+            if (addTime - addTimeInt > new System.Random().NextDouble())
+            {
+                addTimeInt += 1;
+            }
+
+            return addTimeInt;
+        }
     }
 }

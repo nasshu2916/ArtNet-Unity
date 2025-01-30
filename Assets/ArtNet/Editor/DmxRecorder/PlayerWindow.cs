@@ -1,4 +1,5 @@
 ﻿using ArtNet.Editor.DmxRecorder.Util;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -22,7 +23,7 @@ namespace ArtNet.Editor.DmxRecorder
         [MenuItem("ArtNet/DMX Player")]
         public static void ShowWindow()
         {
-            var window = GetWindow<PlayerWindow>();
+            var window = GetWindow<PlayerWindow>()!;
             window.titleContent = new GUIContent("DMX Player");
         }
 
@@ -91,9 +92,7 @@ namespace ArtNet.Editor.DmxRecorder
             var playButton = root.Q<Button>("PlayButton");
             var playButtonImage = new Image { image = IconHelper.PlayButton };
             playButton.Add(playButtonImage);
-            playButton.clicked += () =>
-            {
-            };
+            playButton.clicked += () => { _controller?.Play(); };
 
             _senderTimeLabel = root.Q<Label>("playTimeLabel");
             _senderTimeSlider = root.Q<Slider>("playSlider");
@@ -106,10 +105,10 @@ namespace ArtNet.Editor.DmxRecorder
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
 
-            SetPlayControllerSettings(PlayControllerSetting.GetOrNewGlobalSetting());
+            SetPlayControllerSettings(PlayControllerSetting.GetOrNewGlobalSetting()!);
         }
 
-        private void SetPlayControllerSettings(PlayControllerSetting setting)
+        private void SetPlayControllerSettings([NotNull] PlayControllerSetting setting)
         {
             _controller = new PlayController(setting);
             // _controller.OnStartRecording += OnStartRecording;
@@ -122,7 +121,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void LoadDmxFile(string path)
         {
-            // _sender.Load(path);
+            _controller?.LoadFile(path);
             //
             // var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
             //
