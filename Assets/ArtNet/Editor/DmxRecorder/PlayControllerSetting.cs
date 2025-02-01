@@ -2,23 +2,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
     public class PlayControllerSetting : ControllerSettingBase
     {
-        [SerializeField, NotNull, ItemNotNull] private List<SendElement> _sendElements = new();
+        [SerializeField, NotNull, ItemNotNull] private List<SendDestination> _sendDestinations = new();
         [SerializeField] private bool _isLoop;
         [SerializeField] private float _speed = 1;
 
+        [NotNull, ItemNotNull] public List<SendDestination> SendDestinations => _sendDestinations;
         public bool IsLoop { get => _isLoop; set => _isLoop = value; }
         public float Speed { get => _speed; set => _speed = value; }
 
         [NotNull, ItemNotNull]
         public IEnumerable<EndPoint> SendEndPoints()
         {
-            return _sendElements.Where(e => e.IsEnabled).Select(e => e.EndPoint);
+            return SendDestinations.Where(e => e.IsEnabled).Select(e => e.EndPoint);
         }
 
         public static PlayControllerSetting GetOrNewGlobalSetting()
@@ -28,13 +30,25 @@ namespace ArtNet.Editor.DmxRecorder
 
         protected override Object[] SaveObjects()
         {
-            var sendElementsCopy = _sendElements.ToArray();
+            var sendElementsCopy = SendDestinations.ToArray();
             var objs = new Object[sendElementsCopy.Length + 1];
             objs[0] = this;
 
             for (var i = 0; i < sendElementsCopy.Length; ++i)
                 objs[i + 1] = sendElementsCopy[i];
             return objs;
+        }
+
+        public void AddSendDestination([NotNull] SendDestination sendElement)
+        {
+            EditorUtility.SetDirty(this);
+            Undo.RegisterCompleteObjectUndo(this, "Add Send Destination");
+            if (!SendDestinations.Contains(sendElement))
+            {
+                SendDestinations.Add(sendElement);
+            }
+
+            Save();
         }
 
         public int CalcDeltaTime(int deltaTime)

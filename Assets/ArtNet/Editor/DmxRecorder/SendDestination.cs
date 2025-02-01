@@ -1,10 +1,9 @@
-using System;
 using System.Net;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    public class SendElement : ScriptableObject
+    public class SendDestination : ScriptableObject
     {
         [SerializeField] private string _ip = "127.0.0.1";
         [SerializeField] private int _port = ArtNetReceiver.ArtNetPort;
@@ -20,7 +19,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         public bool IsEnabled => IsValidated && IsSend;
 
-        public SendElement()
+        public SendDestination()
         {
             if (SetEndpoint(Ip, Port) == false)
             {

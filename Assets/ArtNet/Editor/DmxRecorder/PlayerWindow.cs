@@ -1,3 +1,4 @@
+using System.Linq;
 using ArtNet.Editor.DmxRecorder.Util;
 using JetBrains.Annotations;
 using UnityEditor;
@@ -8,6 +9,10 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public class PlayerWindow : EditorWindow
     {
+        private class DestinationList : ElementItemList<SendDestinationItem>
+        {
+        }
+
         [SerializeField] private VisualTreeAsset _visualTree;
         [SerializeField] private StyleSheet _styleSheet;
         [SerializeField] private StyleSheet _darkStyleSheet, _lightStyleSheet;
@@ -19,6 +24,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private Label _senderTimeLabel;
         private Slider _senderTimeSlider;
+
+        private DestinationList _destinationList;
 
         [MenuItem("ArtNet/DMX Player")]
         public static void ShowWindow()
@@ -73,11 +80,7 @@ namespace ArtNet.Editor.DmxRecorder
             senderFileNameField.value = _senderFilePath;
 
             var selectPlayFileButton = root.Q<Button>("selectPlayFileButton");
-            selectPlayFileButton.Add(new Image()
-            {
-                image = EditorGUIUtility.IconContent("Folder Icon").image
-            }
-            );
+            selectPlayFileButton.Add(new Image { image = EditorGUIUtility.IconContent("Folder Icon").image });
             selectPlayFileButton.clicked += () =>
             {
                 var selectedFile =
@@ -105,6 +108,25 @@ namespace ArtNet.Editor.DmxRecorder
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
 
+            // ===== Send Destination =====
+
+            var sendDestinationsPanel = visualElement.Q<VisualElement>("sendDestinationsPanel")!;
+            var addDestinationLabel = root.Q<Label>("addDestinationLabel")!;
+            addDestinationLabel.RegisterCallback<ClickEvent>(_ =>
+            {
+                var menu = new GenericMenu();
+                var context = new GUIContent("Add New Send Destination");
+                menu.AddItem(context, false, () => AddNewSendDestination());
+
+                menu.ShowAsContext();
+            });
+            _destinationList = new DestinationList
+            {
+                name = "destinationList",
+                focusable = true
+            };
+            sendDestinationsPanel.Add(_destinationList);
+
             SetPlayControllerSettings(PlayControllerSetting.GetOrNewGlobalSetting()!);
         }
 
@@ -115,11 +137,40 @@ namespace ArtNet.Editor.DmxRecorder
             // _controller.OnPauseRecording += OnPauseRecording;
             // _controller.OnStopRecording += OnFinishRecording;
             // _controller.OnResumeRecording += OnStartRecording;
-            //
-            // ReloadPlayerSettings();
+
+            ReloadSendDestinations();
         }
 
-        private void LoadDmxFile(string path)
+        private void AddNewSendDestination(bool isSend = false)
+        {
+            if (_controller == null || _destinationList == null) return;
+
+            var sendDestination = (SendDestination) CreateInstance(typeof(SendDestination))!;
+            sendDestination.IsSend = isSend;
+            var item = new SendDestinationItem(_controller.ControllerSetting, sendDestination);
+            _destinationList.Add(item);
+            _controller.ControllerSetting.AddSendDestination(sendDestination);
+        }
+
+        private void ReloadSendDestinations()
+        {
+            if (_controller?.ControllerSetting == null)
+                return;
+
+            var sendDirectionItem = _controller.ControllerSetting.SendDestinations.Select(CreateSendDestinationsItem)
+                .ToArray();
+
+            _destinationList?.Reload(sendDirectionItem);
+        }
+
+        private SendDestinationItem CreateSendDestinationsItem(SendDestination sendDestination)
+        {
+            var sendDestinationItem = new SendDestinationItem(_controller?.ControllerSetting, sendDestination);
+
+            return sendDestinationItem;
+        }
+
+        private void LoadDmxFile([NotNull] string path)
         {
             _controller?.LoadFile(path);
             //
