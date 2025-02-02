@@ -1,0 +1,24 @@
+.root {
+    height: 100%;
+}
+
+TextField > Label {
+    width: 75px;
+    min-width: 75px;
+}
+
+Button > Image {
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== footer ===== */
+
+#footer {
+    padding: 6px;
+    justify-content: space-between;
+}
+
+#footerMessages > .StatusMessage {
+    flex-direction: row;
+}

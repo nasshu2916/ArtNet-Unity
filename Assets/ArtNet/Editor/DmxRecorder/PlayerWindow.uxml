@@ -40,8 +40,8 @@
     </ui:VisualElement>
     <ui:VisualElement>
         <ui:Label text="Send Destination" class="section-title" />
-        <ui:VisualElement name="sendDestinationsPanel" class="Panel" >
-            <ui:VisualElement name="SendDestinationsListHeader">
+        <ui:VisualElement name="sendDestinationsPanel" class="Panel">
+            <ui:VisualElement name="sendDestinationsListHeader">
                 <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addDestinationLabel" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
             </ui:VisualElement>
             <ui:VisualElement name="sendDestinationsList" />

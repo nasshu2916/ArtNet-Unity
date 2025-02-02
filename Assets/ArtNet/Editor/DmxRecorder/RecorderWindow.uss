@@ -1,15 +1,4 @@
-.root {
-    height: 100%;
-}
-
-.Panel {
-    border-bottom-width:2px;
-}
-
-Button > Image {
-    width: 100%;
-    height: 100%;
-}
+@import url("./CommonWindow.uss");
 
 /* Controller */
 
@@ -75,15 +64,4 @@ EditableLabel > Label {
 #recorderSettingsPanel {
     padding: 6px 18px;
     border-bottom-width: 0;
-}
-
-/* footer */
-
-#footer {
-    padding: 6px;
-    justify-content: space-between;
-}
-
-#footerMessages > .StatusMessage {
-    flex-direction: row;
 }

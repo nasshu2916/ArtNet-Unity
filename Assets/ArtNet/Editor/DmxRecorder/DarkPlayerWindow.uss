@@ -1,0 +1,52 @@
+/* ===== Send Destination ===== */
+
+#sendDestinationsPanel {
+    background-color: #404040;
+}
+
+#sendDestinationsListHeader {
+    background-color: #2C2C2C;
+    border-color: #404040;
+}
+
+#sendDestinationsListHeader:hover {
+    background-color: #4C4C4C;
+}
+
+#sendDestinationsList {
+    background-color: #2F2F2F;
+}
+
+SendDestinationItem {
+    background-color: #404040;
+    border-color: #2B2B2B;
+}
+
+SendDestinationItem:hover {
+    background-color: #4A4A4A;
+}
+
+SendDestinationItem.selected {
+    background-color: #555555;
+    border-color: #A2A2A2;
+}
+
+/*#sendDestinationsList:focus > * > SendDestinationItem.selected {*/
+/*    border-color: #4097C3;*/
+/*}*/
+
+SendDestinationItem.disabled {
+    background-color: #303030;
+}
+
+SendDestinationItem.disabled:hover {
+    background-color: #3A3A3A;
+}
+
+SendDestinationItem.disabled.selected {
+    background-color: #555555;
+}
+
+SendDestinationItem.selected > EditableLabel > * {
+    color: #FFFFFF;
+}

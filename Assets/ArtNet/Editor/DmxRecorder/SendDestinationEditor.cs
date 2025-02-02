@@ -1,4 +1,6 @@
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
 {
@@ -16,20 +18,27 @@ namespace ArtNet.Editor.DmxRecorder
             _isSend = serializedObject.FindProperty("_isSend");
         }
 
-        public override void OnInspectorGUI()
+        public override VisualElement CreateInspectorGUI()
         {
-            if (target == null)
-                return;
+            var root = new VisualElement();
 
-            EditorGUI.BeginChangeCheck();
-            serializedObject.Update();
+            var ipField = new PropertyField(_ip)
+            {
+                label = "IP Address",
+                tooltip = "The IP address of the ArtNet DMX sender."
+            };
+            ipField.Bind(serializedObject);
+            root.Add(ipField);
 
-            EditorGUILayout.PropertyField(_ip);
-            EditorGUILayout.PropertyField(_port);
-            EditorGUILayout.PropertyField(_isSend);
+            var portField = new PropertyField(_port)
+            {
+                label = "Port",
+                tooltip = "The port number of the ArtNet DMX sender."
+            };
+            portField.Bind(serializedObject);
+            root.Add(portField);
 
-            serializedObject.ApplyModifiedProperties();
-            EditorGUI.EndChangeCheck();
+            return root;
         }
     }
 }

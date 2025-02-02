@@ -41,12 +41,22 @@ namespace ArtNet.Editor.DmxRecorder
 
         public void AddSendDestination([NotNull] SendDestination sendElement)
         {
+            if (SendDestinations.Contains(sendElement)) return;
+
             EditorUtility.SetDirty(this);
             Undo.RegisterCompleteObjectUndo(this, "Add Send Destination");
-            if (!SendDestinations.Contains(sendElement))
-            {
-                SendDestinations.Add(sendElement);
-            }
+            SendDestinations.Add(sendElement);
+
+            Save();
+        }
+
+        public void RemoveSendDestination([NotNull] SendDestination sendElement)
+        {
+            if (!SendDestinations.Contains(sendElement)) return;
+
+            EditorUtility.SetDirty(this);
+            Undo.RegisterCompleteObjectUndo(this, "Remove Send Destination");
+            SendDestinations.Remove(sendElement);
 
             Save();
         }

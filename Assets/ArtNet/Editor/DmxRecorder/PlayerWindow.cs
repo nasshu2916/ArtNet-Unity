@@ -70,10 +70,18 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
+            var skinStyleSheet = EditorGUIUtility.isProSkin ? _darkStyleSheet : _lightStyleSheet;
+            if (skinStyleSheet == null)
+            {
+                Debug.LogError("SkinStyleSheet is null");
+                return;
+            }
+
             VisualElement visualElement = _visualTree.Instantiate();
             visualElement.AddToClassList("root");
             root.Add(visualElement);
 
+            root.styleSheets.Add(skinStyleSheet);
             root.styleSheets.Add(_styleSheet);
 
             var senderFileNameField = root.Q<TextField>("senderFileNameField");
@@ -112,19 +120,15 @@ namespace ArtNet.Editor.DmxRecorder
 
             var sendDestinationsPanel = visualElement.Q<VisualElement>("sendDestinationsPanel")!;
             var addDestinationLabel = root.Q<Label>("addDestinationLabel")!;
-            addDestinationLabel.RegisterCallback<ClickEvent>(_ =>
-            {
-                var menu = new GenericMenu();
-                var context = new GUIContent("Add New Send Destination");
-                menu.AddItem(context, false, () => AddNewSendDestination());
-
-                menu.ShowAsContext();
-            });
+            addDestinationLabel.RegisterCallback<ClickEvent>(_ => ShowDestinationContextMenu());
             _destinationList = new DestinationList
             {
                 name = "destinationList",
                 focusable = true
             };
+            _destinationList.OnItemContextMenu += OnDestinationContextMenu;
+            _destinationList.OnSelectionChanged += OnDestinationSelectionChanged;
+            _destinationList.OnContextMenu += ShowDestinationContextMenu;
             sendDestinationsPanel.Add(_destinationList);
 
             SetPlayControllerSettings(PlayControllerSetting.GetOrNewGlobalSetting()!);
@@ -168,6 +172,44 @@ namespace ArtNet.Editor.DmxRecorder
             var sendDestinationItem = new SendDestinationItem(_controller?.ControllerSetting, sendDestination);
 
             return sendDestinationItem;
+        }
+
+        private void ShowDestinationContextMenu()
+        {
+            var menu = new GenericMenu();
+            var context = new GUIContent("Add New Send Destination");
+            menu.AddItem(context, false, () => AddNewSendDestination());
+
+            menu.ShowAsContext();
+        }
+
+        private void OnDestinationContextMenu(SendDestinationItem item)
+        {
+            var menu = new GenericMenu();
+
+            menu.AddItem(new GUIContent("Delete"),
+                false,
+                _ =>
+                {
+                    var settings = item.SendDestination;
+                    _controller.ControllerSetting.RemoveSendDestination(settings);
+                    _destinationList.Remove(item);
+                },
+                item);
+
+            menu.ShowAsContext();
+        }
+
+        private void OnDestinationSelectionChanged()
+        {
+            var selectedIndex = _destinationList!.SelectedIndex;
+            var items = _destinationList!.Items;
+            for (var i = 0; i < items.Count; i++)
+            {
+                items[i].SetItemSelected(i == selectedIndex);
+            }
+
+            Repaint();
         }
 
         private void LoadDmxFile([NotNull] string path)
