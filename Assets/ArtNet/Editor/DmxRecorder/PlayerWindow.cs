@@ -145,12 +145,13 @@ namespace ArtNet.Editor.DmxRecorder
             ReloadSendDestinations();
         }
 
-        private void AddNewSendDestination(bool isSend = false)
+        private void AddNewSendDestination(bool isSend = false, string recorderName = null)
         {
             if (_controller == null || _destinationList == null) return;
 
             var sendDestination = (SendDestination) CreateInstance(typeof(SendDestination))!;
             sendDestination.IsSend = isSend;
+            sendDestination.name = UniqueDestinationName(recorderName ?? SendDestination.DefaultName);
             var item = new SendDestinationItem(_controller.ControllerSetting, sendDestination);
             _destinationList.Add(item);
             _controller.ControllerSetting.AddSendDestination(sendDestination);
@@ -210,6 +211,14 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             Repaint();
+        }
+
+        [NotNull]
+        private string UniqueDestinationName(string destinationName)
+        {
+            var existingNames = _controller.ControllerSetting.SendDestinations.Select(destination => destination.name)
+                .ToArray();
+            return ObjectNames.GetUniqueName(existingNames, destinationName) ?? string.Empty;
         }
 
         private void LoadDmxFile([NotNull] string path)

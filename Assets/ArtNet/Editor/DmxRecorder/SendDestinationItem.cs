@@ -62,7 +62,7 @@ namespace ArtNet.Editor.DmxRecorder
             iconContainer.SetEnabled(false);
             header.Add(iconContainer);
 
-            _editableLabel = new EditableLabel("test")
+            _editableLabel = new EditableLabel(sendDestination.name)
             {
                 OnValueChanged = value =>
                 {
@@ -83,6 +83,12 @@ namespace ArtNet.Editor.DmxRecorder
 
             var destinationElement = Editor.CreateInspectorGUI();
             Add(destinationElement);
+
+            Editor!.OnValueChanged += () =>
+            {
+                EditorUtility.SetDirty(SendDestination);
+                playControllerSetting.Save();
+            };
 
             SetItemEnabled(IsEnabled);
             _playControllerSetting = playControllerSetting;
@@ -107,7 +113,6 @@ namespace ArtNet.Editor.DmxRecorder
             _playControllerSetting?.Save();
 
             _toggle.value = value;
-            _editableLabel.SetEnabled(value);
 
             if (value)
             {
