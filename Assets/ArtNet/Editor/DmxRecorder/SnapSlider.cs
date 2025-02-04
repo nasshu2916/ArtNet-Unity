@@ -34,6 +34,11 @@ namespace ArtNet.Editor.DmxRecorder
 
                 menu.ShowAsContext();
             });
+            slider.RegisterCallback<WheelEvent>(evt =>
+            {
+                const float step = 0.05f;
+                slider.value += (evt!.delta.y > 0 ? step : -step);
+            });
 
             var resetButton = new Button(() => slider.value = 1) { text = "Reset" };
             resetButton.RegisterCallback<MouseDownEvent>(evt =>
