@@ -35,6 +35,14 @@ namespace ArtNet.Editor.DmxRecorder
                 menu.ShowAsContext();
             });
 
+            var resetButton = new Button(() => slider.value = 1) { text = "Reset" };
+            resetButton.RegisterCallback<MouseDownEvent>(evt =>
+            {
+                if (evt!.button != 1) return;
+
+                slider.value = 1;
+            });
+
             style!.flexDirection = FlexDirection.Row;
             slider.style!.flexGrow = 1.0f;
             label.style!.width = 40;
@@ -43,6 +51,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             Add(slider);
             Add(label);
+            Add(resetButton);
         }
 
         private float GetSnappedValue(float value)
