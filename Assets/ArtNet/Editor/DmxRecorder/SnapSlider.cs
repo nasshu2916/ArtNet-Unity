@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,6 +14,26 @@ namespace ArtNet.Editor.DmxRecorder
 
         public new class UxmlFactory : UxmlFactory<SnapSlider, UxmlTraits>
         {
+        }
+
+        public new class UxmlTraits : VisualElement.UxmlTraits
+        {
+            [NotNull] private readonly UxmlFloatAttributeDescription _snapThreshold = new()
+                { name = "snap-threshold", defaultValue = 0.05f };
+
+
+            public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
+            {
+                get { yield break; }
+            }
+
+            public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
+            {
+                base.Init(ve, bag, cc);
+                var slider = (SnapSlider) ve!;
+
+                slider.SnapThreshold = Mathf.Max(0.0f, _snapThreshold.GetValueFromBag(bag, cc));
+            }
         }
 
         public SnapSlider()
