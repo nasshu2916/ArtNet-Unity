@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -12,14 +13,28 @@ namespace ArtNet.Editor.DmxRecorder
         public float SnapThreshold { get; set; } = 0.1f;
         public bool SnapEnabled { get; set; } = true;
 
+        [NotNull] private readonly Slider _slider;
+        [NotNull] private readonly Label _label;
+
+        public float Value
+        {
+            get => _slider.value;
+            set
+            {
+                _slider.value = value;
+                _label!.text = $"{value:F2}";
+            }
+        }
+
         public new class UxmlFactory : UxmlFactory<SnapSlider, UxmlTraits>
         {
         }
 
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
-            [NotNull] private readonly UxmlFloatAttributeDescription _snapThreshold = new()
-                { name = "snap-threshold", defaultValue = 0.05f };
+            [NotNull]
+            private readonly UxmlFloatAttributeDescription _snapThreshold = new()
+            { name = "snap-threshold", defaultValue = 0.05f };
 
 
             public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
@@ -38,15 +53,14 @@ namespace ArtNet.Editor.DmxRecorder
 
         public SnapSlider()
         {
-            var slider = new Slider(0f, 5f) { value = 0f }; // 初期値: 0, 範囲: 0～5
-            var label = new Label("0.0");
+            _slider = new Slider(0f, 5f) { value = 0f }; // 初期値: 0, 範囲: 0～5
+            _label = new Label("0.0");
 
-            slider.RegisterValueChangedCallback(evt =>
+            _slider.RegisterValueChangedCallback(evt =>
             {
-                slider.value = GetSnappedValue(evt!.newValue);
-                label!.text = $"{slider!.value:F2}";
+                Value = GetSnappedValue(evt!.newValue);
             });
-            slider.RegisterCallback<MouseDownEvent>(evt =>
+            _slider.RegisterCallback<MouseDownEvent>(evt =>
             {
                 if (evt?.button != 1) return;
 
@@ -55,28 +69,28 @@ namespace ArtNet.Editor.DmxRecorder
 
                 menu.ShowAsContext();
             });
-            slider.RegisterCallback<WheelEvent>(evt =>
+            _slider.RegisterCallback<WheelEvent>(evt =>
             {
                 const float step = 0.05f;
-                slider.value += (evt!.delta.y > 0 ? step : -step);
+                Value += (evt!.delta.y > 0 ? step : -step);
             });
 
-            var resetButton = new Button(() => slider.value = 1) { text = "Reset" };
+            var resetButton = new Button(() => Value = 1) { text = "Reset" };
             resetButton.RegisterCallback<MouseDownEvent>(evt =>
             {
                 if (evt!.button != 1) return;
 
-                slider.value = 1;
+                Value = 1;
             });
 
             style!.flexDirection = FlexDirection.Row;
-            slider.style!.flexGrow = 1.0f;
-            label.style!.width = 40;
-            label.style!.minWidth = 40;
-            label.style!.alignSelf = Align.Center;
+            _slider.style!.flexGrow = 1.0f;
+            _label.style!.width = 40;
+            _label.style!.minWidth = 40;
+            _label.style!.alignSelf = Align.Center;
 
-            Add(slider);
-            Add(label);
+            Add(_slider);
+            Add(_label);
             Add(resetButton);
         }
 
@@ -97,6 +111,11 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             return closestSnap;
+        }
+
+        public void RegisterValueChangedCallback(Action<ChangeEvent<float>> action)
+        {
+            _slider.RegisterValueChangedCallback(evt => action!(evt));
         }
     }
 }

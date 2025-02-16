@@ -25,6 +25,9 @@ namespace ArtNet.Editor.DmxRecorder
         private Label _senderTimeLabel;
         private Slider _senderTimeSlider;
 
+        private Toggle _loopToggle;
+        private SnapSlider _speedSlider;
+
         private DestinationList _destinationList;
 
         [MenuItem("ArtNet/DMX Player")]
@@ -116,6 +119,25 @@ namespace ArtNet.Editor.DmxRecorder
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
 
+            // ===== Send Settings =====
+            _loopToggle = root.Q<Toggle>("sendLoopToggle");
+            _loopToggle.RegisterValueChangedCallback(evt =>
+            {
+                if (_controller?.ControllerSetting == null) return;
+
+                _controller.ControllerSetting.IsLoop = evt!.newValue;
+                _controller.ControllerSetting.Save();
+            });
+
+            _speedSlider = root.Q<SnapSlider>("sendSpeedSlider");
+            _speedSlider!.RegisterValueChangedCallback(evt =>
+            {
+                if (_controller?.ControllerSetting == null) return;
+
+                _controller.ControllerSetting.Speed = evt!.newValue;
+                _controller.ControllerSetting.Save();
+            });
+
             // ===== Send Destination =====
 
             var sendDestinationsPanel = visualElement.Q<VisualElement>("sendDestinationsPanel")!;
@@ -142,6 +164,7 @@ namespace ArtNet.Editor.DmxRecorder
             // _controller.OnStopRecording += OnFinishRecording;
             // _controller.OnResumeRecording += OnStartRecording;
 
+            ReloadSendSettings();
             ReloadSendDestinations();
         }
 
@@ -155,6 +178,15 @@ namespace ArtNet.Editor.DmxRecorder
             var item = new SendDestinationItem(_controller.ControllerSetting, sendDestination);
             _destinationList.Add(item);
             _controller.ControllerSetting.AddSendDestination(sendDestination);
+        }
+
+        private void ReloadSendSettings()
+        {
+            if (_controller?.ControllerSetting == null)
+                return;
+
+            _loopToggle!.value = _controller.ControllerSetting.IsLoop;
+            _speedSlider!.Value = _controller.ControllerSetting.Speed;
         }
 
         private void ReloadSendDestinations()
