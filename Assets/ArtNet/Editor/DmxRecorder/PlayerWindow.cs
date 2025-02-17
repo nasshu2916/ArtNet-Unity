@@ -106,7 +106,17 @@ namespace ArtNet.Editor.DmxRecorder
             var playButton = root.Q<Button>("PlayButton");
             var playButtonImage = new Image { image = IconHelper.PlayButton };
             playButton.Add(playButtonImage);
-            playButton.clicked += () => { _controller?.Play(); };
+            playButton.clicked += () =>
+            {
+                if (_controller!.State == PlaybackState.Play)
+                {
+                    _controller.Pause();
+                }
+                else
+                {
+                    _controller.Play();
+                }
+            };
 
             _senderTimeLabel = root.Q<Label>("playTimeLabel");
             _senderTimeSlider = root.Q<Slider>("playSlider");

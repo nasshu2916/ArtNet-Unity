@@ -22,7 +22,7 @@ namespace ArtNet.Editor.DmxRecorder
     {
         [NotNull] private readonly UdpSender _sender = new();
 
-        private int _lastTime = -1;
+        private int _lastTime = 0;
         private PlaybackState _state = PlaybackState.Stop;
 
         public int LastSend
@@ -77,32 +77,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             _cancellationTokenSource = new CancellationTokenSource();
             var token = _cancellationTokenSource.Token;
-            _task = Task.Run(() =>
-                {
-                    var lastTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    while (!token.IsCancellationRequested)
-                    {
-                        if (State != PlaybackState.Play)
-                        {
-                            Thread.Sleep(1);
-                            continue;
-                        }
-
-                        try
-                        {
-                            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                            SendDmxOfSpecifiedTime((int) (now - lastTime));
-                            lastTime = now;
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogErrorFormat($"[DmxPlayerSendTask] {e.GetType()} : {e.Message}");
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                },
-                token);
+            _task = Task.Run(() => RunTask(token), token);
         }
 
         private void StopTask()
@@ -115,11 +90,40 @@ namespace ArtNet.Editor.DmxRecorder
             _task = null;
         }
 
+        private void RunTask(CancellationToken token)
+        {
+            var lastTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            while (!token.IsCancellationRequested)
+            {
+                if (State != PlaybackState.Play)
+                {
+                    Thread.Sleep(1);
+                    continue;
+                }
+
+                try
+                {
+                    var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    SendDmxOfSpecifiedTime((int) (now - lastTime));
+                    lastTime = now;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogErrorFormat($"[DmxPlayerSendTask] {e.GetType()} : {e.Message}");
+                }
+
+                Thread.Sleep(1);
+            }
+        }
+
         public void Play()
         {
             if (State == PlaybackState.Play) return;
 
             State = PlaybackState.Play;
+
+            // 一旦 Play 開始時に Task を起動する
+            StartTask();
         }
 
         public void Pause()
@@ -177,7 +181,8 @@ namespace ArtNet.Editor.DmxRecorder
 
             if (isReset)
             {
-                LastSend = -1;
+                LastSend = 0;
+                State = PlaybackState.Stop;
             }
             else
             {
