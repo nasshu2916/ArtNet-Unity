@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Packets;
 using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 
 namespace ArtNet.Editor.DmxRecorder
@@ -58,6 +60,9 @@ namespace ArtNet.Editor.DmxRecorder
 
         public event Action<int> TimeChanged;
         public event Action<PlaybackState> StateChanged;
+
+        private const string LastLoadedFilePathKey = "DmxPlayerLastLoadedFilePath";
+        private const string LastLoadedFileDigestKey = "DmxPlayerLastLoadedFileDigest";
 
         public PlayController([NotNull] PlayControllerSetting controllerSetting)
         {
@@ -149,7 +154,38 @@ namespace ArtNet.Editor.DmxRecorder
                 };
                 DmxPackets.Add((Mathf.RoundToInt((float) (dataPacket.Time * 1000f)), packet));
             }
+
             MaxTime = DmxPackets.Max(x => x.time);
+
+            var hash = new MD5CryptoServiceProvider().ComputeHash(data);
+            var hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
+            EditorUserSettings.SetConfigValue(LastLoadedFilePathKey, path);
+            EditorUserSettings.SetConfigValue(LastLoadedFileDigestKey, hashString);
+        }
+
+        /// <summary>
+        /// 最後に読み込んだファイル Path を取得する
+        /// 最後に読み込んだファイルが存在しない場合や Digest が一致しない場合は null を返す
+        /// </summary>
+        /// <returns></returns>
+        public string LastLoadedFilePath()
+        {
+            var path = EditorUserSettings.GetConfigValue(LastLoadedFilePathKey);
+            if (string.IsNullOrEmpty(path)) return null;
+            if (!File.Exists(path)) return null;
+
+            using var md5 = MD5.Create();
+            using var stream = new FileStream(path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 8192,
+                useAsync: false);
+            var hash = md5.ComputeHash(stream);
+            var hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+            var lastDigest = EditorUserSettings.GetConfigValue(LastLoadedFileDigestKey);
+            return hashString == lastDigest ? path : null;
         }
 
         /// <summary>

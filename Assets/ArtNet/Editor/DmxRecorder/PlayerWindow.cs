@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using ArtNet.Editor.DmxRecorder.Util;
 using JetBrains.Annotations;
@@ -94,8 +95,20 @@ namespace ArtNet.Editor.DmxRecorder
             selectPlayFileButton.Add(new Image { image = EditorGUIUtility.IconContent("Folder Icon").image });
             selectPlayFileButton.clicked += () =>
             {
-                var selectedFile =
-                    EditorUtility.OpenFilePanel("Select Play File", "Assets", "dmx");
+                string openDirectory;
+                if (string.IsNullOrEmpty(_senderFilePath) == false)
+                {
+                    openDirectory = Path.GetDirectoryName(_senderFilePath);
+                }
+                else
+                {
+                    var lastLoadedFilePath = _controller?.LastLoadedFilePath();
+                    openDirectory = string.IsNullOrEmpty(lastLoadedFilePath)
+                        ? "Assets"
+                        : Path.GetDirectoryName(lastLoadedFilePath);
+                }
+
+                var selectedFile = EditorUtility.OpenFilePanel("Select Play File", openDirectory, "dmx");
                 if (string.IsNullOrEmpty(selectedFile)) return;
 
                 senderFileNameField.value = selectedFile;
@@ -173,6 +186,8 @@ namespace ArtNet.Editor.DmxRecorder
             // _controller.OnPauseRecording += OnPauseRecording;
             // _controller.OnStopRecording += OnFinishRecording;
             // _controller.OnResumeRecording += OnStartRecording;
+
+            _controller.TimeChanged += OnPlayTimeChanged;
 
             ReloadSendSettings();
             ReloadSendDestinations();
@@ -277,6 +292,11 @@ namespace ArtNet.Editor.DmxRecorder
             //
             // _senderTimeSlider.highValue = maxValue;
             // _senderProgressBar.highValue = maxValue;
+        }
+
+        private void OnPlayTimeChanged(int time)
+        {
+            _senderTimeLabel!.text = TimeText(time);
         }
 
         private static string TimeText(int time)
