@@ -89,7 +89,7 @@ namespace ArtNet.Editor.DmxRecorder
             root.styleSheets.Add(_styleSheet);
 
             var senderFileNameField = root.Q<TextField>("senderFileNameField");
-            senderFileNameField.value = _senderFilePath;
+            senderFileNameField.value = "";
 
             var selectPlayFileButton = root.Q<Button>("selectPlayFileButton");
             selectPlayFileButton.Add(new Image { image = EditorGUIUtility.IconContent("Folder Icon").image });
@@ -111,9 +111,11 @@ namespace ArtNet.Editor.DmxRecorder
                 var selectedFile = EditorUtility.OpenFilePanel("Select Play File", openDirectory, "dmx");
                 if (string.IsNullOrEmpty(selectedFile)) return;
 
+                var result =  LoadDmxFile(selectedFile);
+                if (result == false) return;
+
                 senderFileNameField.value = selectedFile;
                 _senderFilePath = selectedFile;
-                LoadDmxFile(_senderFilePath);
             };
 
             var playButton = root.Q<Button>("PlayButton");
@@ -187,7 +189,7 @@ namespace ArtNet.Editor.DmxRecorder
             // _controller.OnStopRecording += OnFinishRecording;
             // _controller.OnResumeRecording += OnStartRecording;
 
-            _controller.TimeChanged += OnPlayTimeChanged;
+            // _controller.TimeChanged += OnPlayTimeChanged;
 
             ReloadSendSettings();
             ReloadSendDestinations();
@@ -278,9 +280,16 @@ namespace ArtNet.Editor.DmxRecorder
             return ObjectNames.GetUniqueName(existingNames, destinationName) ?? string.Empty;
         }
 
-        private void LoadDmxFile([NotNull] string path)
+        private bool LoadDmxFile([NotNull] string path)
         {
-            _controller?.LoadFile(path);
+            if (_controller == null) return false;
+
+            var result = _controller.LoadFile(path);
+            if (result == false)
+            {
+                Debug.LogError("Failed to load file");
+                return false;
+            }
             //
             // var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
             //
@@ -292,6 +301,7 @@ namespace ArtNet.Editor.DmxRecorder
             //
             // _senderTimeSlider.highValue = maxValue;
             // _senderProgressBar.highValue = maxValue;
+            return true;
         }
 
         private void OnPlayTimeChanged(int time)

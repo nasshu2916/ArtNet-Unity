@@ -57,6 +57,7 @@ namespace ArtNet.Editor.DmxRecorder
         [CanBeNull] private CancellationTokenSource _cancellationTokenSource;
 
         [NotNull] private List<(int time, DmxPacket packet)> DmxPackets { get; set; } = new();
+        private string LoadedFilePath { get; set; } = string.Empty;
 
         public event Action<int> TimeChanged;
         public event Action<PlaybackState> StateChanged;
@@ -138,29 +139,37 @@ namespace ArtNet.Editor.DmxRecorder
             State = PlaybackState.Pause;
         }
 
-        public void LoadFile([NotNull] string path)
+        public bool LoadFile([NotNull] string path)
         {
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path)) return false;
 
-            // SenderSettings.LoadFilePath = path;
             var data = File.ReadAllBytes(path);
-            var universeData = BinaryDmx.Deserialize(data)!.OrderBy(x => x!.Time).ToList();
-            foreach (var dataPacket in universeData)
+            var result = BinaryDmx.Deserialize(data);
+            if (result == null)
+            {
+                Debug.LogError("Failed to deserialize ArtNet binary file.");
+                return false;
+            }
+
+            DmxPackets = result.OrderBy(x => x!.Time).Select(dataPacket =>
             {
                 var packet = new DmxPacket
                 {
                     Universe = dataPacket!.Universe,
                     Dmx = dataPacket.Values
                 };
-                DmxPackets.Add((Mathf.RoundToInt((float) (dataPacket.Time * 1000f)), packet));
-            }
+                return ((int) dataPacket.Time, packet);
+            }).ToList();
+            LoadedFilePath = path;
 
             MaxTime = DmxPackets.Max(x => x.time);
 
+            // EditorUserSettings に最後に読み込んだファイルの情報を保存する
             var hash = new MD5CryptoServiceProvider().ComputeHash(data);
             var hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
             EditorUserSettings.SetConfigValue(LastLoadedFilePathKey, path);
             EditorUserSettings.SetConfigValue(LastLoadedFileDigestKey, hashString);
+            return true;
         }
 
         /// <summary>
