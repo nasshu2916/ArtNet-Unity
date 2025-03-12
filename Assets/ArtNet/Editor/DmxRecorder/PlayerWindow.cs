@@ -51,10 +51,17 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void RegisterCallbacks()
         {
+            EditorApplication.update += ProcessMainThreadUpdates;
         }
 
         private void UnregisterCallbacks()
         {
+            EditorApplication.update -= ProcessMainThreadUpdates;
+        }
+
+        private void ProcessMainThreadUpdates()
+        {
+            _controller?.ProcessMainThreadUpdates();
         }
 
         private void CreateView()
@@ -189,7 +196,7 @@ namespace ArtNet.Editor.DmxRecorder
             // _controller.OnStopRecording += OnFinishRecording;
             // _controller.OnResumeRecording += OnStartRecording;
 
-            // _controller.TimeChanged += OnPlayTimeChanged;
+            _controller.TimeChanged += OnPlayTimeChanged;
 
             ReloadSendSettings();
             ReloadSendDestinations();

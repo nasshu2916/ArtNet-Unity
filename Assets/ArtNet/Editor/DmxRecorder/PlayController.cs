@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace ArtNet.Editor.DmxRecorder
     public class PlayController
     {
         [NotNull] private readonly UdpSender _sender = new();
+        [NotNull] private readonly ConcurrentQueue<Action> _mainThreadQueue = new();
 
         private int _lastTime = 0;
         private PlaybackState _state = PlaybackState.Stop;
@@ -33,7 +35,7 @@ namespace ArtNet.Editor.DmxRecorder
             private set
             {
                 _lastTime = value;
-                TimeChanged?.Invoke(value);
+                EnqueueMainThreadAction(() => TimeChanged?.Invoke(value));
             }
         }
 
@@ -45,7 +47,7 @@ namespace ArtNet.Editor.DmxRecorder
                 if (_state == value) return;
 
                 _state = value;
-                StateChanged?.Invoke(_state);
+                EnqueueMainThreadAction(() => StateChanged?.Invoke(value));
             }
         }
 
@@ -76,6 +78,19 @@ namespace ArtNet.Editor.DmxRecorder
         }
 
         private bool IsTaskRunning => _task is { IsCanceled: false, IsCompleted: false };
+
+        private void EnqueueMainThreadAction(Action action)
+        {
+            _mainThreadQueue.Enqueue(action);
+        }
+
+        public void ProcessMainThreadUpdates()
+        {
+            while (_mainThreadQueue.TryDequeue(out var action))
+            {
+                action?.Invoke();
+            }
+        }
 
         private void StartTask()
         {
@@ -204,7 +219,8 @@ namespace ArtNet.Editor.DmxRecorder
         private void SendDmxOfSpecifiedTime(int deltaTime)
         {
             var prevSendTime = LastSend;
-            var newSendTime = LastSend + ControllerSetting.CalcDeltaTime(deltaTime);
+            deltaTime = ControllerSetting.CalcDeltaTime(deltaTime);
+            var newSendTime = LastSend + deltaTime;
             var isReset = false;
             if (newSendTime > MaxTime)
             {
