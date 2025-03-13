@@ -118,7 +118,7 @@ namespace ArtNet.Editor.DmxRecorder
                 var selectedFile = EditorUtility.OpenFilePanel("Select Play File", openDirectory, "dmx");
                 if (string.IsNullOrEmpty(selectedFile)) return;
 
-                var result =  LoadDmxFile(selectedFile);
+                var result = LoadDmxFile(selectedFile);
                 if (result == false) return;
 
                 senderFileNameField.value = selectedFile;
@@ -311,12 +311,12 @@ namespace ArtNet.Editor.DmxRecorder
             return true;
         }
 
-        private void OnPlayTimeChanged(int time)
+        private void OnPlayTimeChanged(long time)
         {
             _senderTimeLabel!.text = TimeText(time);
         }
 
-        private static string TimeText(int time)
+        private static string TimeText(long time)
         {
             var minutes = time / 60000;
             var seconds = time / 1000 % 60;

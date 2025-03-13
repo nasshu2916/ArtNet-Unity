@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using ArtNet.Editor.DmxRecorder;
 using UnityEditor.Recorder;
-using UnityEngine;
 
 namespace ArtNet.Editor.UnityRecorder.Input
 {
@@ -17,7 +17,7 @@ namespace ArtNet.Editor.UnityRecorder.Input
                 _dmxManager = dmxManager;
             }
 
-            public void RecordFrame(double time)
+            public void RecordFrame(long time)
             {
                 var universes = _dmxManager.Universes();
                 foreach (var universe in universes)
@@ -29,7 +29,7 @@ namespace ArtNet.Editor.UnityRecorder.Input
         }
 
         internal DmxRecorder Recorder;
-        private double _startTime;
+        private long _startTime;
 
         protected override void BeginRecording(RecordingSession session)
         {
@@ -38,13 +38,14 @@ namespace ArtNet.Editor.UnityRecorder.Input
             if (dmxManager == null) return;
 
             Recorder = new DmxRecorder(dmxManager);
-            _startTime = Time.time;
+            _startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
 
         protected override void NewFrameReady(RecordingSession session)
         {
-            Recorder?.RecordFrame(Time.time - _startTime);
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Recorder?.RecordFrame(now - _startTime);
         }
     }
 }

@@ -26,10 +26,10 @@ namespace ArtNet.Editor.DmxRecorder
         [NotNull] private readonly UdpSender _sender = new();
         [NotNull] private readonly ConcurrentQueue<Action> _mainThreadQueue = new();
 
-        private int _lastTime = 0;
+        private long _lastTime = 0;
         private PlaybackState _state = PlaybackState.Stop;
 
-        public int LastSend
+        public long LastSend
         {
             get => _lastTime;
             private set
@@ -51,17 +51,17 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
-        public int MaxTime { get; private set; }
+        public long MaxTime { get; private set; }
 
         [NotNull] public PlayControllerSetting ControllerSetting { get; }
 
         [CanBeNull] private Task _task;
         [CanBeNull] private CancellationTokenSource _cancellationTokenSource;
 
-        [NotNull] private List<(int time, DmxPacket packet)> DmxPackets { get; set; } = new();
+        [NotNull] private List<(long time, DmxPacket packet)> DmxPackets { get; set; } = new();
         private string LoadedFilePath { get; set; } = string.Empty;
 
-        public event Action<int> TimeChanged;
+        public event Action<long> TimeChanged;
         public event Action<PlaybackState> StateChanged;
 
         private const string LastLoadedFilePathKey = "DmxPlayerLastLoadedFilePath";
@@ -173,7 +173,7 @@ namespace ArtNet.Editor.DmxRecorder
                     Universe = dataPacket!.Universe,
                     Dmx = dataPacket.Values
                 };
-                return ((int) dataPacket.Time, packet);
+                return (dataPacket.Time, packet);
             }).ToList();
             LoadedFilePath = path;
 

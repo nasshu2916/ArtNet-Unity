@@ -529,7 +529,7 @@ namespace ArtNet.Editor.DmxRecorder
             GUI.Label(rect, msg);
         }
 
-        private static string TimeCodeText(int time)
+        private static string TimeCodeText(long time)
         {
             var hours = time / 3600000;
             var minutes = time / 60000;
@@ -538,7 +538,7 @@ namespace ArtNet.Editor.DmxRecorder
             return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
         }
 
-        private static string MspaceText(int value, int padding = 2, int mspace = 24)
+        private static string MspaceText(long value, int padding = 2, int mspace = 24)
         {
             var text = value.ToString().PadLeft(padding, '0');
             return $"<mspace={mspace}em>{text}</mspace>";
