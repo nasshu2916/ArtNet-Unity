@@ -178,6 +178,7 @@ namespace ArtNet.Editor.DmxRecorder
             LoadedFilePath = path;
 
             MaxTime = DmxPackets.Max(x => x.time);
+            LastSend = 0;
 
             // EditorUserSettings に最後に読み込んだファイルの情報を保存する
             var hash = new MD5CryptoServiceProvider().ComputeHash(data);

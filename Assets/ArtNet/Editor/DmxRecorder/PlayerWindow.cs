@@ -144,9 +144,9 @@ namespace ArtNet.Editor.DmxRecorder
             _senderTimeSlider = root.Q<Slider>("playSlider");
             _senderTimeSlider.RegisterValueChangedCallback((evt) =>
             {
-                var time = (int) evt.newValue;
+                // var time = (long) evt.newValue;
                 // _controller.ChangePlayTime(time);
-                _senderTimeLabel.text = TimeText(time);
+                // _senderTimeLabel.text = TimeText(time);
             });
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
@@ -297,23 +297,23 @@ namespace ArtNet.Editor.DmxRecorder
                 Debug.LogError("Failed to load file");
                 return false;
             }
-            //
-            // var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
-            //
-            // var maxSeconds = _sender.MaxTime / 1000;
-            // var minutes = maxSeconds / 60;
-            // var seconds = maxSeconds % 60;
-            // maxTimeLabel.text = $"{minutes}:{seconds:D2}";
-            // var maxValue = _sender.MaxTime;
-            //
-            // _senderTimeSlider.highValue = maxValue;
-            // _senderProgressBar.highValue = maxValue;
+
+            var maxTimeLabel = rootVisualElement.Q<Label>("playbackMaxTimeLabel");
+
+            var maxTime = _controller.MaxTime;
+            maxTimeLabel!.text = TimeText(maxTime);
+
+            _senderTimeSlider!.highValue = maxTime;
+            _senderProgressBar!.highValue = maxTime;
             return true;
         }
 
         private void OnPlayTimeChanged(long time)
         {
+            var newSliderValue = time;
             _senderTimeLabel!.text = TimeText(time);
+            _senderTimeSlider!.value = newSliderValue;
+            _senderProgressBar!.value = newSliderValue;
         }
 
         private static string TimeText(long time)
