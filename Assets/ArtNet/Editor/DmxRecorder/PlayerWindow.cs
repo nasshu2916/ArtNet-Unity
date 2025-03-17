@@ -31,6 +31,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private DestinationList _destinationList;
 
+        private PlaybackState? _sliderDragBeforeState;
+
         [MenuItem("ArtNet/DMX Player")]
         public static void ShowWindow()
         {
@@ -140,14 +142,29 @@ namespace ArtNet.Editor.DmxRecorder
                 }
             };
 
-            _senderTimeLabel = root.Q<Label>("playTimeLabel");
-            _senderTimeSlider = root.Q<Slider>("playSlider");
-            _senderTimeSlider.RegisterValueChangedCallback((evt) =>
+            _senderTimeLabel = root.Q<Label>("playTimeLabel")!;
+            _senderTimeSlider = root.Q<Slider>("playSlider")!;
+            _senderTimeSlider.RegisterValueChangedCallback(evt =>
             {
-                // var time = (long) evt.newValue;
-                // _controller.ChangePlayTime(time);
-                // _senderTimeLabel.text = TimeText(time);
+                if (_controller == null || _controller.IsLoaded == false) return;
+                _sliderDragBeforeState ??= _controller.State;
+
+                _controller.Pause();
+                var time = (long) evt!.newValue;
+                _controller.ChangePlayTime(time);
+                _senderTimeLabel.text = TimeText(time);
             });
+            _senderTimeSlider.RegisterCallback<PointerCaptureOutEvent>(_ =>
+                {
+                    if (_controller == null || _controller.IsLoaded == false) return;
+                    var time = (long) _senderTimeSlider.value;
+                    _controller.ChangePlayTime(time);
+
+                    if (_sliderDragBeforeState == PlaybackState.Play)
+                        _controller!.Play();
+                    _sliderDragBeforeState = null;
+                }
+            );
 
             _senderProgressBar = root.Q<ProgressBar>("playProgressBar");
 
@@ -312,7 +329,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var newSliderValue = time;
             _senderTimeLabel!.text = TimeText(time);
-            _senderTimeSlider!.value = newSliderValue;
+            _senderTimeSlider!.SetValueWithoutNotify(newSliderValue);
             _senderProgressBar!.value = newSliderValue;
         }
 

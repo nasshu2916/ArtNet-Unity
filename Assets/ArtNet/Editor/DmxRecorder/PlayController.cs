@@ -51,6 +51,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
         }
 
+        public bool IsLoaded => !string.IsNullOrEmpty(LoadedFilePath);
         public long MaxTime { get; private set; }
 
         [NotNull] public PlayControllerSetting ControllerSetting { get; }
@@ -154,6 +155,11 @@ namespace ArtNet.Editor.DmxRecorder
             State = PlaybackState.Pause;
         }
 
+        public void ChangePlayTime(long time)
+        {
+            LastSend = time;
+        }
+
         public bool LoadFile([NotNull] string path)
         {
             if (!File.Exists(path)) return false;
@@ -221,7 +227,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             var prevSendTime = LastSend;
             deltaTime = ControllerSetting.CalcDeltaTime(deltaTime);
-            var newSendTime = LastSend + deltaTime;
+            var newSendTime = prevSendTime + deltaTime;
             var isReset = false;
             if (newSendTime > MaxTime)
             {
