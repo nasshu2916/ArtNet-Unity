@@ -31,7 +31,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private DestinationList _destinationList;
 
-        private PlaybackState? _sliderDragBeforeState;
+        private PlaybackState _sliderDragBeforeState = PlaybackState.Invalid;
 
         [MenuItem("ArtNet/DMX Player")]
         public static void ShowWindow()
@@ -147,7 +147,10 @@ namespace ArtNet.Editor.DmxRecorder
             _senderTimeSlider.RegisterValueChangedCallback(evt =>
             {
                 if (_controller == null || _controller.IsLoaded == false) return;
-                _sliderDragBeforeState ??= _controller.State;
+                if (_sliderDragBeforeState == PlaybackState.Invalid)
+                {
+                    _sliderDragBeforeState = _controller.State;
+                }
 
                 _controller.Pause();
                 var time = (long) evt!.newValue;
@@ -162,7 +165,7 @@ namespace ArtNet.Editor.DmxRecorder
 
                     if (_sliderDragBeforeState == PlaybackState.Play)
                         _controller!.Play();
-                    _sliderDragBeforeState = null;
+                    _sliderDragBeforeState = PlaybackState.Invalid;
                 }
             );
 

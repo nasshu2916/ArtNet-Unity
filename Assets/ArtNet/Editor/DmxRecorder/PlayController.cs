@@ -16,6 +16,7 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public enum PlaybackState
     {
+        Invalid = -1,
         Stop,
         Play,
         Pause
