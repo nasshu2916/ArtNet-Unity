@@ -238,6 +238,10 @@ namespace ArtNet.Editor.DmxRecorder
                 {
                     isReset = true;
                 }
+                else
+                {
+                    State = PlaybackState.Stop;
+                }
             }
 
             // TODO: O(n) なので DmxPackets の量が多い場合速度が遅くなるので最適化が必要
@@ -248,15 +252,7 @@ namespace ArtNet.Editor.DmxRecorder
                 SendDmx(packet!);
             }
 
-            if (isReset)
-            {
-                LastSend = 0;
-                State = PlaybackState.Stop;
-            }
-            else
-            {
-                LastSend = newSendTime;
-            }
+            LastSend = isReset ? 0 : newSendTime;
         }
 
         private void SendDmx([NotNull] DmxPacket packet)
