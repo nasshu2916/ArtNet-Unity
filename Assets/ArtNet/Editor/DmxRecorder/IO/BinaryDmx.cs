@@ -22,7 +22,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
 
         public static byte[] SerializeUniverseData(IEnumerable<UniverseData> universeData)
         {
-            var sortedData = universeData.OrderBy(x => x.Time).ToList();
+            var sortedData = universeData.Where(x => x != null).OrderBy(x => x.Time).ToList();
             var startTime = sortedData.First().Time;
             using var memoryStream = new MemoryStream();
             memoryStream.Write(Identifiers);
@@ -31,7 +31,8 @@ namespace ArtNet.Editor.DmxRecorder.IO
 
             foreach (var data in sortedData)
             {
-                memoryStream.Write(BitConverter.GetBytes((float) data.Time - startTime));
+                var time = data.Time - startTime;
+                memoryStream.Write(BitConverter.GetBytes(time));
                 memoryStream.Write(BitConverter.GetBytes(data.Universe));
                 var length = data.Length;
                 memoryStream.Write(BitConverter.GetBytes(length));
@@ -57,7 +58,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
             var result = new List<UniverseData>();
             while (position < dataLength - 12)
             {
-                var time = BitConverter.ToSingle(data[position..]);
+                var time = BitConverter.ToInt64(data[position..]);
                 position += 8;
                 var universe = BitConverter.ToUInt16(data[position..]);
                 position += 2;

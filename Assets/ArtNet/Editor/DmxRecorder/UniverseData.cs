@@ -4,11 +4,11 @@ namespace ArtNet.Editor.DmxRecorder
 {
     public class UniverseData
     {
-        public double Time { get; }
+        public long Time { get; }
         public ushort Universe { get; }
         public byte[] Values { get; }
 
-        public UniverseData(double time, ushort universe, ReadOnlySpan<byte> values)
+        public UniverseData(long time, ushort universe, ReadOnlySpan<byte> values)
         {
             Time = time;
             Universe = universe;

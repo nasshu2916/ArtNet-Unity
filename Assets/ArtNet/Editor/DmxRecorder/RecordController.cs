@@ -19,18 +19,18 @@ namespace ArtNet.Editor.DmxRecorder
     {
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
 
-        private List<(int, DmxPacket)> _recordedDmx = new();
+        private List<(long, DmxPacket)> _recordedDmx = new();
 
         private long _recordStartTime;
 
-        public RecordControllerSettings Settings { get; }
-        public int RecordedTime { get; private set; }
+        public RecordControllerSettings ControllerSettings { get; }
+        public long RecordedTime { get; private set; }
 
         public Action OnStartRecording, OnStopRecording, OnPauseRecording, OnResumeRecording;
 
-        public RecordController(RecordControllerSettings settings)
+        public RecordController(RecordControllerSettings controllerSettings)
         {
-            Settings = settings;
+            ControllerSettings = controllerSettings;
             _receiver.OnReceivedPacket = OnReceivedPacket;
         }
 
@@ -46,7 +46,7 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            _recordedDmx = new List<(int, DmxPacket)>();
+            _recordedDmx = new List<(long, DmxPacket)>();
             RecordedTime = 0;
             Status = RecordingStatus.Recording;
             _recordStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -99,14 +99,15 @@ namespace ArtNet.Editor.DmxRecorder
             OnResumeRecording?.Invoke();
         }
 
-        public int GetRecordingTime()
+        public long GetRecordingTime()
         {
             if (Status != RecordingStatus.Recording)
             {
                 return RecordedTime;
             }
 
-            var currentRecordTime = (int) (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _recordStartTime);
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var currentRecordTime = now - _recordStartTime;
             return currentRecordTime + RecordedTime;
         }
 
@@ -133,11 +134,11 @@ namespace ArtNet.Editor.DmxRecorder
                 return;
             }
 
-            var recorderSettings = Settings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
+            var recorderSettings = ControllerSettings.RecorderSettings.Where(x => x.Enabled && !x.HasErrors());
             foreach (var setting in recorderSettings)
             {
                 var universeData = setting.UniverseFilter.Filter(_recordedDmx, frame => frame.Item2.Universe)
-                    .Select(x => new UniverseData(x.Item1 / 1000f, x.Item2.Universe, x.Item2.Dmx));
+                    .Select(x => new UniverseData(x.Item1, x.Item2.Universe, x.Item2.Dmx));
 
                 setting.StoreUniverseData(universeData);
                 setting.Take++;

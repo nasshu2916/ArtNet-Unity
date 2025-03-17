@@ -1,22 +1,21 @@
 using System.Net;
 using System.Net.Sockets;
+using JetBrains.Annotations;
 
 namespace ArtNet
 {
     public class UdpSender
     {
-        private Socket _socket;
+        [NotNull] private readonly Socket _socket = new(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-        public UdpSender(int port)
+        public void Send([NotNull] byte[] data, [NotNull] IPAddress ip, int port)
         {
-            Port = port;
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            _socket.SendTo(data, new IPEndPoint(ip, port));
         }
-        public int Port { get; }
 
-        public void Send(byte[] data, IPAddress ip)
+        public void Send([NotNull] byte[] data, [NotNull] EndPoint endPoint)
         {
-            _socket.SendTo(data, new IPEndPoint(ip, Port));
+            _socket.SendTo(data, endPoint);
         }
     }
 }

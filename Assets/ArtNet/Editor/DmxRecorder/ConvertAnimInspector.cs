@@ -82,7 +82,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var timelineConverter = new TimelineConverter(artNetDmxClip);
             var universeDataList = timelineConverter.ToUniverseData();
-            var dmxPackets = new List<(int, DmxPacket)>();
+            var dmxPackets = new List<(long, DmxPacket)>();
             byte sequence = 0;
             foreach (var universeData in universeDataList)
             {
@@ -92,7 +92,7 @@ namespace ArtNet.Editor.DmxRecorder
                     Universe = (ushort) universeData.Universe,
                     Dmx = universeData.Values
                 };
-                dmxPackets.Add(((int) (universeData.Time * 1000f), packet)); ;
+                dmxPackets.Add((universeData.Time, packet));
 
                 if (sequence >= 255)
                 {
@@ -105,7 +105,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var dmxUniverseData = dmxPackets.Select(packet =>
-                new UniverseData(packet.Item1 / 1000f, packet.Item2.Universe, packet.Item2.Dmx)).ToList();
+                new UniverseData(packet.Item1, packet.Item2.Universe, packet.Item2.Dmx)).ToList();
 
             var path = convertAnim.OutputDirectory + "/DmxPackets.bytes";
             var exists = File.Exists(path);

@@ -85,7 +85,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (state == PlayModeStateChange.EnteredEditMode)
             {
-                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
                 ReloadRecorderSettings();
                 Repaint();
             }
@@ -110,7 +110,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void OnUpdateRecordButton()
         {
-            var recorderSettings = _controller.Settings.RecorderSettings;
+            var recorderSettings = _controller.ControllerSettings.RecorderSettings;
             if (recorderSettings.All(x => !x.Enabled))
             {
                 SetRecordButtonEnabled(false, "No recorders enabled");
@@ -128,10 +128,10 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void ReloadRecorderSettings()
         {
-            if (_controller?.Settings == null)
+            if (_controller?.ControllerSettings == null)
                 return;
 
-            var recorderItems = _controller.Settings.RecorderSettings.Select(CreateRecorderItem).ToArray();
+            var recorderItems = _controller.ControllerSettings.RecorderSettings.Select(CreateRecorderItem).ToArray();
             foreach (var recorderItem in recorderItems)
                 recorderItem.UpdateState();
 
@@ -140,8 +140,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void SaveAndRepaint()
         {
-            if (_controller.Settings != null)
-                _controller.Settings.Save();
+            if (_controller.ControllerSettings != null)
+                _controller.ControllerSettings.Save();
 
             Repaint();
         }
@@ -164,7 +164,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
 
             var skinStyleSheet = EditorGUIUtility.isProSkin ? _darkStyleSheet : _lightStyleSheet;
-            if (_darkStyleSheet == null)
+            if (skinStyleSheet == null)
             {
                 Debug.LogError("SkinStyleSheet is null");
                 return;
@@ -212,13 +212,13 @@ namespace ArtNet.Editor.DmxRecorder
             var footerMessages = visualElement.Q<VisualElement>("footerMessages");
             footerMessages.Add(new IMGUIContainer(StatusMessagesGUI));
 
-            SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSettings());
+            SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
             SetSettingPanelEnabled(!DisableEditRecordSettings());
         }
 
         private void StatusMessagesGUI()
         {
-            var activeRecorders = _controller.Settings.RecorderSettings.Where(x => x.Enabled).ToArray();
+            var activeRecorders = _controller.ControllerSettings.RecorderSettings.Where(x => x.Enabled).ToArray();
 
             if (activeRecorders.Length == 0)
             {
@@ -312,7 +312,7 @@ namespace ArtNet.Editor.DmxRecorder
                         if (EditorGUI.EndChangeCheck() || EditorUtility.IsDirty(_selectedRecorderItem.Settings))
                         {
                             // data changed
-                            _controller.Settings.Save();
+                            _controller.ControllerSettings.Save();
                             _selectedRecorderItem.UpdateState();
                         }
                     }
@@ -374,7 +374,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private RecorderItem CreateRecorderItem(RecorderSettings recorderSettings)
         {
-            var recorderItem = new RecorderItem(_controller.Settings, recorderSettings);
+            var recorderItem = new RecorderItem(_controller.ControllerSettings, recorderSettings);
             recorderItem.OnEnableStateChanged += enabled =>
             {
                 if (enabled)
@@ -401,7 +401,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             recorder.name = UniqueRecorderName(recorderName);
             recorder.Enabled = enabled;
-            _controller.Settings.AddRecorderSettings(recorder);
+            _controller.ControllerSettings.AddRecorderSettings(recorder);
 
             var item = CreateRecorderItem(recorder);
             _recorderList.Add(item);
@@ -419,7 +419,7 @@ namespace ArtNet.Editor.DmxRecorder
         private void DeleteRecorder(RecorderItem item)
         {
             var settings = item.Settings;
-            _controller.Settings.RemoveRecorderSettings(settings);
+            _controller.ControllerSettings.RemoveRecorderSettings(settings);
             _recorderList.Remove(item);
         }
 
@@ -431,7 +431,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private string UniqueRecorderName(string recorderName)
         {
-            var existingNames = _controller.Settings.RecorderSettings.Select(settings => settings.name).ToArray();
+            var existingNames = _controller.ControllerSettings.RecorderSettings.Select(settings => settings.name).ToArray();
             return ObjectNames.GetUniqueName(existingNames, recorderName);
         }
 
@@ -529,7 +529,7 @@ namespace ArtNet.Editor.DmxRecorder
             GUI.Label(rect, msg);
         }
 
-        private static string TimeCodeText(int time)
+        private static string TimeCodeText(long time)
         {
             var hours = time / 3600000;
             var minutes = time / 60000;
@@ -538,7 +538,7 @@ namespace ArtNet.Editor.DmxRecorder
             return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
         }
 
-        private static string MspaceText(int value, int padding = 2, int mspace = 24)
+        private static string MspaceText(long value, int padding = 2, int mspace = 24)
         {
             var text = value.ToString().PadLeft(padding, '0');
             return $"<mspace={mspace}em>{text}</mspace>";
