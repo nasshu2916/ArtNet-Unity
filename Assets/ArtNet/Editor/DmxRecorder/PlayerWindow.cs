@@ -25,6 +25,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private Label _senderTimeLabel;
         private Slider _senderTimeSlider;
+        private Image _playButtonImage;
 
         private Toggle _loopToggle;
         private SnapSlider _speedSlider;
@@ -127,11 +128,12 @@ namespace ArtNet.Editor.DmxRecorder
                 _senderFilePath = selectedFile;
             };
 
-            var playButton = root.Q<Button>("PlayButton");
-            var playButtonImage = new Image { image = IconHelper.PlayButton };
-            playButton.Add(playButtonImage);
+            var playButton = root.Q<Button>("PlayButton")!;
+            _playButtonImage = new Image { image = IconHelper.PlayButton };
+            playButton.Add(_playButtonImage);
             playButton.clicked += () =>
             {
+                if (_controller == null || _controller.IsLoaded == false) return;
                 if (_controller!.State == PlaybackState.Play)
                 {
                     _controller.Pause();
@@ -211,12 +213,9 @@ namespace ArtNet.Editor.DmxRecorder
         private void SetPlayControllerSettings([NotNull] PlayControllerSetting setting)
         {
             _controller = new PlayController(setting);
-            // _controller.OnStartRecording += OnStartRecording;
-            // _controller.OnPauseRecording += OnPauseRecording;
-            // _controller.OnStopRecording += OnFinishRecording;
-            // _controller.OnResumeRecording += OnStartRecording;
 
             _controller.TimeChanged += OnPlayTimeChanged;
+            _controller.StateChanged += OnPlaybackStateChanged;
 
             ReloadSendSettings();
             ReloadSendDestinations();
@@ -334,6 +333,17 @@ namespace ArtNet.Editor.DmxRecorder
             _senderTimeLabel!.text = TimeText(time);
             _senderTimeSlider!.SetValueWithoutNotify(newSliderValue);
             _senderProgressBar!.value = newSliderValue;
+        }
+
+        private void OnPlaybackStateChanged(PlaybackState state)
+        {
+            var image = state switch
+            {
+                PlaybackState.Play => IconHelper.PauseButton,
+                PlaybackState.Pause => IconHelper.PlayButton,
+                _ => IconHelper.PlayButton
+            };
+            _playButtonImage!.image = image;
         }
 
         private static string TimeText(long time)
