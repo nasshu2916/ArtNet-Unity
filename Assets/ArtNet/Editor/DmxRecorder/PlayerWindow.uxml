@@ -3,7 +3,7 @@
     <ui:VisualElement class="section-content">
         <ui:VisualElement>
             <ui:VisualElement style="width: 100%;">
-                <ui:TextField name="senderFileNameField" text="file_name" label="DMX File" tooltip="Play a DMX file" />
+                <ui:TextField name="senderFileNameField" text="file_name" label="DMX File" tooltip="Play a DMX file" readonly="true" />
             </ui:VisualElement>
             <ui:Button name="selectPlayFileButton" tooltip="Open a DMX file to play" />
         </ui:VisualElement>
@@ -37,13 +37,12 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1;">
         <ui:Label text="Send Destination" class="section-title" />
         <ui:VisualElement name="sendDestinationsPanel" class="Panel">
             <ui:VisualElement name="sendDestinationsListHeader">
                 <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addDestinationLabel" tooltip="Add a new send destination item to the list" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
             </ui:VisualElement>
-            <ui:VisualElement name="sendDestinationsList" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

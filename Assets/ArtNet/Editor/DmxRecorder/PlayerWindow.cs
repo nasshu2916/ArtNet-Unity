@@ -69,7 +69,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private void CreateView()
         {
-            minSize = new Vector2(400, 200);
+            minSize = new Vector2(350, 400);
             var root = rootVisualElement;
 
             if (_visualTree == null)
@@ -200,7 +200,11 @@ namespace ArtNet.Editor.DmxRecorder
             _destinationList = new DestinationList
             {
                 name = "destinationList",
-                focusable = true
+                focusable = true,
+                style =
+                {
+                    flexGrow = 1
+                }
             };
             _destinationList.OnItemContextMenu += OnDestinationContextMenu;
             _destinationList.OnSelectionChanged += OnDestinationSelectionChanged;
