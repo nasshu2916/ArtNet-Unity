@@ -3,14 +3,14 @@
     <ui:VisualElement class="Panel" style="min-height: 140px;">
         <ui:Label text="00:00:00.000" name="timeCode" />
         <ui:VisualElement name="controllerButton">
-            <ui:Button name="playButton" focusable="false" />
-            <ui:Button name="stopButton" focusable="false" />
+            <ui:Button name="playButton" focusable="false" tooltip="Start recording" />
+            <ui:Button name="stopButton" focusable="false" tooltip="Stop recording" />
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement style="flex-direction: row; flex-grow: 1;">
         <ui:VisualElement name="recordersPanel" class="Panel" style="width: 200px; max-width: 500px; min-width: 150px;">
             <ui:VisualElement class="RecorderListHeader">
-                <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addRecorderLabel" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
+                <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addRecorderLabel" tooltip="Add a new recorder item to the list" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:ScrollView style="flex-grow: 1;">

@@ -8,12 +8,33 @@ namespace ArtNet.Editor.DmxRecorder
     [CustomPropertyDrawer(typeof(FileGenerator))]
     internal class FileGeneratorDrawer : TargetedPropertyDrawer<FileGenerator>
     {
-        private static class Styles
+        private static class Contents
         {
-            internal static readonly GUIContent FileNameLabel = new("File Name", "The name of the file to record to.");
-            internal static readonly GUIContent AddWildcardButton = new("+ Wildcards",
-                "Add a wildcard to the file name. Wildcards are replaced with values.");
-            internal static readonly GUIContent PathSelectButton = new("...", "Select the output location");
+            internal static readonly GUIContent FileNameLabel = new()
+            {
+                text = "File Name",
+                tooltip =
+                    "The name of the file to record to.\n" +
+                    "If using wildcards, they will be replaced with dynamic values. (use the \"+ Wildcards\" button)"
+            };
+
+            internal static readonly GUIContent AddWildcardButton = new()
+            {
+                text = "+ Wildcards",
+                tooltip = "Add a wildcard to the file name. Wildcards are replaced with values."
+            };
+
+            internal static readonly GUIContent PathSelectButton = new()
+            {
+                text = "...",
+                tooltip = "Select the output location"
+            };
+
+            internal static readonly GUIContent OpenDirectoryButton = new()
+            {
+                image = IconHelper.FolderOpen,
+                tooltip = "Open Directory"
+            };
         }
 
         private SerializedProperty _fileName;
@@ -28,12 +49,8 @@ namespace ArtNet.Editor.DmxRecorder
             clipping = TextClipping.Overflow
         };
 
-        private static Texture2D _openPathIcon;
-
         protected override void Initialize(SerializedProperty property)
         {
-            if (_openPathIcon == null) _openPathIcon = IconHelper.FolderOpen as Texture2D;
-
             base.Initialize(property);
 
             _fileName = property.FindPropertyRelative("_fileName");
@@ -48,9 +65,9 @@ namespace ArtNet.Editor.DmxRecorder
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.PropertyField(_fileName, Styles.FileNameLabel);
+                EditorGUILayout.PropertyField(_fileName, Contents.FileNameLabel);
 
-                if (GUILayout.Button(Styles.AddWildcardButton, EditorStyles.popup, GUILayout.Width(90)))
+                if (GUILayout.Button(Contents.AddWildcardButton, EditorStyles.popup, GUILayout.Width(90)))
                 {
                     GUI.FocusControl(null);
                     var menu = new GenericMenu();
@@ -87,7 +104,7 @@ namespace ArtNet.Editor.DmxRecorder
                 );
                 _directory.stringValue = EditorGUI.TextField(directoryInputRect, _directory.stringValue);
 
-                if (GUILayout.Button(Styles.PathSelectButton, EditorStyles.miniButton, GUILayout.Width(30)))
+                if (GUILayout.Button(Contents.PathSelectButton, EditorStyles.miniButton, GUILayout.Width(30)))
                 {
                     var outputDirectory = Target.OutputDirectory();
                     var newDirectory = EditorUtility.OpenFolderPanel("Select Folder", outputDirectory, "");
@@ -133,7 +150,7 @@ namespace ArtNet.Editor.DmxRecorder
                 var rect = GUILayoutUtility.GetRect(new GUIContent(outputPath), PathPreviewStyle, layoutOptions);
                 EditorGUI.SelectableLabel(rect, outputPath, PathPreviewStyle);
 
-                if (GUILayout.Button(_openPathIcon, EditorStyles.miniButton, GUILayout.Width(30)))
+                if (GUILayout.Button(Contents.OpenDirectoryButton, EditorStyles.miniButton, GUILayout.Width(30)))
                 {
                     var outputDir = Target.OutputDirectory();
                     var dir = new DirectoryInfo(outputDir);
