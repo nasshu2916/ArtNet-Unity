@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ArtNet.Editor.DmxRecorder.Util;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace ArtNet.Editor.DmxRecorder
 
         [NotNull] private readonly Slider _slider;
         [NotNull] private readonly Label _label;
+
+        public float DefaultValue { get; set; } = 1.0f;
 
         public float Value
         {
@@ -75,13 +78,12 @@ namespace ArtNet.Editor.DmxRecorder
                 Value += (evt!.delta.y > 0 ? step : -step);
             });
 
-            var resetButton = new Button(() => Value = 1) { text = "Reset" };
-            resetButton.RegisterCallback<MouseDownEvent>(evt =>
+            var resetButton = new Button(() => Value = DefaultValue)
             {
-                if (evt!.button != 1) return;
-
-                Value = 1;
-            });
+                name = "Reset value",
+                tooltip = $"Reset value to default ({DefaultValue:F2})"
+            };
+            resetButton.Add(new Image { image = IconHelper.RefreshIcon });
 
             style!.flexDirection = FlexDirection.Row;
             _slider.style!.flexGrow = 1.0f;
