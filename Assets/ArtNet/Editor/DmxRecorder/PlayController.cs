@@ -246,6 +246,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             // TODO: O(n) なので DmxPackets の量が多い場合速度が遅くなるので最適化が必要
             var dmxPackets = DmxPackets.Where(x => x.time > prevSendTime && x.time <= newSendTime)
+                .OrderBy(x => x.time)
                 .Select(x => x.packet);
             foreach (var packet in dmxPackets)
             {

@@ -17,6 +17,10 @@ namespace ArtNet.Editor.DmxRecorder
         {
             internal static readonly GUIContent DuplicateLabel = new("Duplicate");
             internal static readonly GUIContent DeleteLabel = new("Delete");
+
+            internal static string PlayButtonTooltip => "Start recording";
+            internal static string PauseButtonTooltip => "Pause recording";
+            internal static string StopButtonTooltip => "Stop recording";
         }
         #endregion
 
@@ -180,13 +184,15 @@ namespace ArtNet.Editor.DmxRecorder
             // TimeCode の作成
             _timeCode = visualElement.Q<Label>("timeCode");
 
-            _playButton = visualElement.Q<Button>("playButton");
+            _playButton = visualElement.Q<Button>("playButton")!;
             _playButton.clicked += OnPlayButtonClicked;
-            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.style!.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
 
-            _stopButton = visualElement.Q<Button>("stopButton");
+            _stopButton = visualElement.Q<Button>("stopButton")!;
             _stopButton.clicked += OnStopButtonClicked;
-            _stopButton.style.backgroundImage = (StyleBackground) IconHelper.PreMatQuad;
+            _stopButton.style!.backgroundImage = (StyleBackground) IconHelper.PreMatQuad;
+            _stopButton.tooltip = Contents.StopButtonTooltip;
             _stopButton.SetEnabled(false);
 
             // RecordersPanel の作成
@@ -289,7 +295,12 @@ namespace ArtNet.Editor.DmxRecorder
                         var recorderName = editor.target.GetType().Name;
                         EditorGUILayout.LabelField("Recorder Type", ObjectNames.NicifyVariableName(recorderName));
 
-                        if (GUILayout.Button(IconHelper.PresetIcon, new GUIStyle("iconButton") { fixedWidth = 20f }))
+                        var content = new GUIContent
+                        {
+                            tooltip = "Load or save a preset",
+                            image = IconHelper.PresetIcon
+                        };
+                        if (GUILayout.Button(content, new GUIStyle("iconButton") { fixedWidth = 20f }))
                         {
                             var settings = editor.target as RecorderSettings;
 
@@ -470,6 +481,7 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("recording");
             _playButton.style.backgroundImage = (StyleBackground) IconHelper.PauseButton;
+            _playButton.tooltip = Contents.PauseButtonTooltip;
             _stopButton.SetEnabled(true);
             SetSettingPanelEnabled(false);
             _recorderList.Items.ForEach(x => x.SetReadOnly(true));
@@ -480,6 +492,7 @@ namespace ArtNet.Editor.DmxRecorder
             _timeCode.ClearClassList();
             _timeCode.AddToClassList("paused");
             _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
             _stopButton.SetEnabled(true);
         }
 
@@ -487,6 +500,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             _timeCode.ClearClassList();
             _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
             _stopButton.SetEnabled(false);
             _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
             SetSettingPanelEnabled(true);
