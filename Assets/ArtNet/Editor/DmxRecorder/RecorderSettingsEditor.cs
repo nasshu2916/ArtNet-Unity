@@ -8,13 +8,14 @@ namespace ArtNet.Editor.DmxRecorder
     [CustomEditor(typeof(RecorderSettings), true)]
     public class RecorderSettingsEditor : UnityEditor.Editor
     {
-        private static class Styles
+        private static class Contents
         {
             internal static readonly GUIContent TakeNumberLabel = new("Take Number", "Value that the Recorder uses to number the recordings. It increases by one after each recording.");
+            internal static readonly GUIContent CompressBinaryLabel = new("Compress Binary Data", "Compress the binary data when saving the file.");
         }
 
         internal event Action OnRecorderValidated;
-        private SerializedProperty _universeFilter, _fileGenerator, _take;
+        private SerializedProperty _universeFilter, _fileGenerator, _take, _isCompressBinary;
 
         public void OnEnable()
         {
@@ -23,12 +24,15 @@ namespace ArtNet.Editor.DmxRecorder
             _universeFilter = serializedObject.FindProperty("_universeFilter");
             _fileGenerator = serializedObject.FindProperty("_fileGenerator");
             _take = serializedObject.FindProperty("_take");
+            _isCompressBinary = serializedObject.FindProperty("_isCompressBinary");
         }
 
         public override void OnInspectorGUI()
         {
             if (target == null)
                 return;
+
+            var targetType = target.GetType();
 
             EditorGUI.BeginChangeCheck();
             serializedObject.Update();
@@ -43,7 +47,13 @@ namespace ArtNet.Editor.DmxRecorder
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(_take, Styles.TakeNumberLabel);
+            EditorGUILayout.PropertyField(_take, Contents.TakeNumberLabel);
+
+            if (targetType == typeof(BinaryRecorderSettings))
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(_isCompressBinary, Contents.CompressBinaryLabel);
+            }
 
             EditorGUILayout.Separator();
 

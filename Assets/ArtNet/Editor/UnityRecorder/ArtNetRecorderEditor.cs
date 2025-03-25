@@ -7,7 +7,7 @@ namespace ArtNet.Editor.UnityRecorder
     [CustomEditor(typeof(ArtNetRecorderSettings))]
     public class ArtNetRecorderEditor : RecorderEditor
     {
-        private SerializedProperty _outputFormat, _universeFilter;
+        private SerializedProperty _outputFormat, _universeFilter, _isCompressBinary;
 
         private static class Styles
         {
@@ -23,6 +23,7 @@ namespace ArtNet.Editor.UnityRecorder
 
             _outputFormat = serializedObject.FindProperty("_outputFormat");
             _universeFilter = serializedObject.FindProperty("_universeFilter");
+            _isCompressBinary = serializedObject.FindProperty("_isCompressBinary");
         }
 
         protected override void ExtraOptionsGUI()
@@ -36,6 +37,11 @@ namespace ArtNet.Editor.UnityRecorder
         protected override void FileTypeAndFormatGUI()
         {
             EditorGUILayout.PropertyField(_outputFormat, Styles.FormatLabel);
+            if (_outputFormat?.enumValueIndex == (int) ArtNetRecorderSettings.ArtNetRecorderOutputFormat.Binary)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(_isCompressBinary);
+            }
         }
     }
 }

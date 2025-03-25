@@ -56,6 +56,8 @@ You can save receivable ArtNet packets as binary data.
 
 Specify the output file name and folder, and press the `Start` button to save the received ArtNet packets. If a file with the same name already exists, it will be overwritten automatically.
 
+When saving in binary format in the Recorder tab, it is saved in a [proprietary format](Docs/BinaryFormat.md).
+
 #### Sender Tab
 
 You can send the file saved by the Recorder.
