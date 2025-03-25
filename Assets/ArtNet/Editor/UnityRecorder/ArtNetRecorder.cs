@@ -39,7 +39,7 @@ namespace ArtNet.Editor.UnityRecorder
                 switch (settings.OutputFormat)
                 {
                     case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.Binary:
-                        BinaryWrite(filteredFrames, absolutePath);
+                        BinaryWrite(filteredFrames, absolutePath, settings.IsCompressBinary);
                         break;
                     case ArtNetRecorderSettings.ArtNetRecorderOutputFormat.AnimationClip:
                         AnimationClipWrite(filteredFrames, absolutePath);
@@ -52,9 +52,9 @@ namespace ArtNet.Editor.UnityRecorder
             }
         }
 
-        private static void BinaryWrite(IEnumerable<UniverseData> frames, string absolutePath)
+        private static void BinaryWrite(IEnumerable<UniverseData> frames, string absolutePath, bool isCompress)
         {
-            BinaryDmx.Export(frames, absolutePath);
+            BinaryDmx.Export(frames, absolutePath, isCompress);
         }
 
         private static void AnimationClipWrite(IEnumerable<UniverseData> frames, string absolutePath)

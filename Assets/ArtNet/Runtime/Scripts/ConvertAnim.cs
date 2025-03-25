@@ -8,5 +8,6 @@ namespace ArtNet
         // Binary を入れる SerializedField
         public TextAsset binary;
         public string OutputDirectory;
+        public bool IsCompressBinary;
     }
 }

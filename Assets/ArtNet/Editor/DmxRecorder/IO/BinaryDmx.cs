@@ -55,13 +55,13 @@ namespace ArtNet.Editor.DmxRecorder.IO
             }
         }
 
-        public static void Export(IEnumerable<UniverseData> universeData, string path)
+        public static void Export(IEnumerable<UniverseData> universeData, string path, bool isCompress)
         {
-            var binary = SerializeUniverseData(universeData, true);
+            var binary = SerializeUniverseData(universeData, isCompress);
             File.WriteAllBytes(path, binary);
         }
 
-        public static byte[] SerializeUniverseData(IEnumerable<UniverseData> universeData, bool isCompress = false)
+        public static byte[] SerializeUniverseData(IEnumerable<UniverseData> universeData, bool isCompress)
         {
             var sortedData = universeData.Where(x => x != null).OrderBy(x => x.Time).ToList();
             var startTime = sortedData.First().Time;

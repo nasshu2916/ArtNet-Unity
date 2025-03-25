@@ -27,6 +27,7 @@ namespace ArtNet.Editor.UnityRecorder
 
         [SerializeField] private ArtNetRecorderOutputFormat _outputFormat = ArtNetRecorderOutputFormat.Binary;
         [SerializeField] private UniverseFilter _universeFilter = new();
+        [SerializeField] private bool _isCompressBinary = true;
 
         public ArtNetRecorderOutputFormat OutputFormat
         {
@@ -48,6 +49,7 @@ namespace ArtNet.Editor.UnityRecorder
         }
 
         public UniverseFilter UniverseFilter => _universeFilter;
+        public bool IsCompressBinary => _isCompressBinary;
 
         public ArtNetRecorderSettings()
         {

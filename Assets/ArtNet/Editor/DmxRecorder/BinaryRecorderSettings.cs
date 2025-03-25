@@ -11,12 +11,14 @@ namespace ArtNet.Editor.DmxRecorder
         internal override string DefaultName => "Binary";
         protected internal override Texture Icon => IconHelper.Icon("DefaultAsset Icon", true);
 
+        [SerializeField] private bool _isCompressBinary = true;
+
         public override void StoreUniverseData(IEnumerable<UniverseData> universeData)
         {
             FileGenerator.CreateDirectory();
             var path = OutputAbsolutePath;
 
-            BinaryDmx.Export(universeData, path);
+            BinaryDmx.Export(universeData, path, _isCompressBinary);
         }
     }
 }

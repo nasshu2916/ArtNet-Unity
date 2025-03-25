@@ -109,7 +109,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             var path = convertAnim.OutputDirectory + "/DmxPackets.bytes";
             var exists = File.Exists(path);
-            BinaryDmx.Export(dmxUniverseData, path);
+            BinaryDmx.Export(dmxUniverseData, path, convertAnim.IsCompressBinary);
 
             var message = exists ? "Data updated" : "Data stored";
             Debug.Log($"ArtNet Recorder: {message} at {path}");
