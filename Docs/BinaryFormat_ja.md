@@ -5,17 +5,18 @@ ArtNet Recorder で保存するデータは独自のバイナリフォーマッ�
 保存されるバイナリデータは Header と Body に分かれており、Header にはバイナリの識別情報やバージョン情報が、Body
 には実際のデータが記録される。
 
-### Header
+### Header 部
 
 Header 部は以下の 16 byte で構成されます。
 
-| Field | Name         | Size | Description                          |
-|-------|--------------|------|--------------------------------------|
-| 1     | ID[4]        | int8 | 識別子 `\0xFF, 0x44, 0x4D, 0x58` の4文字固定 |
-| 2     | Version      | int8 | バイナリの Encode Version (現在は `0x02`)    |
-| 3     | Reserved[11] | int8 | 予約領域 (0x00 で埋める)                     |
+| Field | Name         | Size | Description                                        |
+|-------|--------------|------|----------------------------------------------------|
+| 1     | ID[4]        | int8 | 識別子 `\0xFF, 0x44, 0x4D, 0x58` の4文字固定               |
+| 2     | Version      | int8 | バイナリの Encode Version (現在は `0x02`)                  |
+| 3     | CompressType | int8 | Body 部の圧縮形式 <br/> - 0x00: 非圧縮<br/> - 0x01: Deflate |
+| 4     | Reserved[10] | int8 | 予約領域 (0x00 で埋める)                                   |
 
-### Body
+### Body 部
 
 Body は以下のフォーマットで DMX データをファイルの終端まで繰り返し記録する。
 
@@ -28,3 +29,6 @@ Body は以下のフォーマットで DMX データをファイルの終端ま�
 
 > [!NOTE]
 > Body で記録する DMX データ長は Length の field で指定され、固定長ではない。
+
+> [!NOTE]
+> Body 部は Header の CompressType で指定された圧縮形式で圧縮されるため、Serialize/Deserialize 時には適切な圧縮/解凍処理を行う必要がある。
