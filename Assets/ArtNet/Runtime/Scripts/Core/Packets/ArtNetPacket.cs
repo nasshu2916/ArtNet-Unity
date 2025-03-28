@@ -15,14 +15,24 @@ namespace ArtNet.Packets
         private static readonly byte IdentificationIdsLength = (byte) IdentificationIds.Length;
 
         public abstract OpCode OpCode { get; }
-        public ushort ProtocolVersion => 14;
+        public static ushort ProtocolVersion => 14;
         public bool IsNeedProtocolVersion => OpCode != OpCode.PollReply;
 
-        public static T FromByteArray<T>(ReadOnlySpan<byte> buffer) where T : ArtNetPacket, new()
+        /// <summary>
+        /// Creates an instance of the packet from a byte array.
+        /// If the packet is not valid, it returns null.
+        /// </summary>
+        public static T FromByteArray<T>(ReadOnlySpan<byte> buffer, bool validate = true) where T : ArtNetPacket, new()
         {
-            if (!Validate(buffer)) return null;
-
             var packet = new T();
+
+            if (validate)
+            {
+                if (!Validate(buffer)) return null;
+                var opCode = GetOpCode(buffer.Slice(IdentificationIdsLength, 2));
+                if (opCode != packet.OpCode) return null;
+            }
+
             var result = packet.Deserialize(buffer);
             return result ? packet : null;
         }
@@ -79,9 +89,9 @@ namespace ArtNet.Packets
 
             return GetOpCode(buffer.Slice(IdentificationIdsLength, 2)) switch
             {
-                OpCode.Poll => FromByteArray<PollPacket>(buffer),
-                OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer),
-                OpCode.Dmx => FromByteArray<DmxPacket>(buffer),
+                OpCode.Poll => FromByteArray<PollPacket>(buffer, false),
+                OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer, false),
+                OpCode.Dmx => FromByteArray<DmxPacket>(buffer, false),
                 _ => null
             };
         }
