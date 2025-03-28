@@ -14,19 +14,18 @@ namespace ArtNet.Packets
         private static readonly byte[] IdentificationIds = Encoding.ASCII.GetBytes(ArtNetId);
         private static readonly byte IdentificationIdsLength = (byte) IdentificationIds.Length;
 
-        protected ArtNetPacket(OpCode opCode)
-        {
-            OpCode = opCode;
-        }
-
-        protected ArtNetPacket(ReadOnlySpan<byte> buffer, OpCode opCode) : this(opCode)
-        {
-            Deserialize(buffer);
-        }
-
-        public OpCode OpCode { get; }
-        public ushort ProtocolVersion { get; protected set; } = 14;
+        public abstract OpCode OpCode { get; }
+        public ushort ProtocolVersion => 14;
         public bool IsNeedProtocolVersion => OpCode != OpCode.PollReply;
+
+        public static T FromByteArray<T>(ReadOnlySpan<byte> buffer) where T : ArtNetPacket, new()
+        {
+            if (!Validate(buffer)) return null;
+
+            var packet = new T();
+            var result = packet.Deserialize(buffer);
+            return result ? packet : null;
+        }
 
         public byte[] ToByteArray()
         {
@@ -35,16 +34,19 @@ namespace ArtNet.Packets
             return memoryStream.ToArray();
         }
 
-        private void Deserialize(ReadOnlySpan<byte> buffer)
+        private bool Deserialize(ReadOnlySpan<byte> buffer)
         {
-            if (!Validate(buffer)) return;
+            if (!Validate(buffer)) return false;
 
             var artReader = new ArtNetReader(buffer[FixedArtNetPacketLength..]);
             if (IsNeedProtocolVersion)
             {
-                ProtocolVersion = artReader.ReadNetworkUInt16();
+                var protocolVersion = artReader.ReadNetworkUInt16();
+                if (protocolVersion != ProtocolVersion) return false;
             }
+
             DeserializeBody(artReader);
+            return true;
         }
 
         protected virtual void DeserializeBody(ArtNetReader artNetReader)
@@ -77,9 +79,9 @@ namespace ArtNet.Packets
 
             return GetOpCode(buffer.Slice(IdentificationIdsLength, 2)) switch
             {
-                OpCode.Poll => new PollPacket(buffer),
-                OpCode.PollReply => new PollReplyPacket(buffer),
-                OpCode.Dmx => new DmxPacket(buffer),
+                OpCode.Poll => FromByteArray<PollPacket>(buffer),
+                OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer),
+                OpCode.Dmx => FromByteArray<DmxPacket>(buffer),
                 _ => null
             };
         }

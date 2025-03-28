@@ -1,4 +1,3 @@
-using System;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -6,13 +5,7 @@ namespace ArtNet.Packets
 {
     public class DmxPacket : ArtNetPacket
     {
-        public DmxPacket() : base(OpCode.Dmx)
-        {
-        }
-
-        public DmxPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Dmx)
-        {
-        }
+        public override OpCode OpCode => OpCode.Dmx;
 
         public byte Sequence { get; set; }
         public byte Physical { get; set; }

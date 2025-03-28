@@ -1,4 +1,3 @@
-using System;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -6,13 +5,7 @@ namespace ArtNet.Packets
 {
     public class PollPacket : ArtNetPacket
     {
-        public PollPacket() : base(OpCode.Poll)
-        {
-        }
-
-        public PollPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Poll)
-        {
-        }
+        public override OpCode OpCode => OpCode.Poll;
 
         public byte Flags { get; set; }
         public byte Priority { get; set; }

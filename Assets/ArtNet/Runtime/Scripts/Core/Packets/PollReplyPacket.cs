@@ -1,4 +1,3 @@
-using System;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -6,13 +5,7 @@ namespace ArtNet.Packets
 {
     public class PollReplyPacket : ArtNetPacket
     {
-        public PollReplyPacket() : base(OpCode.PollReply)
-        {
-        }
-
-        public PollReplyPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.PollReply)
-        {
-        }
+        public override OpCode OpCode => OpCode.PollReply;
 
         public byte[] IpAddress { get; set; } = new byte[4];
         public ushort Port { get; set; }
