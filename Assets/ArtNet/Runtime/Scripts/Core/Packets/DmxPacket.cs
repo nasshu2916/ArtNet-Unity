@@ -22,9 +22,8 @@ namespace ArtNet.Packets
 
         public byte[] Dmx { get; set; }
 
-        protected override void Deserialize(ArtNetReader artNetReader)
+        protected override void DeserializeBody(ArtNetReader artNetReader)
         {
-            ProtocolVersion = artNetReader.ReadNetworkUInt16();
             Sequence = artNetReader.ReadByte();
             Physical = artNetReader.ReadByte();
             Universe = artNetReader.ReadUInt16();
@@ -32,10 +31,8 @@ namespace ArtNet.Packets
             Dmx = artNetReader.ReadBytes(length);
         }
 
-        protected override void Serialize(ArtNetWriter artNetWriter)
+        protected override void SerializeBody(ArtNetWriter artNetWriter)
         {
-            base.Serialize(artNetWriter);
-            artNetWriter.WriteNetwork(ProtocolVersion);
             artNetWriter.Write(Sequence);
             artNetWriter.Write(Physical);
             artNetWriter.Write(Universe);

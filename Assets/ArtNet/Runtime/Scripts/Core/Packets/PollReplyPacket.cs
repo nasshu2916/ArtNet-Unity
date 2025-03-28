@@ -43,7 +43,7 @@ namespace ArtNet.Packets
         public byte Status2 { get; set; }
         public byte[] Filter { get; set; } = new byte[26];
 
-        protected override void Deserialize(ArtNetReader artNetReader)
+        protected override void DeserializeBody(ArtNetReader artNetReader)
         {
             IpAddress = artNetReader.ReadBytes(4);
             Port = artNetReader.ReadUInt16();
@@ -75,9 +75,8 @@ namespace ArtNet.Packets
             Filter = artNetReader.ReadBytes(26);
         }
 
-        protected override void Serialize(ArtNetWriter artNetWriter)
+        protected override void SerializeBody(ArtNetWriter artNetWriter)
         {
-            base.Serialize(artNetWriter);
             artNetWriter.Write(IpAddress);
             artNetWriter.Write(Port);
             artNetWriter.WriteNetwork(VersionInfo);

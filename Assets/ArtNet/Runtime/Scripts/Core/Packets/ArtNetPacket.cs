@@ -21,12 +21,12 @@ namespace ArtNet.Packets
 
         protected ArtNetPacket(ReadOnlySpan<byte> buffer, OpCode opCode) : this(opCode)
         {
-            var artReader = new ArtNetReader(buffer[FixedArtNetPacketLength..]);
-            Deserialize(artReader);
+            Deserialize(buffer);
         }
 
         public OpCode OpCode { get; }
         public ushort ProtocolVersion { get; protected set; } = 14;
+        public bool IsNeedProtocolVersion => OpCode != OpCode.PollReply;
 
         public byte[] ToByteArray()
         {
@@ -35,15 +35,40 @@ namespace ArtNet.Packets
             return memoryStream.ToArray();
         }
 
-        protected virtual void Deserialize(ArtNetReader artNetReader)
+        private void Deserialize(ReadOnlySpan<byte> buffer)
+        {
+            if (!Validate(buffer)) return;
+
+            var artReader = new ArtNetReader(buffer[FixedArtNetPacketLength..]);
+            if (IsNeedProtocolVersion)
+            {
+                ProtocolVersion = artReader.ReadNetworkUInt16();
+            }
+            DeserializeBody(artReader);
+        }
+
+        protected virtual void DeserializeBody(ArtNetReader artNetReader)
         {
         }
 
-        protected virtual void Serialize(ArtNetWriter artNetWriter)
+        private void Serialize(ArtNetWriter artNetWriter)
+        {
+            SerializeHeader(artNetWriter);
+            SerializeBody(artNetWriter);
+        }
+
+        private void SerializeHeader(ArtNetWriter artNetWriter)
         {
             artNetWriter.WriteNetwork(ArtNetId, 8);
             artNetWriter.Write((ushort) OpCode);
+            if (IsNeedProtocolVersion)
+            {
+                artNetWriter.WriteNetwork(ProtocolVersion);
+            }
         }
+
+        protected abstract void SerializeBody(ArtNetWriter artNetWriter);
+
 
         [CanBeNull]
         public static ArtNetPacket Create(ReadOnlySpan<byte> buffer)

@@ -18,17 +18,14 @@ namespace ArtNet.Packets
         public byte Priority { get; set; }
 
 
-        protected override void Deserialize(ArtNetReader artNetReader)
+        protected override void DeserializeBody(ArtNetReader artNetReader)
         {
-            ProtocolVersion = artNetReader.ReadNetworkUInt16();
             Flags = artNetReader.ReadByte();
             Priority = artNetReader.ReadByte();
         }
 
-        protected override void Serialize(ArtNetWriter artNetWriter)
+        protected override void SerializeBody(ArtNetWriter artNetWriter)
         {
-            base.Serialize(artNetWriter);
-            artNetWriter.WriteNetwork(ProtocolVersion);
             artNetWriter.Write(Flags);
             artNetWriter.Write(Priority);
         }
