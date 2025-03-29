@@ -25,5 +25,10 @@ namespace ArtNet.Packets
             artNetWriter.Write(Flags);
             artNetWriter.Write(Priority);
         }
+
+        protected override bool Validate()
+        {
+            return true;
+        }
     }
 }

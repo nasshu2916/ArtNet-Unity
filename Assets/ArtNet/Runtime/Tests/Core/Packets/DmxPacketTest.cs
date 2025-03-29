@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ArtNet.Packets;
@@ -90,7 +91,7 @@ namespace ArtNet.Tests.Core.Packets
             CollectionAssert.AreEqual(packet.Dmx, deserializedPacket.Dmx);
         }
 
-        private static IEnumerable<TestCaseData> InvalidDmxPacketTestCases
+        private static IEnumerable<TestCaseData> InvalidDmxPacketBytesTestCases
         {
             get
             {
@@ -166,11 +167,47 @@ namespace ArtNet.Tests.Core.Packets
             }
         }
 
-        [TestCaseSource(nameof(InvalidDmxPacketTestCases))]
-        public void TestDmxPacketInvalid(byte[] invalidData)
+        [TestCaseSource(nameof(InvalidDmxPacketBytesTestCases))]
+        public void TestInvalidDmxPacketBytes(byte[] invalidData)
         {
             var deserializedPacket = ArtNetPacket.FromByteArray<DmxPacket>(invalidData);
             Assert.IsNull(deserializedPacket);
+        }
+
+        private static IEnumerable<TestCaseData> InvalidDmxPacketDataTestCases
+        {
+            get
+            {
+                yield return new TestCaseData(new DmxPacket
+                    {
+                        Sequence = 1,
+                        Physical = 0,
+                        Universe = 1,
+                        Dmx = null
+                    })
+                    .SetName("DMX data is null");
+                yield return new TestCaseData(new DmxPacket
+                {
+                    Sequence = 1,
+                    Physical = 0,
+                    Universe = 1,
+                    Dmx = Array.Empty<byte>()
+                }).SetName("DMX data is empty");
+                yield return new TestCaseData(new DmxPacket
+                {
+                    Sequence = 1,
+                    Physical = 0,
+                    Universe = 1,
+                    Dmx = new byte[513]
+                }).SetName("DMX data length is too long");
+            }
+        }
+
+        [TestCaseSource(nameof(InvalidDmxPacketDataTestCases))]
+        public void TestInvalidDmxPacketData(DmxPacket invalidData)
+        {
+            var serializedData = invalidData!.ToByteArray();
+            Assert.IsNull(serializedData);
         }
     }
 }

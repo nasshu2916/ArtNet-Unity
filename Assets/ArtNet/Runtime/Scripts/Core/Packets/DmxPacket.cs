@@ -37,5 +37,10 @@ namespace ArtNet.Packets
             artNetWriter.WriteNetwork(Length);
             artNetWriter.Write(Dmx);
         }
+
+        protected override bool Validate()
+        {
+            return Length is <= 512 and > 0;
+        }
     }
 }

@@ -42,8 +42,11 @@ namespace ArtNet.Packets
             return result ? packet : null;
         }
 
+        [CanBeNull]
         public byte[] ToByteArray()
         {
+            if (Validate() == false) return null;
+
             using var memoryStream = new MemoryStream();
             Serialize(new ArtNetWriter(memoryStream));
             return memoryStream.ToArray();
@@ -65,13 +68,13 @@ namespace ArtNet.Packets
 
         protected abstract bool DeserializeBody(ArtNetReader artNetReader);
 
-        private void Serialize(ArtNetWriter artNetWriter)
+        private void Serialize([NotNull] ArtNetWriter artNetWriter)
         {
             SerializeHeader(artNetWriter);
             SerializeBody(artNetWriter);
         }
 
-        private void SerializeHeader(ArtNetWriter artNetWriter)
+        private void SerializeHeader([NotNull] ArtNetWriter artNetWriter)
         {
             artNetWriter.WriteNetwork(ArtNetId, 8);
             artNetWriter.Write((ushort) OpCode);
@@ -81,7 +84,8 @@ namespace ArtNet.Packets
             }
         }
 
-        protected abstract void SerializeBody(ArtNetWriter artNetWriter);
+        protected abstract void SerializeBody([NotNull] ArtNetWriter artNetWriter);
+        protected abstract bool Validate();
 
 
         /// <summary>

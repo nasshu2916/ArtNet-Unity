@@ -101,5 +101,10 @@ namespace ArtNet.Packets
             artNetWriter.Write(Status2);
             artNetWriter.Write(Filter);
         }
+
+        protected override bool Validate()
+        {
+            return true;
+        }
     }
 }
