@@ -96,6 +96,16 @@ namespace ArtNet.Tests.Core.Packets
             {
                 yield return new TestCaseData(new byte[]
                     {
+                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, // Invalid Art-Net ID
+                        0x00, 0x50,
+                        0x00, 0x0E,
+                        0x7B,
+                        0x00,
+                        0x01, 0x00
+                    })
+                    .SetName("Missing DMX Body");
+                yield return new TestCaseData(new byte[]
+                    {
                         0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x01, // Invalid Art-Net ID
                         0x00, 0x50,
                         0x00, 0x0E,
@@ -130,18 +140,29 @@ namespace ArtNet.Tests.Core.Packets
                         0x01, 0x02, 0x03
                     })
                     .SetName("Invalid Protocol Version");
-                // yield return new TestCaseData(new byte[]
-                //     {
-                //         0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
-                //         0x00, 0x50,
-                //         0x00, 0x0E,
-                //         0x7B,
-                //         0x00,
-                //         0x01, 0x00,
-                //         0x00, 0x03,
-                //         0x01, 0x02
-                //     })
-                //     .SetName("DMX data length mismatch");
+                yield return new TestCaseData(new byte[]
+                    {
+                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                        0x00, 0x50,
+                        0x00, 0x0E,
+                        0x7B,
+                        0x00,
+                        0x01, 0x00,
+                        0x00, 0x03,
+                        0x01, 0x02
+                    })
+                    .SetName("DMX data length mismatch");
+                yield return new TestCaseData((new byte[]
+                    {
+                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                        0x00, 0x50,
+                        0x00, 0x0E,
+                        0x7B,
+                        0x00,
+                        0x01, 0x00,
+                        0x02, 0x01
+                    }).Concat(Enumerable.Repeat((byte) 0xFF, 257)).ToArray())
+                    .SetName("DMX data length too long");
             }
         }
 

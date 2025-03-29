@@ -6,6 +6,7 @@ namespace ArtNet.Packets
     public class DmxPacket : ArtNetPacket
     {
         public override OpCode OpCode => OpCode.Dmx;
+        protected override int MinimumBodyLenght => 7;
 
         public byte Sequence { get; set; }
         public byte Physical { get; set; }
@@ -15,13 +16,17 @@ namespace ArtNet.Packets
 
         public byte[] Dmx { get; set; }
 
-        protected override void DeserializeBody(ArtNetReader artNetReader)
+        protected override bool DeserializeBody(ArtNetReader artNetReader)
         {
             Sequence = artNetReader.ReadByte();
             Physical = artNetReader.ReadByte();
             Universe = artNetReader.ReadUInt16();
             int length = artNetReader.ReadNetworkUInt16();
+            if (length > 512) return false;
+            if (artNetReader.RemainingLength < length) return false;
             Dmx = artNetReader.ReadBytes(length);
+
+            return true;
         }
 
         protected override void SerializeBody(ArtNetWriter artNetWriter)

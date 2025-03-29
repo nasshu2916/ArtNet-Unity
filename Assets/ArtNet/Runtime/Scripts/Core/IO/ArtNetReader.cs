@@ -15,6 +15,8 @@ namespace ArtNet.IO
             _position = 0;
         }
 
+        internal int RemainingLength => _data.Length - _position;
+
         internal byte ReadByte()
         {
             var value = _data[_position];

@@ -7,14 +7,17 @@ namespace ArtNet.Packets
     {
         public override OpCode OpCode => OpCode.Poll;
 
+        protected override int MinimumBodyLenght => 2;
+
         public byte Flags { get; set; }
         public byte Priority { get; set; }
 
 
-        protected override void DeserializeBody(ArtNetReader artNetReader)
+        protected override bool DeserializeBody(ArtNetReader artNetReader)
         {
             Flags = artNetReader.ReadByte();
             Priority = artNetReader.ReadByte();
+            return true;
         }
 
         protected override void SerializeBody(ArtNetWriter artNetWriter)
