@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
-using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace ArtNet.Editor.DmxRecorder.IO
 {
