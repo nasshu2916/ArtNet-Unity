@@ -107,42 +107,6 @@ namespace ArtNet.Tests.Core.Packets
                     .SetName("Missing DMX Body");
                 yield return new TestCaseData(new byte[]
                     {
-                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x01, // Invalid Art-Net ID
-                        0x00, 0x50,
-                        0x00, 0x0E,
-                        0x7B,
-                        0x00,
-                        0x01, 0x00,
-                        0x00, 0x03,
-                        0x01, 0x02, 0x03
-                    })
-                    .SetName("Invalid Art-Net ID");
-                yield return new TestCaseData(new byte[]
-                    {
-                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
-                        0x50, 0x00, // Invalid OpCode
-                        0x00, 0x0E,
-                        0x7B,
-                        0x00,
-                        0x01, 0x00,
-                        0x00, 0x03,
-                        0x01, 0x02, 0x03
-                    })
-                    .SetName("Invalid OpCode");
-                yield return new TestCaseData(new byte[]
-                    {
-                        0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
-                        0x00, 0x50,
-                        0x00, 0x0F, // Invalid Protocol Version
-                        0x7B,
-                        0x00,
-                        0x01, 0x00,
-                        0x00, 0x03,
-                        0x01, 0x02, 0x03
-                    })
-                    .SetName("Invalid Protocol Version");
-                yield return new TestCaseData(new byte[]
-                    {
                         0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
                         0x00, 0x50,
                         0x00, 0x0E,

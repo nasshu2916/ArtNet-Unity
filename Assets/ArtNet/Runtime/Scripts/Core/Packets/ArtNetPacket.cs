@@ -97,12 +97,16 @@ namespace ArtNet.Packets
         [CanBeNull]
         public static ArtNetPacket Create(ReadOnlySpan<byte> buffer)
         {
-            return ArtNetOpCode(buffer) switch
+            var opCode = ArtNetOpCode(buffer);
+            if (opCode == null) return null;
+            if (Enum.IsDefined(typeof(OpCode), opCode) == false) return null;
+
+            return opCode switch
             {
                 OpCode.Poll => FromByteArray<PollPacket>(buffer, false),
                 OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer, false),
                 OpCode.Dmx => FromByteArray<DmxPacket>(buffer, false),
-                _ => null
+                _ => throw new ArgumentOutOfRangeException(nameof(opCode), opCode, "OpCode not supported")
             };
         }
 
