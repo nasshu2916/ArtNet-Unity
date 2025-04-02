@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using ArtNet.Packets;
 using JetBrains.Annotations;
