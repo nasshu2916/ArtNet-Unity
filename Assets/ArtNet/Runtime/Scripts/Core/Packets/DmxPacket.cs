@@ -6,7 +6,7 @@ namespace ArtNet.Packets
     public class DmxPacket : ArtNetPacket
     {
         public override OpCode OpCode => OpCode.Dmx;
-        protected override int MinimumBodyLenght => 7;
+        protected override int MinimumBodyLength => 7;
 
         public byte Sequence { get; set; }
         public byte Physical { get; set; }

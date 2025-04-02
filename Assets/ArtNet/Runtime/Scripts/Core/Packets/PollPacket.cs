@@ -7,7 +7,7 @@ namespace ArtNet.Packets
     {
         public override OpCode OpCode => OpCode.Poll;
 
-        protected override int MinimumBodyLenght => 2;
+        protected override int MinimumBodyLength => 2;
 
         public byte Flags { get; set; }
         public byte Priority { get; set; }

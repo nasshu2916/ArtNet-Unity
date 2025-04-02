@@ -19,9 +19,9 @@ namespace ArtNet.Packets
         public bool IsNeedProtocolVersion => OpCode != OpCode.PollReply;
 
         private int HeaderLength => FixedArtNetPacketLength + (IsNeedProtocolVersion ? 2 : 0);
-        protected abstract int MinimumBodyLenght { get; }
+        protected abstract int MinimumBodyLength { get; }
 
-        public int MinimumPacketLength => HeaderLength + MinimumBodyLenght;
+        public int MinimumPacketLength => HeaderLength + MinimumBodyLength;
 
         /// <summary>
         /// Creates an instance of the packet from a byte array.
