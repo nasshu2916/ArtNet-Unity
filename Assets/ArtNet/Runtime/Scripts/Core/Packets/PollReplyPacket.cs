@@ -6,7 +6,7 @@ namespace ArtNet.Packets
     public class PollReplyPacket : ArtNetPacket
     {
         public override OpCode OpCode => OpCode.PollReply;
-        protected override int MinimumBodyLenght => 229;
+        protected override int MinimumBodyLenght => 197;
 
         public byte[] IpAddress { get; set; } = new byte[4];
         public ushort Port { get; set; }
