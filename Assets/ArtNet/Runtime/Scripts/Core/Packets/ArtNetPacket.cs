@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using ArtNet.Enums;
 using ArtNet.IO;
-using JetBrains.Annotations;
 
 namespace ArtNet.Packets
 {
@@ -11,7 +10,7 @@ namespace ArtNet.Packets
     {
         private const string ArtNetId = "Art-Net\0";
         private const byte FixedArtNetPacketLength = 10;
-        [NotNull] private static readonly byte[] IdentificationIds = Encoding.ASCII.GetBytes(ArtNetId);
+        private static readonly byte[] IdentificationIds = Encoding.ASCII.GetBytes(ArtNetId);
         private static readonly byte IdentificationIdsLength = (byte) IdentificationIds.Length;
 
         public abstract OpCode OpCode { get; }
@@ -42,7 +41,6 @@ namespace ArtNet.Packets
             return result ? packet : null;
         }
 
-        [CanBeNull]
         public byte[] ToByteArray()
         {
             if (Validate() == false) return null;
@@ -68,13 +66,13 @@ namespace ArtNet.Packets
 
         protected abstract bool DeserializeBody(ArtNetReader artNetReader);
 
-        private void Serialize([NotNull] ArtNetWriter artNetWriter)
+        private void Serialize(ArtNetWriter artNetWriter)
         {
             SerializeHeader(artNetWriter);
             SerializeBody(artNetWriter);
         }
 
-        private void SerializeHeader([NotNull] ArtNetWriter artNetWriter)
+        private void SerializeHeader(ArtNetWriter artNetWriter)
         {
             artNetWriter.WriteNetwork(ArtNetId, 8);
             artNetWriter.Write((ushort) OpCode);
@@ -84,7 +82,7 @@ namespace ArtNet.Packets
             }
         }
 
-        protected abstract void SerializeBody([NotNull] ArtNetWriter artNetWriter);
+        protected abstract void SerializeBody(ArtNetWriter artNetWriter);
         protected abstract bool Validate();
 
 
@@ -94,7 +92,6 @@ namespace ArtNet.Packets
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns>An instance of the packet or null if the packet is not valid.</returns>
-        [CanBeNull]
         public static ArtNetPacket Create(ReadOnlySpan<byte> buffer)
         {
             var opCode = ArtNetOpCode(buffer);
