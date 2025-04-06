@@ -10,20 +10,26 @@ namespace ArtNet.Editor.DmxRecorder.IO
 {
     public static class BinaryDmx
     {
+        public enum CompressType
+        {
+            None = 0,
+            Deflate = 1
+        }
+
         public class Header
         {
             [NotNull] private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
-            [NotNull] private static readonly byte[] ReservedBuffer = new byte[10];
+            private const byte ReservedBufferLength = 10;
             private const byte Version = 0x02;
 
-            public bool IsCompressed { get; }
+            public CompressType BodyCompressType { get; }
 
             private static int IdentifierLength => Identifiers.Length;
-            public static int Length => IdentifierLength + 2 + ReservedBuffer.Length;
+            public static int Length => IdentifierLength + 2 + ReservedBufferLength;
 
-            public Header(bool isCompressed = false)
+            public Header(CompressType compressType = CompressType.None)
             {
-                IsCompressed = isCompressed;
+                BodyCompressType = compressType;
             }
 
             [NotNull]
@@ -32,25 +38,23 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 using var memoryStream = new MemoryStream();
                 memoryStream.Write(Identifiers);
                 memoryStream.WriteByte(Version);
-                memoryStream.WriteByte((byte) (IsCompressed ? 1 : 0));
-                memoryStream.Write(ReservedBuffer);
+                memoryStream.WriteByte((byte) BodyCompressType);
+                memoryStream.Write(new byte[ReservedBufferLength]);
                 return memoryStream.ToArray();
             }
 
             public static Header DeserializeHeader(ReadOnlySpan<byte> data)
             {
-                if (!data[..Identifiers.Length].SequenceEqual(Identifiers))
-                    return null;
+                if (data.Length < Length) return null;
+                if (!data[..Identifiers.Length].SequenceEqual(Identifiers)) return null;
                 var position = IdentifierLength;
                 var dataVersion = data[position++];
-                if (dataVersion != Version)
-                {
-                    Debug.LogError($"ArtNet Recorder: Version mismatch. Required: {Version}, Found: {dataVersion}");
-                    return null;
-                }
+                if (dataVersion != Version) return null;
 
-                var isCompressed = data[position] == 1;
-                return new Header(isCompressed: isCompressed);
+                var compressType = (CompressType) data[position++];
+                if (typeof(CompressType).IsEnumDefined(compressType) == false) return null;
+
+                return new Header(compressType: compressType);
             }
         }
 
@@ -62,10 +66,11 @@ namespace ArtNet.Editor.DmxRecorder.IO
 
         public static byte[] SerializeUniverseData(IEnumerable<UniverseData> universeData, bool isCompress)
         {
-            var sortedData = universeData.Where(x => x != null).OrderBy(x => x.Time).ToList();
+            var sortedData = universeData.Where(x => x != null).OrderBy(x => (x.Time, x.Universe)).ToList();
             var startTime = sortedData.First().Time;
 
-            var header = new Header(isCompressed: isCompress);
+            var compressType = isCompress ? CompressType.Deflate : CompressType.None;
+            var header = new Header(compressType: compressType);
             var headerArray = header.SerializeHeader();
             var bodyArray = SerializeBody(sortedData, startTime);
 
@@ -76,6 +81,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 {
                     deflateStream.Write(bodyArray, 0, bodyArray.Length);
                 }
+
                 bodyArray = memoryStream.ToArray();
             }
 
@@ -100,14 +106,22 @@ namespace ArtNet.Editor.DmxRecorder.IO
 
             var body = data[Header.Length..];
 
-            if (header.IsCompressed)
+            switch (header.BodyCompressType)
             {
-                using var compressedStream = new MemoryStream(body.ToArray()!);
-                using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
-                using var memoryStream = new MemoryStream();
-                deflateStream.CopyTo(memoryStream);
+                case CompressType.None:
+                    break;
+                case CompressType.Deflate:
+                    {
+                        using var compressedStream = new MemoryStream(body.ToArray()!);
+                        using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
+                        using var memoryStream = new MemoryStream();
+                        deflateStream.CopyTo(memoryStream);
 
-                body = memoryStream.ToArray();
+                        body = memoryStream.ToArray();
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             return DeserializeBody(body);
@@ -146,7 +160,6 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 position += 2;
                 if (position + length > dataLength || length > 512)
                 {
-                    Debug.LogError("ArtNet Recorder: Invalid data length");
                     return null;
                 }
 
@@ -155,7 +168,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 result.Add(new UniverseData(time, universe, dmx));
             }
 
-            return result;
+            return result.OrderBy(x => (x!.Time, x!.Universe)).ToList();
         }
     }
 }
