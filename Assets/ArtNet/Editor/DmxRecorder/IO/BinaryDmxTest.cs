@@ -247,6 +247,32 @@ namespace ArtNet.Editor.DmxRecorder.IO
                         new(500, 1, Enumerable.Repeat((byte) 0xFF, 1).ToArray()),
                     }
                 )!.SetName("Compress UniverseData");
+                yield return new TestCaseData(
+                    new byte[]
+                    {
+                        0xFF, 0x44, 0x4D, 0x58, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, // Headers
+                        0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x50, 0x01, 0x00,
+                        0x00, 0x00, 0x05, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                        0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x50, 0x01, 0x00,
+                        0x01, 0x00, 0x01, 0x00, 0xFF,
+                        0xF4, 0x01, 0x00, 0x00,
+                        0x00, 0x50, 0x02, 0x00,
+                        0x00, 0x00, 0x05, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                        0xF4, 0x01, 0x00, 0x00,
+                        0x00, 0x50, 0x02, 0x00,
+                        0x01, 0x00, 0x01, 0x00, 0xFF
+                    },
+                    new List<UniverseData>
+                    {
+                        new(0, 0, Enumerable.Repeat((byte) 0xFF, 5).ToArray()),
+                        new(0, 1, Enumerable.Repeat((byte) 0xFF, 1).ToArray()),
+                        new(500, 0, Enumerable.Repeat((byte) 0xFF, 5).ToArray()),
+                        new(500, 1, Enumerable.Repeat((byte) 0xFF, 1).ToArray())
+                    }
+                )!.SetName("Full Packet Data");
             }
         }
 
@@ -296,7 +322,6 @@ namespace ArtNet.Editor.DmxRecorder.IO
                         0x00, 0x00, 0x05, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
                     }
                 )!.SetName("Deserialize UniverseData with missing data");
-
                 yield return new TestCaseData(
                     new byte[]
                     {
@@ -306,6 +331,18 @@ namespace ArtNet.Editor.DmxRecorder.IO
                         0x00, 0x00, 0x05, 0x50, 0xFF
                     }
                 )!.SetName("Invalid Dmx data length");
+
+                // Full Packet Data
+                yield return new TestCaseData(
+                    new byte[]
+                    {
+                        0xFF, 0x44, 0x4D, 0x58, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, // Headers
+                        0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x50, 0x01, 0x00,
+                        0x00, 0x00, 0x05, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
+                    }
+                )!.SetName("Invalid Full Packet Dmx data length");
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using ArtNet.Enums;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -19,8 +20,8 @@ namespace ArtNet.Editor.DmxRecorder.IO
         public enum BodyEncodeType
         {
             FullPacketByIntTime = 0,
-            FullPacket = 1, // Not used, but defined
-            UniverseAndValuesByIntTime = 2, // Not used, but defined
+            // FullPacket = 1, // Not used, but defined
+            // UniverseAndValuesByIntTime = 2, // Not used, but defined
             UniverseAndValues = 3
         }
 
@@ -126,23 +127,25 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 case CompressType.None:
                     break;
                 case CompressType.Deflate:
-                {
-                    using var compressedStream = new MemoryStream(body.ToArray()!);
-                    using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
-                    using var memoryStream = new MemoryStream();
-                    deflateStream.CopyTo(memoryStream);
+                    {
+                        using var compressedStream = new MemoryStream(body.ToArray()!);
+                        using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
+                        using var memoryStream = new MemoryStream();
+                        deflateStream.CopyTo(memoryStream);
 
-                    body = memoryStream.ToArray();
-                    break;
-                }
+                        body = memoryStream.ToArray();
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             switch (header.BodyEncodeType)
             {
+                case BodyEncodeType.FullPacketByIntTime:
+                    return DeserializeFullPacketBody(body);
                 case BodyEncodeType.UniverseAndValues:
-                    return DeserializeBody(body);
+                    return DeserializeUniverseAndValuesBody(body);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -166,7 +169,45 @@ namespace ArtNet.Editor.DmxRecorder.IO
             return memoryStream.ToArray();
         }
 
-        private static List<UniverseData> DeserializeBody(ReadOnlySpan<byte> body)
+        private static List<UniverseData> DeserializeFullPacketBody(ReadOnlySpan<byte> body)
+        {
+            var position = 0;
+            var dataLength = body.Length;
+            var result = new List<UniverseData>();
+            while (position < dataLength - 10)
+            {
+                var time = BitConverter.ToInt32(body[position..]);
+                position += 4;
+                var opCode = (OpCode) BitConverter.ToUInt16(body[position..]);
+                if (opCode != OpCode.Dmx)
+                {
+                    Debug.Log($"ArtNet Recorder: OpCode mismatch. Required: {OpCode.Dmx}, Found: {opCode}");
+                    continue;
+                }
+
+                position += 2;
+                var sequence = body[position];
+                position += 1;
+                var physical = body[position];
+                position += 1;
+                var universe = BitConverter.ToUInt16(body[position..]);
+                position += 2;
+                var length = BitConverter.ToUInt16(body[position..]);
+                position += 2;
+                if (position + length > dataLength || length > 512)
+                {
+                    Debug.Log("ArtNet Recorder: DMX data length mismatch");
+                    return null;
+                }
+                var dmx = body[position..(position + length)].ToArray();
+                position += length;
+                result.Add(new UniverseData(time, universe, dmx));
+            }
+
+            return result.OrderBy(x => (x!.Time, x!.Universe)).ToList();
+        }
+
+        private static List<UniverseData> DeserializeUniverseAndValuesBody(ReadOnlySpan<byte> body)
         {
             var position = 0;
             var dataLength = body.Length;
