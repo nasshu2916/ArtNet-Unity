@@ -9,12 +9,13 @@ version information, and the Body containing the actual data.
 
 The Header consists of the following 16 bytes.
 
-| Field | Name         | Size | Description                                                                            |
-|-------|--------------|------|----------------------------------------------------------------------------------------|
-| 1     | ID[4]        | int8 | Identifier, 4 characters fixed to `\0xFF, 0x44, 0x4D, 0x58`                            |
-| 2     | Version      | int8 | Binary Encode Version (currently `0x02`)                                               |
-| 3     | CompressType | int8 | Compression format of the Body section <br/> - 0x00: Uncompressed<br/> - 0x01: Deflate |
-| 4     | Reserved[10] | int8 | Reserved area (filled with 0x00)                                                       |
+| Field | Name           | Size | Description                                                                                                                      |
+|-------|----------------|------|----------------------------------------------------------------------------------------------------------------------------------|
+| 1     | ID[4]          | int8 | Identifier, 4 characters fixed to `\0xFF, 0x44, 0x4D, 0x58`                                                                      |
+| 2     | Version        | int8 | Binary Encode Version (currently `0x02`)                                                                                         |
+| 3     | CompressType   | int8 | Compression format of the Body section <br/> - 0x00: Uncompressed<br/> - 0x01: Deflate                                           |
+| 4     | BodyEncodeType | int8 | Body Encode Type <br/> - 0x00: DMX<br/> - 0x00: DMX Packet (only supported for Deserialize)<br/> - 0x03: Universe And DMX Values |
+| 5     | Reserved[9]    | int8 | Reserved area (filled with 0x00)                                                                                                 |
 
 ### Body Section
 
