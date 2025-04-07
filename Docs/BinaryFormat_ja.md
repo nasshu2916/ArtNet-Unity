@@ -9,12 +9,13 @@ ArtNet Recorder で保存するデータは独自のバイナリフォーマッ�
 
 Header 部は以下の 16 byte で構成されます。
 
-| Field | Name         | Size | Description                                        |
-|-------|--------------|------|----------------------------------------------------|
-| 1     | ID[4]        | int8 | 識別子 `\0xFF, 0x44, 0x4D, 0x58` の4文字固定               |
-| 2     | Version      | int8 | バイナリの Encode Version (現在は `0x02`)                  |
-| 3     | CompressType | int8 | Body 部の圧縮形式 <br/> - 0x00: 非圧縮<br/> - 0x01: Deflate |
-| 4     | Reserved[10] | int8 | 予約領域 (0x00 で埋める)                                   |
+| Field | Name           | Size | Description                                                                                     |
+|-------|----------------|------|-------------------------------------------------------------------------------------------------|
+| 1     | ID[4]          | int8 | 識別子 `\0xFF, 0x44, 0x4D, 0x58` の4文字固定                                                            |
+| 2     | Version        | int8 | バイナリの Encode Version (現在は `0x01`)                                                               |
+| 3     | CompressType   | int8 | Body 部の圧縮形式 <br/> - 0x00: 非圧縮<br/> - 0x01: Deflate                                              |
+| 4     | BodyEncodeType | int8 | Body 部のエンコード形式 <br/> - 0x00: Dmx Packet(Deserializeのみサポート)<br/> - 0x03: Universe And Dmx Values |
+| 5     | Reserved[9]    | int8 | 予約領域 (0x00 で埋める)                                                                                |
 
 ### Body 部
 

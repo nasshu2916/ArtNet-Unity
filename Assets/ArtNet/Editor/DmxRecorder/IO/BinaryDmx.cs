@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using ArtNet.Enums;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -16,20 +17,31 @@ namespace ArtNet.Editor.DmxRecorder.IO
             Deflate = 1
         }
 
+        public enum BodyEncodeType
+        {
+            FullPacketByIntTime = 0,
+            // FullPacket = 1, // Not used, but defined
+            // UniverseAndValuesByIntTime = 2, // Not used, but defined
+            UniverseAndValues = 3
+        }
+
         public class Header
         {
             [NotNull] private static readonly byte[] Identifiers = { 0xFF, 0x44, 0x4D, 0x58 };
-            private const byte ReservedBufferLength = 10;
-            private const byte Version = 0x02;
+            private const byte Version = 0x01;
 
             public CompressType BodyCompressType { get; }
+            public BodyEncodeType BodyEncodeType { get; }
 
             private static int IdentifierLength => Identifiers.Length;
-            public static int Length => IdentifierLength + 2 + ReservedBufferLength;
+            public const int Length = 16;
+            private static readonly int ReservedBufferLength = Length - IdentifierLength - 3;
 
-            public Header(CompressType compressType = CompressType.None)
+            public Header(CompressType compressType = CompressType.None,
+                BodyEncodeType encodeType = BodyEncodeType.UniverseAndValues)
             {
                 BodyCompressType = compressType;
+                BodyEncodeType = encodeType;
             }
 
             [NotNull]
@@ -39,6 +51,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 memoryStream.Write(Identifiers);
                 memoryStream.WriteByte(Version);
                 memoryStream.WriteByte((byte) BodyCompressType);
+                memoryStream.WriteByte((byte) BodyEncodeType);
                 memoryStream.Write(new byte[ReservedBufferLength]);
                 return memoryStream.ToArray();
             }
@@ -54,7 +67,10 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 var compressType = (CompressType) data[position++];
                 if (typeof(CompressType).IsEnumDefined(compressType) == false) return null;
 
-                return new Header(compressType: compressType);
+                var bodyEncodeType = (BodyEncodeType) data[position++];
+                if (typeof(BodyEncodeType).IsEnumDefined(bodyEncodeType) == false) return null;
+
+                return new Header(compressType: compressType, encodeType: bodyEncodeType);
             }
         }
 
@@ -70,7 +86,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
             var startTime = sortedData.First().Time;
 
             var compressType = isCompress ? CompressType.Deflate : CompressType.None;
-            var header = new Header(compressType: compressType);
+            var header = new Header(compressType: compressType, encodeType: BodyEncodeType.UniverseAndValues);
             var headerArray = header.SerializeHeader();
             var bodyArray = SerializeBody(sortedData, startTime);
 
@@ -124,7 +140,15 @@ namespace ArtNet.Editor.DmxRecorder.IO
                     throw new ArgumentOutOfRangeException();
             }
 
-            return DeserializeBody(body);
+            switch (header.BodyEncodeType)
+            {
+                case BodyEncodeType.FullPacketByIntTime:
+                    return DeserializeFullPacketBody(body);
+                case BodyEncodeType.UniverseAndValues:
+                    return DeserializeUniverseAndValuesBody(body);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         [NotNull]
@@ -145,7 +169,45 @@ namespace ArtNet.Editor.DmxRecorder.IO
             return memoryStream.ToArray();
         }
 
-        private static List<UniverseData> DeserializeBody(ReadOnlySpan<byte> body)
+        private static List<UniverseData> DeserializeFullPacketBody(ReadOnlySpan<byte> body)
+        {
+            var position = 0;
+            var dataLength = body.Length;
+            var result = new List<UniverseData>();
+            while (position < dataLength - 10)
+            {
+                var time = BitConverter.ToInt32(body[position..]);
+                position += 4;
+                var opCode = (OpCode) BitConverter.ToUInt16(body[position..]);
+                if (opCode != OpCode.Dmx)
+                {
+                    Debug.Log($"ArtNet Recorder: OpCode mismatch. Required: {OpCode.Dmx}, Found: {opCode}");
+                    continue;
+                }
+
+                position += 2;
+                var sequence = body[position];
+                position += 1;
+                var physical = body[position];
+                position += 1;
+                var universe = BitConverter.ToUInt16(body[position..]);
+                position += 2;
+                var length = BitConverter.ToUInt16(body[position..]);
+                position += 2;
+                if (position + length > dataLength || length > 512)
+                {
+                    Debug.Log("ArtNet Recorder: DMX data length mismatch");
+                    return null;
+                }
+                var dmx = body[position..(position + length)].ToArray();
+                position += length;
+                result.Add(new UniverseData(time, universe, dmx));
+            }
+
+            return result.OrderBy(x => (x!.Time, x!.Universe)).ToList();
+        }
+
+        private static List<UniverseData> DeserializeUniverseAndValuesBody(ReadOnlySpan<byte> body)
         {
             var position = 0;
             var dataLength = body.Length;
