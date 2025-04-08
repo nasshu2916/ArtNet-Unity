@@ -1,9 +1,8 @@
 ﻿# ArtNet-Unity
 
 Unity(C#) で ArtNet を扱うためのライブラリです。
-ArtNet のパケットを受信し、Callback から受信したデータを処理することができます。
 
-エディタ拡張から ArtNet の受信の確認状況の確認ができます。また、受信したパケットを保存し、送信することも可能です。
+エディタ拡張として、ArtNet の受信状況の確認や ArtNet DMX パケットの保存、送信を行うことができる機能もあります。
 
 ![dmx_receive](Docs/dmx_receive.gif)
 
@@ -20,7 +19,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ```
 
 > [!NOTE]
-> Unity 2021.3.1 以上が必要です。
+> Unity 2021.3.1(C# 9) 以降が必要です。
 
 ## 使用方法
 

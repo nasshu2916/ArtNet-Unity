@@ -1,8 +1,10 @@
 # ArtNet-Unity
 
-A tool to receive ArtNet in Unity(C#). You can receive ArtNet packets and process the received data from the callback.
+A tool to receive ArtNet in Unity(C#).
 
-You can check the status of ArtNet reception from the editor extension. You can also save and send the received packets.
+This library allows you to handle ArtNet in Unity(C#).
+It includes an editor extension for checking the status of ArtNet reception and saving and sending ArtNet DMX packets without running the game.
+
 
 [日本語](./README_ja.md)
 
@@ -23,7 +25,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ```
 
 > [!NOTE]
-> Unity 2021.3.1 or later is required.
+> Unity 2021.3.1(C# 9) or later is required.
 
 ## Usage
 
