@@ -21,7 +21,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ```
 
 > [!NOTE]
-> Unity 2021.3.1(C# 9) 以降が必要です。
+> Unity 2021.3.1 (C# 9) 以降が必要です。
 
 ## 使用方法
 

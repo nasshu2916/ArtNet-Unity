@@ -25,7 +25,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ```
 
 > [!NOTE]
-> Unity 2021.3.1(C# 9) or later is required.
+> Unity 2021.3.1 (C# 9) or later is required.
 
 ## Usage
 
@@ -67,7 +67,7 @@ The recorded Animation Clip can be played using the Animation component. The rec
 
 ![dmx_player](https://github.com/user-attachments/assets/a5c51fa4-c0d0-4964-9db3-abb32c4601df)
 
-This editor extension can play recorded ArtNet packets by saved Binary file
+This editor extension can play recorded ArtNet packets by the saved Binary file
 
 This Editor extension can re-transmit the recorded ArtNet packets by the saved DmxRecorder Binary file.
 You can loop the playback and change the playback speed.
