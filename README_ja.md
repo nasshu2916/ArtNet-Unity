@@ -35,10 +35,14 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 - OpPollReply
 - OpDmx
 
-## エディタ拡張の機能
+## エディタ拡張
+
 ### ArtNetTester
 
-Game を実行せずに ArtNet の受信状況を確認するためのエディタ拡張です。
+![DmxTester](Docs/dmx_tester.gif)
+
+Editor を再生せずに ArtNet の受信状況の確認ができるエディタ拡張です。
+
 Window 表示時は ArtNet のパケットを受信していません。
 そのため、`Start Receive ArtNet Packet` ボタンを押すことで受信させる必要があります。
 
@@ -47,33 +51,27 @@ Window 表示時は ArtNet のパケットを受信していません。
 
 ### DmxRecorder
 
-Game を実行せずに ArtNet のパケットを保存、送信することができるエディタ拡張です。
+![DmxRecorder](Docs/dmx_recorder.gif)
 
-#### Recorder タブ
-Recorder タブでは、受信可能な ArtNet のパケットをバイナリデータとして保存することができます。
+Editor を再生せずに ArtNet のパケットを保存できるエディタ拡張です。
 
-出力先のファイル名とフォルダを指定し、`Start` ボタンを押すと、受信した ArtNet のパケットを保存します。
-既に同じ名前のファイルが存在する場合、自動的に上書きされます。
+録画開始ボタンを押すことで、ArtNet パケットの受信と保存が開始され、停止ボタンを押すまでの間に受信した ArtNet パケットを
+Animation Clip か Binary 形式で保存できます。
 
-Recorder タブでバイナリ形式で保存する場合
-[独自のフォーマット](Docs/BinaryFormat_ja.md)で保存されます。
+録画した Binary ファイルは [独自形式](Docs/BinaryFormat_ja.md) で保存され、DmxPlayer を使うことで録画した ArtNet
+パケットを送信することが可能です。
 
-#### Sender タブ
-Sender タブでは、Recorder で保存したファイルを送信することができます。
+録画した Animation Clip は Animation コンポーネントを使って再生することができ、Binary ファイルはエディタ拡張の DmxPlayer を使って再生することができます。
 
-出力先の IP アドレスを指定し、`Start` ボタンを押すと、指定した IP アドレスに ArtNet のパケットを送信します。
-また、以下の設定を行うことができます。
+### DmxPlayer
 
-- ループで送信するかどうか
-- 保存時の Sequence を使用するかどうか
-- 送信速度
+![DmxSender](Docs/dmx_player.gif)
+
+DmxRecorder で保存した ArtNet パケットを送信するためのエディタ拡張です。
+
+DmxRecorder で保存した ArtNet パケットを再送信する機能で、ループ再生や再生速度の変更が可能です。
+送信先に関しては、複数の IP アドレス・ポートを指定することが可能です。
 
 ### DmxManagerViewer
 
 DmxManager Class で管理している DMX の値を確認するためのエディタ拡張です。このエディタ拡張は Game を実行している時のみ有効です。
-
-## Test Software
-
-- QLC+
-- MagicQ
-- dot2 on PC

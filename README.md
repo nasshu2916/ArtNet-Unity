@@ -44,40 +44,35 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 ## Editor Extension
 ### ArtNetTester
 
-An editor extension to check the status of ArtNet reception without running the game. When the window is displayed, ArtNet packets are not received, so press the `Start Receive ArtNet Packet` button to start receiving.
+![DmxTester](Docs/dmx_tester.gif)
+
+This editor extension can check the received ArtNet status without running the editor.
+
+When the window is displayed, ArtNet packets are not received. Therefore, you need to press the `Start Receive ArtNet Packet` button to start receiving.
 
 You can check the time of the last ArtNet packet received and the contents of the OP Code. You can also check the last received DMX value per Universe.
 
 ### DmxRecorder
 
-An editor extension that allows you to save and send ArtNet packets without running the game.
+!![DmxRecorder](Docs/dmx_recorder.gif)
 
-#### Recorder Tab
+This editor extension can save ArtNet packets without playing the editor.
 
-You can save receivable ArtNet packets as binary data.
+By pressing the record start button, the reception and saving of ArtNet packets will start. You can save the received ArtNet packets in Animation Clip or Binary format until you press the stop button.
+The recorded Binary file is saved in a [custom format](Docs/BinaryFormat.md), and you can play the recorded ArtNet packets using the DmxPlayer.
 
-Specify the output file name and folder, and press the `Start` button to save the received ArtNet packets. If a file with the same name already exists, it will be overwritten automatically.
+The recorded Animation Clip can be played using the Animation component. The recorded Binary file can be played using the DmxPlayer.
 
-When saving in binary format in the Recorder tab, it is saved in a [proprietary format](Docs/BinaryFormat.md).
+### DmxPlayer
 
-#### Sender Tab
+![DmxPlayer](Docs/dmx_player.gif)
 
-You can send the file saved by the Recorder.
+This editor extension can play recorded ArtNet packets by saved Binary file
 
-Specify the destination IP address and press the `Start` button to send the ArtNet packets to the specified IP address.
-And, You can also configure the following settings:
-
-- Whether to send in a loop
-- Whether to use the same Sequence when saving
-- Sending speed
+This Editor extension can re-transmit the recorded ArtNet packets by the saved DmxRecorder Binary file.
+You can loop the playback and change the playback speed.
+Also, this editor extension can transmit multiple destination IP addresses and ports.
 
 ### DmxManagerViewer
 
 An editor extension for checking the DMX values managed by DmxManager Class. This editor extension is only available when the game is running.
-
-
-## Test Software
-
-- QLC+
-- MagicQ
-- dot2 on PC
