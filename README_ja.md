@@ -4,7 +4,9 @@ Unity(C#) で ArtNet を扱うためのライブラリです。
 
 エディタ拡張として、ArtNet の受信状況の確認や ArtNet DMX パケットの保存、送信を行うことができる機能もあります。
 
-![dmx_receive](Docs/dmx_receive.gif)
+![dmx_receive](https://github.com/user-attachments/assets/08afbbf8-4892-478c-9feb-4b8f74832e6d)
+
+https://github.com/nasshu2916/ArtNet-Unity/assets/13119954/36851801-4f0a-4a2a-98aa-0b4659588a59
 
 ## インストール方法
 
@@ -23,7 +25,8 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 
 ## 使用方法
 
-![artnet_receiver](Docs/artnet_receiver.png)
+<img width="400" alt="artnet_receiver" src="https://github.com/user-attachments/assets/7823e286-f0c5-4135-ac4f-94f40caa843c" />
+
 
 1. `ArtNet` プレハブをシーンに追加するか、`ArtNetReceiver` を GameObject に追加します。
 2. `ArtNetReceiver` の callback プロパティに受信したデータを処理するスクリプトを設定します。
@@ -39,7 +42,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 
 ### ArtNetTester
 
-![DmxTester](Docs/dmx_tester.gif)
+![dmx_tester](https://github.com/user-attachments/assets/9d48aae9-6909-40c6-8377-660fe97b3b7b)
 
 Editor を再生せずに ArtNet の受信状況の確認ができるエディタ拡張です。
 
@@ -51,7 +54,7 @@ Window 表示時は ArtNet のパケットを受信していません。
 
 ### DmxRecorder
 
-![DmxRecorder](Docs/dmx_recorder.gif)
+![dmx_recorder](https://github.com/user-attachments/assets/bc99d798-23af-41bc-82f6-445458ff9949)
 
 Editor を再生せずに ArtNet のパケットを保存できるエディタ拡張です。
 
@@ -65,7 +68,8 @@ Animation Clip か Binary 形式で保存できます。
 
 ### DmxPlayer
 
-![DmxSender](Docs/dmx_player.gif)
+![dmx_player](https://github.com/user-attachments/assets/a5c51fa4-c0d0-4964-9db3-abb32c4601df)
+
 
 DmxRecorder で保存した ArtNet パケットを送信するためのエディタ拡張です。
 
