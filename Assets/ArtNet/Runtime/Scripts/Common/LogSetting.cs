@@ -8,9 +8,23 @@ namespace ArtNet.Common
     public class LogSetting
     {
         [NotNull] private static readonly LogSetting Instance = new();
-        [SerializeField] private ArtNetDebug.LogLevel _logLevel = ArtNetDebug.LogLevel.Debug;
 
-        public static ArtNetDebug.LogLevel LogLevel
+        [SerializeField] private bool _enableLogging = true;
+        [SerializeField] private LogLevel _logLevel = LogLevel.Info;
+
+        public static bool EnableLog
+        {
+            get => Instance._enableLogging;
+            set
+            {
+                if (Instance._enableLogging == value) return;
+
+                Instance._enableLogging = value;
+                ArtNetDebug.LogDebug($"Logging enabled: {Instance._enableLogging}");
+            }
+        }
+
+        public static LogLevel LogLevel
         {
             get => Instance._logLevel;
             set

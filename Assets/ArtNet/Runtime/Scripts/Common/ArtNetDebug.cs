@@ -5,21 +5,14 @@ namespace ArtNet.Common
 {
     public static class ArtNetDebug
     {
-        public enum LogLevel
-        {
-            Debug,
-            Info,
-            Warn,
-            Error
-        }
+        private const string DefaultTag = "ArtNet";
 
         [DebuggerStepThrough]
-        private static void InternalLog(LogLevel level, string message)
+        private static void InternalLog(LogLevel level, string message, string tag = DefaultTag)
         {
-            if (LogSetting.LogLevel > level) return;
-            if (string.IsNullOrEmpty(message)) return;
+            if (EnableLog(level) == false || string.IsNullOrEmpty(message)) return;
 
-            var text = $"{message}";
+            var text = FormatMessage(tag, message);
 
             switch (level)
             {
@@ -34,6 +27,21 @@ namespace ArtNet.Common
                     Debug.LogError(text);
                     break;
             }
+        }
+
+        private static bool EnableLog(LogLevel level)
+        {
+            return LogSetting.EnableLog && LogSetting.LogLevel <= level;
+        }
+
+        private static string FormatMessage(string tag, string message)
+        {
+            if (string.IsNullOrEmpty(tag))
+            {
+                return message;
+            }
+
+            return $"[{tag}] {message}";
         }
 
         [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
@@ -53,7 +61,6 @@ namespace ArtNet.Common
         {
             InternalLog(LogLevel.Warn, message);
         }
-
 
         [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
         public static void LogError(string message)
