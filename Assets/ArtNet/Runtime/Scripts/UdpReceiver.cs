@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
+using ArtNet.Common;
 
 namespace ArtNet
 {
@@ -39,7 +39,7 @@ namespace ArtNet
             StopReceive();
             if (IsRunning) return;
 
-            if (Port == 0) Debug.LogWarning("[UdpReceiver] Port is not set.");
+            if (Port == 0) ArtNetLogger.LogError("ArtNetReceiver", "Port is not set.");
 
             try
             {
@@ -52,14 +52,14 @@ namespace ArtNet
             }
             catch (Exception e)
             {
-                Debug.LogErrorFormat($"[UdpReceiver] Udp start failed. {e.GetType()} : {e.Message}");
+                ArtNetLogger.LogError("ArtNetReceiver", $"UDP start failed. {e.GetType()} : {e.Message}");
                 OnUdpStartFailed?.Invoke(e);
             }
         }
 
         private async Task UdpTaskAsync(CancellationToken token)
         {
-            Debug.Log($"[UdpReceiver] Udp Receive task start. port: {Port}");
+            ArtNetLogger.LogInfo("ArtNetReceiver", $"UDP Receive task start. port: {Port}");
 
             while (!token.IsCancellationRequested && _socket != null)
             {
@@ -75,12 +75,12 @@ namespace ArtNet
                 }
                 catch (Exception e) when (e is SocketException or ObjectDisposedException)
                 {
-                    Debug.Log($"[UdpReceiver] Udp Receive task failed. {e.Message} : {e.GetType()}");
+                    ArtNetLogger.LogInfo("ArtNetReceiver", $"UDP Receive task failed. {e.Message} : {e.GetType()}");
                     OnUdpReceiveFailed?.Invoke(e);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogErrorFormat($"[UdpReceiver] Udp receive failed. {e.Message} : {e.GetType()}");
+                    ArtNetLogger.LogError("ArtNetReceiver", $"UDP receive failed. {e.Message} : {e.GetType()}");
                     OnUdpReceiveRaiseException?.Invoke(e);
                 }
             }

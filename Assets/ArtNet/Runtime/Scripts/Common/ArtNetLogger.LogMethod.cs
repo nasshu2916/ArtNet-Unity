@@ -11,6 +11,18 @@ namespace ArtNet.Common
     {
 
         // Debug
+        [DebuggerStepThrough]
+        public static void LogDebug(string message)
+        {
+            InternalLog(LogLevel.Debug, DefaultTag, message);
+        }
+
+        [DebuggerStepThrough]
+        public static void LogDebug(string tag, string message)
+        {
+            InternalLog(LogLevel.Debug, tag, message);
+        }
+
         [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
         public static void DevLogDebug(string message)
         {
@@ -24,6 +36,18 @@ namespace ArtNet.Common
         }
 
         // Info
+        [DebuggerStepThrough]
+        public static void LogInfo(string message)
+        {
+            InternalLog(LogLevel.Info, DefaultTag, message);
+        }
+
+        [DebuggerStepThrough]
+        public static void LogInfo(string tag, string message)
+        {
+            InternalLog(LogLevel.Info, tag, message);
+        }
+
         [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
         public static void DevLogInfo(string message)
         {
@@ -37,6 +61,18 @@ namespace ArtNet.Common
         }
 
         // Warn
+        [DebuggerStepThrough]
+        public static void LogWarn(string message)
+        {
+            InternalLog(LogLevel.Warn, DefaultTag, message);
+        }
+
+        [DebuggerStepThrough]
+        public static void LogWarn(string tag, string message)
+        {
+            InternalLog(LogLevel.Warn, tag, message);
+        }
+
         [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
         public static void DevLogWarn(string message)
         {
@@ -50,6 +86,18 @@ namespace ArtNet.Common
         }
 
         // Error
+        [DebuggerStepThrough]
+        public static void LogError(string message)
+        {
+            InternalLog(LogLevel.Error, DefaultTag, message);
+        }
+
+        [DebuggerStepThrough]
+        public static void LogError(string tag, string message)
+        {
+            InternalLog(LogLevel.Error, tag, message);
+        }
+
         [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
         public static void DevLogError(string message)
         {
