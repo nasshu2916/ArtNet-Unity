@@ -11,7 +11,7 @@ namespace ArtNet.Common
         [DebuggerStepThrough]
         private static void InternalLog(LogLevel level, string tag, string message)
         {
-            if (EnableLog(level) == false || string.IsNullOrEmpty(message)) return;
+            if (DisableLog(level)) return;
 
             var text = FormatMessage(tag, message);
 
@@ -31,11 +31,12 @@ namespace ArtNet.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool EnableLog(LogLevel level)
+        private static bool DisableLog(LogLevel level)
         {
-            return LogSetting.EnableLog && LogSetting.LogLevel <= level;
+            return !LogSetting.EnableLog || LogSetting.LogLevel > level;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string FormatMessage(string tag, string message)
         {
             if (string.IsNullOrEmpty(tag))
