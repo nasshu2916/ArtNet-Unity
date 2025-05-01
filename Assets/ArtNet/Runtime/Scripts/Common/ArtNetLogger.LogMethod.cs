@@ -11,53 +11,53 @@ namespace ArtNet.Common
     {
 
         // Debug
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogDebug(string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogDebug(string message)
         {
             InternalLog(LogLevel.Debug, DefaultTag, message);
         }
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogDebug(string tag, string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogDebug(string tag, string message)
         {
             InternalLog(LogLevel.Debug, tag, message);
         }
 
         // Info
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogInfo(string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogInfo(string message)
         {
             InternalLog(LogLevel.Info, DefaultTag, message);
         }
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogInfo(string tag, string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogInfo(string tag, string message)
         {
             InternalLog(LogLevel.Info, tag, message);
         }
 
         // Warn
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogWarn(string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogWarn(string message)
         {
             InternalLog(LogLevel.Warn, DefaultTag, message);
         }
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogWarn(string tag, string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogWarn(string tag, string message)
         {
             InternalLog(LogLevel.Warn, tag, message);
         }
 
         // Error
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogError(string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogError(string message)
         {
             InternalLog(LogLevel.Error, DefaultTag, message);
         }
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogError(string tag, string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLogError(string tag, string message)
         {
             InternalLog(LogLevel.Error, tag, message);
         }

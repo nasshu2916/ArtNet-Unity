@@ -8,7 +8,7 @@ namespace ArtNet.Common
     {
         private const string DefaultTag = "ArtNet";
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
+        [DebuggerStepThrough]
         private static void InternalLog(LogLevel level, string tag, string message)
         {
             if (EnableLog(level) == false || string.IsNullOrEmpty(message)) return;

@@ -29,7 +29,7 @@ namespace ArtNet.Editor.UnityRecorder
                 var groupedFrames = frames.GroupBy(f => f.Universe);
                 foreach (var group in groupedFrames)
                 {
-                    ArtNetLogger.LogDebug($"Universe {group.Key}, Frames: {group.Count()}");
+                    ArtNetLogger.DevLogDebug($"Universe {group.Key}, Frames: {group.Count()}");
                 }
 
                 settings.FileNameGenerator.CreateDirectory(session);

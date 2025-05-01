@@ -43,7 +43,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.None)
             {
-                ArtNetLogger.LogError("DmxRecorder is already recording");
+                ArtNetLogger.DevLogError("DmxRecorder is already recording");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status == RecordingStatus.None)
             {
-                ArtNetLogger.LogError("DmxRecorder is not recording");
+                ArtNetLogger.DevLogError("DmxRecorder is not recording");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Recording)
             {
-                ArtNetLogger.LogError("DmxRecorder is not recording");
+                ArtNetLogger.DevLogError("DmxRecorder is not recording");
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Paused)
             {
-                ArtNetLogger.LogError("DmxRecorder is not paused");
+                ArtNetLogger.DevLogError("DmxRecorder is not paused");
                 return;
             }
 
@@ -131,7 +131,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (_recordedDmx.Count == 0)
             {
-                ArtNetLogger.LogInfo("ArtNet Recorder: No data to store");
+                ArtNetLogger.DevLogInfo("ArtNet Recorder: No data to store");
                 return;
             }
 

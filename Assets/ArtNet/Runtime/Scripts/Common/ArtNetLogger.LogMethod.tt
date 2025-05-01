@@ -22,14 +22,14 @@ namespace ArtNet.Common
 #>
 
         // <#= value #>
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void Log<#= value #>(string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLog<#= value #>(string message)
         {
             InternalLog(LogLevel.<#= value #>, DefaultTag, message);
         }
 
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void Log<#= value #>(string tag, string message)
+        [DebuggerStepThrough, Conditional("ART_NET_DEVELOP_LOG")]
+        public static void DevLog<#= value #>(string tag, string message)
         {
             InternalLog(LogLevel.<#= value #>, tag, message);
         }
