@@ -43,7 +43,7 @@ namespace ArtNet.Common
                 return message;
             }
 
-            return $"[{tag}] {message}";
+            return $"[<color=cyan>{tag}</color>] {message}";
         }
 
         [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
