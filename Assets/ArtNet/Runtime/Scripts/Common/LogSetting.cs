@@ -20,7 +20,7 @@ namespace ArtNet.Common
                 if (Instance._enableLogging == value) return;
 
                 Instance._enableLogging = value;
-                ArtNetDebug.LogDebug($"Logging enabled: {Instance._enableLogging}");
+                ArtNetLogger.LogDebug($"Logging enabled: {Instance._enableLogging}");
             }
         }
 
@@ -32,7 +32,7 @@ namespace ArtNet.Common
                 if (Instance._logLevel == value) return;
 
                 Instance._logLevel = value;
-                ArtNetDebug.LogDebug($"Log level changed to {Instance._logLevel}");
+                ArtNetLogger.LogDebug($"Log level changed to {Instance._logLevel}");
             }
         }
     }

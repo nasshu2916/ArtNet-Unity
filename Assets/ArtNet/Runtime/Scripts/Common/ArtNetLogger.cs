@@ -4,7 +4,7 @@ using Debug = UnityEngine.Debug;
 
 namespace ArtNet.Common
 {
-    public static class ArtNetDebug
+    public static class ArtNetLogger
     {
         private const string DefaultTag = "ArtNet";
 
