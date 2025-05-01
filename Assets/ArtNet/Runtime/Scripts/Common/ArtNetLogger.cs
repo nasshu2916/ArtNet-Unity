@@ -4,7 +4,7 @@ using Debug = UnityEngine.Debug;
 
 namespace ArtNet.Common
 {
-    public static class ArtNetLogger
+    public static partial class ArtNetLogger
     {
         private const string DefaultTag = "ArtNet";
 
@@ -44,55 +44,6 @@ namespace ArtNet.Common
             }
 
             return $"[<color=cyan>{tag}</color>] {message}";
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogDebug(string message)
-        {
-            InternalLog(LogLevel.Debug, DefaultTag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogDebug(string tag, string message)
-        {
-            InternalLog(LogLevel.Debug, tag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogInfo(string message)
-        {
-            InternalLog(LogLevel.Info, DefaultTag, message);
-        }
-
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogInfo(string tag, string message)
-        {
-            InternalLog(LogLevel.Info, tag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogWarn(string message)
-        {
-            InternalLog(LogLevel.Warn, DefaultTag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogWarn(string tag, string message)
-        {
-            InternalLog(LogLevel.Warn, tag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogError(string message)
-        {
-            InternalLog(LogLevel.Error, DefaultTag, message);
-        }
-
-        [DebuggerStepThrough, Conditional("ART_NET_DEBUG_LOG")]
-        public static void LogError(string tag, string message)
-        {
-            InternalLog(LogLevel.Error, tag, message);
         }
     }
 }
