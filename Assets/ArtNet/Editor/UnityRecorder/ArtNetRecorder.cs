@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ArtNet.Common;
 using ArtNet.Editor.DmxRecorder;
 using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Editor.UnityRecorder.Input;
@@ -28,7 +29,7 @@ namespace ArtNet.Editor.UnityRecorder
                 var groupedFrames = frames.GroupBy(f => f.Universe);
                 foreach (var group in groupedFrames)
                 {
-                    Debug.Log($"Universe {group.Key}, Frames: {group.Count()}");
+                    ArtNetLogger.DevLogDebug($"Universe {group.Key}, Frames: {group.Count()}");
                 }
 
                 settings.FileNameGenerator.CreateDirectory(session);

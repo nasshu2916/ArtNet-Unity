@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using ArtNet.Common;
 using ArtNet.Enums;
 using ArtNet.Packets;
 using UnityEngine;
@@ -42,7 +43,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.None)
             {
-                Debug.LogError("DmxRecorder is already recording");
+                ArtNetLogger.DevLogError("DmxRecorder is already recording");
                 return;
             }
 
@@ -58,7 +59,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status == RecordingStatus.None)
             {
-                Debug.LogError("DmxRecorder is not recording");
+                ArtNetLogger.DevLogError("DmxRecorder is not recording");
                 return;
             }
 
@@ -75,7 +76,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Recording)
             {
-                Debug.LogError("DmxRecorder is not recording");
+                ArtNetLogger.DevLogError("DmxRecorder is not recording");
                 return;
             }
 
@@ -90,7 +91,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (Status != RecordingStatus.Paused)
             {
-                Debug.LogError("DmxRecorder is not paused");
+                ArtNetLogger.DevLogError("DmxRecorder is not paused");
                 return;
             }
 
@@ -130,7 +131,7 @@ namespace ArtNet.Editor.DmxRecorder
         {
             if (_recordedDmx.Count == 0)
             {
-                Debug.Log("ArtNet Recorder: No data to store");
+                ArtNetLogger.DevLogInfo("ArtNet Recorder: No data to store");
                 return;
             }
 

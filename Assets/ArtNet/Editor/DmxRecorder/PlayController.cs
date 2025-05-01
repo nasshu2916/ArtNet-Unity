@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using ArtNet.Common;
 using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Packets;
 using JetBrains.Annotations;
@@ -132,7 +133,7 @@ namespace ArtNet.Editor.DmxRecorder
                 }
                 catch (Exception e)
                 {
-                    Debug.LogErrorFormat($"[DmxPlayerSendTask] {e.GetType()} : {e.Message}");
+                    ArtNetLogger.LogError("ArtNet DmxPlayerSendTask", $"{e.GetType()} : {e.Message}");
                 }
 
                 Thread.Sleep(1);

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using ArtNet.Common;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -97,6 +98,7 @@ namespace ArtNet.Packets
             var opCode = ArtNetOpCode(buffer);
             if (opCode == null) return null;
             if (Enum.IsDefined(typeof(OpCode), opCode) == false) return null;
+            ArtNetLogger.DevLogDebug("Start Receive ArtNet Packet");
 
             return opCode switch
             {

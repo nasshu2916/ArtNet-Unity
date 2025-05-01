@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using ArtNet.Common;
 using JetBrains.Annotations;
 using UnityEditorInternal;
 using UnityEngine;
@@ -31,7 +32,7 @@ namespace ArtNet.Editor.DmxRecorder
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load RecorderSettings: {e.Message}");
+                ArtNetLogger.LogError($"Failed to load RecorderSettings: {e.Message}");
                 setting = null;
             }
 

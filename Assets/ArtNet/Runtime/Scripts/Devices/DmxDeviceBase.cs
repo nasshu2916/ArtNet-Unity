@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using ArtNet.Common;
 using UnityEngine;
 
 namespace ArtNet.Devices
@@ -30,7 +31,7 @@ namespace ArtNet.Devices
         {
             if (dmx.Length < ChannelNumber)
             {
-                Debug.LogError($"DMX data is too short. Expected {ChannelNumber} bytes, got {dmx.Length} bytes.");
+                ArtNetLogger.LogError($"DMX data is too short. Expected {ChannelNumber} bytes, got {dmx.Length} bytes.");
                 return;
             }
 
