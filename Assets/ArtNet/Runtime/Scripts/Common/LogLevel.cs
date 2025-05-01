@@ -1,4 +1,4 @@
-﻿namespace ArtNet.Common
+namespace ArtNet.Common
 {
     public enum LogLevel
     {
