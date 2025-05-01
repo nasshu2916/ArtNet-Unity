@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using ArtNet.Common;
 using ArtNet.Enums;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -113,7 +114,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
         {
             if (data.Length < Header.Length)
             {
-                Debug.LogError("ArtNet Recorder: Invalid data length");
+                ArtNetLogger.LogError("ArtNet Recorder: Invalid data length");
                 return null;
             }
 
@@ -181,7 +182,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 var opCode = (OpCode) BitConverter.ToUInt16(body[position..]);
                 if (opCode != OpCode.Dmx)
                 {
-                    Debug.Log($"ArtNet Recorder: OpCode mismatch. Required: {OpCode.Dmx}, Found: {opCode}");
+                    ArtNetLogger.LogInfo($"ArtNet Recorder: OpCode mismatch. Required: {OpCode.Dmx}, Found: {opCode}");
                     continue;
                 }
 
@@ -196,7 +197,7 @@ namespace ArtNet.Editor.DmxRecorder.IO
                 position += 2;
                 if (position + length > dataLength || length > 512)
                 {
-                    Debug.Log("ArtNet Recorder: DMX data length mismatch");
+                    ArtNetLogger.LogInfo("ArtNet Recorder: DMX data length mismatch");
                     return null;
                 }
                 var dmx = body[position..(position + length)].ToArray();

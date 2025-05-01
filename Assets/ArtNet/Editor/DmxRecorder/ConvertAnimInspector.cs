@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ArtNet.Common;
 using ArtNet.Editor.DmxRecorder.IO;
 using ArtNet.Packets;
 using UnityEditor;
@@ -56,7 +57,7 @@ namespace ArtNet.Editor.DmxRecorder
             var output = convertAnim.OutputDirectory + "/ArtNetDmx.anim";
             AnimationClipDmx.Export(universeData, output);
 
-            Debug.Log("Conversion complete");
+            ArtNetLogger.LogDebug("Conversion complete");
         }
 
         private static void ConvertPacket(ConvertAnim convertAnim)
@@ -112,8 +113,8 @@ namespace ArtNet.Editor.DmxRecorder
             BinaryDmx.Export(dmxUniverseData, path, convertAnim.IsCompressBinary);
 
             var message = exists ? "Data updated" : "Data stored";
-            Debug.Log($"ArtNet Recorder: {message} at {path}");
-            Debug.Log("Conversion complete");
+            ArtNetLogger.LogDebug($"ArtNet Recorder: {message} at {path}");
+            ArtNetLogger.LogDebug("Conversion complete");
         }
     }
 }
