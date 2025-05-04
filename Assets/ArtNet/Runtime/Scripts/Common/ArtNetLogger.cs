@@ -33,7 +33,7 @@ namespace ArtNet.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool DisableLog(LogLevel level)
         {
-            return !LogSetting.EnableLog || LogSetting.LogLevel > level;
+            return !Config.EnableLog || Config.LogLevel > level;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
