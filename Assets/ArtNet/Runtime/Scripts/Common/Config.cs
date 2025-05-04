@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,36 +19,41 @@ namespace ArtNet.Common
         [MenuItem("Edit/" + "\u2699 Open ArtNet Config", false, Priority)]
         private static void MenuEditOpenConfig() { EditorSelectInstance(); }
 
-        private static Config Instance => GetInstance();
+        private static Config Instance
+        {
+            get
+            {
+                var config = GetOrLoadInstance();
+                return config == null ? CreateInstance<Config>() : config;
+            }
+        }
+
         public static bool EnableLog => Instance._enableLogging;
         public static LogLevel LogLevel => Instance._logLevel;
 
         private static void EditorSelectInstance()
         {
-            Selection.activeObject = Instance;
+            Selection.activeObject = GetOrLoadInstance();
+
             if (Selection.activeObject == null)
-                Debug.LogError("Cannot find any Config resource");
+            {
+                CreateInstanceAsset();
+                Debug.LogError("Cannot find any Config resource. Created a new one.");
+            }
         }
 
-        private static Config GetInstance()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Config GetOrLoadInstance()
         {
             if (_instance != null) return _instance;
-
             _instance = LoadAsset(AssetName);
-            if (_instance != null) return _instance;
-
-#if UNITY_EDITOR
-            return CreateInstanceAsset();
-#else
-            return CreateInstance<Config>();
-#endif
+            return _instance;
         }
 
-        private static Config CreateInstanceAsset()
+        private static void CreateInstanceAsset()
         {
             var asset = CreateInstance<Config>();
             CreateDirectoryAndAsset(asset, "Resources", AssetName + AssetNameExt);
-            return asset;
         }
 
         private static void CreateDirectoryAndAsset(Config obj, string directory, string assetName)
