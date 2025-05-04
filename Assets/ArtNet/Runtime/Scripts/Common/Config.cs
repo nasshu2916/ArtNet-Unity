@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,45 +14,56 @@ namespace ArtNet.Common
         [SerializeField] private LogLevel _logLevel = Const.Config.DefaultLogLevel;
 
         private static Config _instance;
+        private static bool _isConfigAssetLoaded;
+        private static Config _fallbackInstance;
 
         [MenuItem("Edit/" + "\u2699 Open ArtNet Config", false, Priority)]
         private static void MenuEditOpenConfig() { EditorSelectInstance(); }
 
-        private static Config Instance
-        {
-            get
-            {
-                var config = GetOrLoadInstance();
-                return config == null ? CreateInstance<Config>() : config;
-            }
-        }
+        private static Config Instance => GetOrLoadInstance(isFallback: true);
 
         public static bool EnableLog => Instance._enableLogging;
         public static LogLevel LogLevel => Instance._logLevel;
 
         private static void EditorSelectInstance()
         {
-            Selection.activeObject = GetOrLoadInstance();
+            Selection.activeObject = GetOrLoadInstance(isForceLoad: true, isFallback: false);
 
             if (Selection.activeObject == null)
             {
-                CreateInstanceAsset();
+                var instance = CreateInstanceAsset();
                 Debug.LogError("Cannot find any Config resource. Created a new one.");
+                Selection.activeObject = instance;
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Config GetOrLoadInstance()
+        private static Config GetOrLoadInstance(bool isForceLoad = false, bool isFallback = false)
         {
-            if (_instance != null) return _instance;
+            if (isForceLoad) _isConfigAssetLoaded = false;
+
+            if (_instance != null && _isConfigAssetLoaded) return _instance;
+
             _instance = LoadAsset(AssetName);
+            _isConfigAssetLoaded = true;
+            if (_instance != null) return _instance;
+
+            if (isFallback)
+            {
+                _fallbackInstance = CreateInstance<Config>();
+                return _fallbackInstance;
+            }
+
             return _instance;
         }
 
-        private static void CreateInstanceAsset()
+        private static Config CreateInstanceAsset()
         {
             var asset = CreateInstance<Config>();
             CreateDirectoryAndAsset(asset, "Resources", AssetName + AssetNameExt);
+
+            _isConfigAssetLoaded = true;
+            _instance = asset;
+            return asset;
         }
 
         private static void CreateDirectoryAndAsset(Config obj, string directory, string assetName)
