@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ArtNet.Common;
 using ArtNet.Editor.DmxRecorder.Util;
 using UnityEditor;
 using UnityEditor.Presets;
@@ -43,8 +44,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private bool IsRecording => _controller?.Status == RecordingStatus.Recording;
 
-
-        [MenuItem("ArtNet/DMX Recorder")]
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "DMX Recorder", false, Const.Editor.Priority)]
         public static void ShowWindow()
         {
             var window = GetWindow<RecorderWindow>();

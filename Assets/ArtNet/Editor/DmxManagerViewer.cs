@@ -1,4 +1,4 @@
-using System;
+using ArtNet.Common;
 using ArtNet.Editor.UI;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -14,7 +14,7 @@ namespace ArtNet.Editor
         private bool _updateDmx = true;
         private Label _infoLabel;
 
-        [MenuItem("ArtNet/DmxManagerViewer")]
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "DmxManagerViewer", false, Const.Editor.Priority)]
         public static void ShowWindow()
         {
             var wnd = GetWindow<DmxManagerViewer>();
