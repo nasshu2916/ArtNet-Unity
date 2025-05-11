@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using ArtNet.Common;
 using ArtNet.Editor.DmxRecorder.Util;
 using JetBrains.Annotations;
 using UnityEditor;
@@ -34,7 +35,7 @@ namespace ArtNet.Editor.DmxRecorder
 
         private PlaybackState _sliderDragBeforeState = PlaybackState.Invalid;
 
-        [MenuItem("ArtNet/DMX Player")]
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "DMX Player", false, Const.Editor.Priority)]
         public static void ShowWindow()
         {
             var window = GetWindow<PlayerWindow>()!;

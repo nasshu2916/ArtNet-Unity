@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using ArtNet.Common;
 using ArtNet.Editor.UI;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -69,7 +70,7 @@ namespace ArtNet.Editor
             root.Bind(new SerializedObject(this));
         }
 
-        [MenuItem("ArtNet/ArtNetTester")]
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "ArtNetTester", false, Const.Editor.Priority)]
         public static void ShowExample()
         {
             var wnd = GetWindow<ArtNetTester>();

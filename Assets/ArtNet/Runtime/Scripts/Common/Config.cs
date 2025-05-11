@@ -10,6 +10,7 @@ namespace ArtNet.Common
 
         private const int Priority = 20000;
 
+        [Header("Log Settings")]
         [SerializeField] private bool _enableLogging = true;
         [SerializeField] private LogLevel _logLevel = Const.Config.DefaultLogLevel;
 
