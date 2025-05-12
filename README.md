@@ -76,3 +76,13 @@ Also, this editor extension can transmit multiple destination IP addresses and p
 ### DmxManagerViewer
 
 An editor extension for checking the DMX values managed by DmxManager Class. This editor extension is only available when the game is running.
+
+### Unity Recorder Custom Source
+
+[Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@3.0/manual/index.html)
+can be installed to add a feature that saves received ArtNet packets as a custom source for Unity Recorder.
+
+![dmx_receive](https://github.com/user-attachments/assets/32ae8407-9963-4b37-9c4b-2ef010509e51)
+
+The specified DmxManager can save received ArtNet packets using Unity Recorder.
+The save format and options are the same as [DmxRecorder](#dmxrecorder), supporting both Binary and Animation Clip formats.

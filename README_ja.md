@@ -79,3 +79,13 @@ DmxRecorder で保存した ArtNet パケットを再送信する機能で、ル
 ### DmxManagerViewer
 
 DmxManager Class で管理している DMX の値を確認するためのエディタ拡張です。このエディタ拡張は Game を実行している時のみ有効です。
+
+### Unity Recorder カスタムソース
+
+[Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@3.0/manual/index.html)
+をインストールしている場合、Unity Recorder のカスタムソースとして受信した ArtNet パケットを保存する機能が追加されます。
+
+![dmx_receive](https://github.com/user-attachments/assets/32ae8407-9963-4b37-9c4b-2ef010509e51)
+
+指定した DmxManager が受信した ArtNet パケットを Unity Recorder で保存することができます。
+保存形式と保存オプションは [DmxRecorder](#dmxrecorder) と同じで、Binary 形式と Animation Clip 形式で保存することができます。
