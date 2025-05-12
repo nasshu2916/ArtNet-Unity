@@ -27,6 +27,12 @@ namespace ArtNet.Common
         public static bool EnableLog => Instance._enableLogging;
         public static LogLevel LogLevel => Instance._logLevel;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void OnSetup()
+        {
+            LoadAsset(AssetName);
+        }
+
         private static void EditorSelectInstance()
         {
             Selection.activeObject = GetOrLoadInstance();
@@ -79,7 +85,7 @@ namespace ArtNet.Common
         {
             var result = Resources.Load<Config>(assetName);
             _isConfigAssetLoaded = true;
-            _defaultInstance =  CreateInstance<Config>();
+            _defaultInstance = CreateInstance<Config>();
             return result;
         }
     }
