@@ -68,7 +68,7 @@ namespace ArtNet.Editor.DmxRecorder
     public class FileGenerator
     {
         [SerializeField] private string _directory = "Recordings";
-        [SerializeField] private string _fileName = DefaultWildcard.Recorder;
+        [SerializeField] private string _fileName = $"{DefaultWildcard.Recorder}_{DefaultWildcard.Take}";
 
         private readonly List<Wildcard> _wildcards;
         internal IEnumerable<Wildcard> Wildcards => _wildcards;
