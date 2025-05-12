@@ -10,27 +10,28 @@ namespace ArtNet.Common
 
         private const int Priority = 20000;
 
-        [Header("Log Settings")]
-        [SerializeField] private bool _enableLogging = true;
+        [Header("Log Settings")] [SerializeField]
+        private bool _enableLogging = true;
+
         [SerializeField] private LogLevel _logLevel = Const.Config.DefaultLogLevel;
 
         private static Config _instance;
         private static bool _isConfigAssetLoaded;
-        private static Config _fallbackInstance;
+        private static Config _defaultInstance;
 
         [MenuItem("Edit/" + "\u2699 Open ArtNet Config", false, Priority)]
         private static void MenuEditOpenConfig() { EditorSelectInstance(); }
 
-        private static Config Instance => GetOrLoadInstance(isFallback: true);
+        private static Config Instance => GetOrDefaultInstance();
 
         public static bool EnableLog => Instance._enableLogging;
         public static LogLevel LogLevel => Instance._logLevel;
 
         private static void EditorSelectInstance()
         {
-            Selection.activeObject = GetOrLoadInstance(isForceLoad: true, isFallback: false);
+            Selection.activeObject = GetOrLoadInstance();
 
-            if (Selection.activeObject == null)
+            if (Selection.activeObject is null)
             {
                 var instance = CreateInstanceAsset();
                 Debug.LogError("Cannot find any Config resource. Created a new one.");
@@ -38,23 +39,20 @@ namespace ArtNet.Common
             }
         }
 
-        private static Config GetOrLoadInstance(bool isForceLoad = false, bool isFallback = false)
+        private static Config GetOrDefaultInstance()
         {
-            if (isForceLoad) _isConfigAssetLoaded = false;
+            if (_instance) return _instance;
+            if (_isConfigAssetLoaded) return _defaultInstance;
 
-            if (_instance != null && _isConfigAssetLoaded) return _instance;
+            LoadAsset(AssetName);
+            return _instance ? _instance : _defaultInstance;
+        }
 
-            _instance = LoadAsset(AssetName);
-            _isConfigAssetLoaded = true;
-            if (_instance != null) return _instance;
+        private static Config GetOrLoadInstance()
+        {
+            if (_instance) return _instance;
 
-            if (isFallback)
-            {
-                _fallbackInstance = CreateInstance<Config>();
-                return _fallbackInstance;
-            }
-
-            return _instance;
+            return LoadAsset(AssetName);
         }
 
         private static Config CreateInstanceAsset()
@@ -63,6 +61,7 @@ namespace ArtNet.Common
             CreateDirectoryAndAsset(asset, "Resources", AssetName + AssetNameExt);
 
             _isConfigAssetLoaded = true;
+            _defaultInstance = asset;
             _instance = asset;
             return asset;
         }
@@ -78,7 +77,10 @@ namespace ArtNet.Common
 
         private static Config LoadAsset(string assetName)
         {
-            return Resources.Load<Config>(assetName);
+            var result = Resources.Load<Config>(assetName);
+            _isConfigAssetLoaded = true;
+            _defaultInstance =  CreateInstance<Config>();
+            return result;
         }
     }
 }
