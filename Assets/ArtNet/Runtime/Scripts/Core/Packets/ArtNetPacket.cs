@@ -98,7 +98,6 @@ namespace ArtNet.Packets
             var opCode = ArtNetOpCode(buffer);
             if (opCode == null) return null;
             if (Enum.IsDefined(typeof(OpCode), opCode) == false) return null;
-            ArtNetLogger.DevLogDebug("Start Receive ArtNet Packet");
 
             return opCode switch
             {

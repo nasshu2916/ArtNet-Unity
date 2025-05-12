@@ -183,6 +183,7 @@ namespace ArtNet.Editor.DmxRecorder
 
             // TimeCode の作成
             _timeCode = visualElement.Q<Label>("timeCode");
+            _timeCode.text = TimeCodeText(0);
 
             _playButton = visualElement.Q<Button>("playButton")!;
             _playButton.clicked += OnPlayButtonClicked;
@@ -552,10 +553,10 @@ namespace ArtNet.Editor.DmxRecorder
             return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
         }
 
-        private static string MspaceText(long value, int padding = 2, int mspace = 24)
+        private static string MspaceText(long value, int padding = 2, int mspace = 36)
         {
             var text = value.ToString().PadLeft(padding, '0');
-            return $"<mspace={mspace}em>{text}</mspace>";
+            return $"<mspace={mspace}px>{text}</mspace>";
         }
     }
 }
