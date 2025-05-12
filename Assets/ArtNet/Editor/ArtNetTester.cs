@@ -122,6 +122,7 @@ namespace ArtNet.Editor
             _receiverStatus = "Running";
             _receiveStartButton.text = "Stop Receive ArtNet Packet";
             _receiveStartButton.AddToClassList("selected");
+            ArtNetLogger.DevLogDebug("ArtNet Tester", "Start Receive ArtNet Packet");
         }
 
         private void StopReceive()
@@ -130,6 +131,7 @@ namespace ArtNet.Editor
             _receiverStatus = "Not Running";
             _receiveStartButton.text = "Start Receive ArtNet Packet";
             _receiveStartButton.RemoveFromClassList("selected");
+            ArtNetLogger.DevLogDebug("ArtNet Tester", "Stop Receive ArtNet Packet");
         }
 
         private void AddUniverseInfo(ushort universe)
