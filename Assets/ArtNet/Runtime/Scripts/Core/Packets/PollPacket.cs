@@ -1,35 +1,34 @@
-using System;
 using ArtNet.Enums;
+using ArtNet.IO;
 
 namespace ArtNet.Packets
 {
     public class PollPacket : ArtNetPacket
     {
-        public PollPacket() : base(OpCode.Poll)
-        {
-        }
+        public override OpCode OpCode => OpCode.Poll;
 
-        public PollPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.Poll)
-        {
-        }
+        protected override int MinimumBodyLength => 2;
 
         public byte Flags { get; set; }
         public byte Priority { get; set; }
 
 
-        protected override void Deserialize(ArtNetReader artNetReader)
+        protected override bool DeserializeBody(ArtNetReader artNetReader)
         {
-            ProtocolVersion = artNetReader.ReadNetworkUInt16();
             Flags = artNetReader.ReadByte();
             Priority = artNetReader.ReadByte();
+            return true;
         }
 
-        protected override void Serialize(ArtNetWriter artNetWriter)
+        protected override void SerializeBody(ArtNetWriter artNetWriter)
         {
-            base.Serialize(artNetWriter);
-            artNetWriter.WriteNetwork(ProtocolVersion);
             artNetWriter.Write(Flags);
             artNetWriter.Write(Priority);
+        }
+
+        protected override bool Validate()
+        {
+            return true;
         }
     }
 }

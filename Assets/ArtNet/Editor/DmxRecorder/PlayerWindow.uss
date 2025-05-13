@@ -1,0 +1,67 @@
+@import url("./CommonWindow.uss");
+
+.section-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    background-color: rgb(44, 44, 44);
+    margin: 3px 0 0 0;
+    padding: 0 6px;
+}
+
+.section-content {
+    padding: 4px;
+}
+
+.section-content > VisualElement {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#selectPlayFileButton {
+    height: 18px;
+    width: 24px;
+    padding: 0;
+}
+
+#playTimeLabel {
+    font-size: 11px;
+    width: 50px;
+    margin-top: 8px;
+}
+
+#playProgressBar {
+    height: 15px;
+    margin: 0 6px 0 6px;
+}
+
+#senderConfigFields Label {
+    width: 150px;
+    min-width: 150px;
+}
+
+/* ===== Send Destination ===== */
+
+#sendDestinationsPanel {
+    padding: 4px;
+}
+
+/*#addDestinationLabel {*/
+/*    border-bottom-width: 2px;*/
+/*}*/
+
+SendDestinationList {
+    flex-direction: column;
+    margin-top: 4px;
+}
+
+SendDestinationItem {
+    margin-top : 4px;
+    padding: 5px;
+    border-width:1px;
+}
+
+.SendDestinationItemIcon {
+    width : 14px;
+    height : 14px;
+    margin: 2px 3px 3px 3px;
+}

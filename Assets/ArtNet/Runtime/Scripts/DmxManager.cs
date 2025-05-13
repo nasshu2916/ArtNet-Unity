@@ -9,20 +9,9 @@ namespace ArtNet
 {
     public class DmxManager : MonoBehaviour
     {
-        private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         private readonly Queue<ushort> _updatedUniverses = new();
+        private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
-
-        private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
-        {
-            return FindObjectsOfType<GameObject>().SelectMany(o => o.GetComponents<IDmxDevice>())
-                .GroupBy(device => device.Universe).ToDictionary(g => g.Key, g => g as IEnumerable<IDmxDevice>);
-        }
-
-        public void OnEnable()
-        {
-            DmxDevices = FindDmxDevices();
-        }
 
         public void Update()
         {
@@ -42,6 +31,17 @@ namespace ArtNet
                     }
                 }
             }
+        }
+
+        public void OnEnable()
+        {
+            DmxDevices = FindDmxDevices();
+        }
+
+        private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
+        {
+            return FindObjectsOfType<GameObject>().SelectMany(o => o.GetComponents<IDmxDevice>())
+                .GroupBy(device => device.Universe).ToDictionary(g => g.Key, g => g as IEnumerable<IDmxDevice>);
         }
 
         public ushort[] Universes()

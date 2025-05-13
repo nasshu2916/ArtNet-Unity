@@ -1,0 +1,48 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" MemoryProfiler="Unity.MemoryProfiler.Editor" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/ArtNet/Editor/DmxRecorder/PlayerWindow.uss?fileID=7433441132597879392&amp;guid=8b5140e2d31c068468a5f8efc7fb3d81&amp;type=3#PlayerWindow" />
+    <ui:VisualElement class="section-content">
+        <ui:VisualElement>
+            <ui:VisualElement style="width: 100%;">
+                <ui:TextField name="senderFileNameField" text="file_name" label="DMX File" tooltip="Play a DMX file" readonly="true" />
+            </ui:VisualElement>
+            <ui:Button name="selectPlayFileButton" tooltip="Open a DMX file to play" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement class="section-content">
+        <ui:VisualElement>
+            <ui:Button name="PlayButton" tooltip="Play or pause the playback" style="width: 45px; height: 45px;" />
+            <ui:Label name="playTimeLabel" text="0:00.000" />
+            <ui:VisualElement style="width: 100%;">
+                <ui:Slider name="playSlider" high-value="100" focusable="false" />
+                <ui:ProgressBar name="playProgressBar" />
+                <ui:VisualElement style="align-items: flex-end;">
+                    <ui:Label name="playbackMaxTimeLabel" text="0:00" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="senderConfig">
+        <ui:VisualElement>
+            <ui:Label text="Sender Setting" class="section-title" />
+            <ui:VisualElement class="section-content">
+                <ui:VisualElement>
+                    <ui:VisualElement name="senderConfigFields" style="width: 100%;">
+                        <ui:Toggle label="Loop" name="sendLoopToggle" tooltip="Loop the playback" />
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Speed" display-tooltip-when-elided="true" tooltip="Playback speed" />
+                            <ArtNet.Editor.DmxRecorder.SnapSlider name="sendSpeedSlider" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:Label text="Send Destination" class="section-title" />
+        <ui:VisualElement name="sendDestinationsPanel" class="Panel">
+            <ui:VisualElement name="sendDestinationsListHeader">
+                <ui:Label text="+ Add" display-tooltip-when-elided="true" name="addDestinationLabel" tooltip="Add a new send destination item to the list" style="height: 30px; -unity-text-align: middle-left; padding-left: 10px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,17 +1,12 @@
-using System;
 using ArtNet.Enums;
+using ArtNet.IO;
 
 namespace ArtNet.Packets
 {
     public class PollReplyPacket : ArtNetPacket
     {
-        public PollReplyPacket() : base(OpCode.PollReply)
-        {
-        }
-
-        public PollReplyPacket(ReadOnlySpan<byte> buffer) : base(buffer, OpCode.PollReply)
-        {
-        }
+        public override OpCode OpCode => OpCode.PollReply;
+        protected override int MinimumBodyLength => 197;
 
         public byte[] IpAddress { get; set; } = new byte[4];
         public ushort Port { get; set; }
@@ -42,7 +37,7 @@ namespace ArtNet.Packets
         public byte Status2 { get; set; }
         public byte[] Filter { get; set; } = new byte[26];
 
-        protected override void Deserialize(ArtNetReader artNetReader)
+        protected override bool DeserializeBody(ArtNetReader artNetReader)
         {
             IpAddress = artNetReader.ReadBytes(4);
             Port = artNetReader.ReadUInt16();
@@ -72,11 +67,11 @@ namespace ArtNet.Packets
             BindIndex = artNetReader.ReadByte();
             Status2 = artNetReader.ReadByte();
             Filter = artNetReader.ReadBytes(26);
+            return true;
         }
 
-        protected override void Serialize(ArtNetWriter artNetWriter)
+        protected override void SerializeBody(ArtNetWriter artNetWriter)
         {
-            base.Serialize(artNetWriter);
             artNetWriter.Write(IpAddress);
             artNetWriter.Write(Port);
             artNetWriter.WriteNetwork(VersionInfo);
@@ -105,6 +100,11 @@ namespace ArtNet.Packets
             artNetWriter.Write(BindIndex);
             artNetWriter.Write(Status2);
             artNetWriter.Write(Filter);
+        }
+
+        protected override bool Validate()
+        {
+            return true;
         }
     }
 }

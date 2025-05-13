@@ -1,7 +1,9 @@
 {
     "name": "ArtNet",
+    "rootNamespace": "",
     "references": [
-        "GUID:e88422c88230bca4d8e836cfcef4dd58"
+        "GUID:e88422c88230bca4d8e836cfcef4dd58",
+        "GUID:0f009064be0f49cc8ae02b838bdf7fa4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

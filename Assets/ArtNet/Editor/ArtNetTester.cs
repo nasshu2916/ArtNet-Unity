@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
+using ArtNet.Common;
 using ArtNet.Editor.UI;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -17,21 +19,32 @@ namespace ArtNet.Editor
         [SerializeField] private string _receiverStatus;
         [SerializeField] private string _lastReceived;
         [SerializeField] private string _lastOpCode;
+        private readonly Dictionary<ushort, byte[]> _dmxData = new();
 
         private readonly UdpReceiver _receiver = new(ArtNetReceiver.ArtNetPort);
-        private readonly Dictionary<ushort, byte[]> _dmxData = new();
-        private readonly Queue<ushort> _updatedUniverses = new();
         private readonly Dictionary<ushort, UniverseInfo> _universeInfos = new();
-        private Button _receiveStartButton;
-        private ScrollView _universeSelector;
+        private readonly Queue<ushort> _updatedUniverses = new();
         private DmxViewer _dmxViewer;
-        private ushort _selectedUniverseNum;
+        private Button _receiveStartButton;
+        private ushort _selectedUniverse;
+        private ScrollView _universeSelector;
 
-        [MenuItem("ArtNet/ArtNetTester")]
-        public static void ShowExample()
+        private void Update()
         {
-            var wnd = GetWindow<ArtNetTester>();
-            wnd.titleContent = new GUIContent("ArtNetTester");
+            lock (_updatedUniverses)
+            {
+                while (0 < _updatedUniverses.Count)
+                {
+                    var universe = _updatedUniverses.Dequeue();
+                    if (!_universeInfos.ContainsKey(universe)) AddUniverseInfo(universe);
+
+                    _universeInfos[universe].ReceivedAt = DateTime.Now;
+                    if (universe == _selectedUniverse)
+                    {
+                        _dmxViewer.value = _dmxData[universe];
+                    }
+                }
+            }
         }
 
         public void CreateGUI()
@@ -57,26 +70,15 @@ namespace ArtNet.Editor
             root.Bind(new SerializedObject(this));
         }
 
-        private void Update()
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "ArtNetTester", false, Const.Editor.Priority)]
+        public static void ShowExample()
         {
-            lock (_updatedUniverses)
-            {
-                while (0 < _updatedUniverses.Count)
-                {
-                    var universe = _updatedUniverses.Dequeue();
-                    if (!_universeInfos.ContainsKey(universe)) AddUniverseInfo(universe);
-
-                    _universeInfos[universe].ReceivedAt = DateTime.Now;
-                    if (universe == _selectedUniverseNum)
-                    {
-                        _dmxViewer.value = _dmxData[universe];
-                    }
-                }
-            }
+            var wnd = GetWindow<ArtNetTester>();
+            wnd.titleContent = new GUIContent("ArtNetTester");
         }
 
 
-        private void OnReceivedPacket(byte[] receiveBuffer, int length, System.Net.EndPoint remoteEp)
+        private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
             var packet = ArtNetPacket.Create(receiveBuffer);
             if (packet == null) return;
@@ -120,6 +122,7 @@ namespace ArtNet.Editor
             _receiverStatus = "Running";
             _receiveStartButton.text = "Stop Receive ArtNet Packet";
             _receiveStartButton.AddToClassList("selected");
+            ArtNetLogger.DevLogDebug("ArtNet Tester", "Start Receive ArtNet Packet");
         }
 
         private void StopReceive()
@@ -128,6 +131,7 @@ namespace ArtNet.Editor
             _receiverStatus = "Not Running";
             _receiveStartButton.text = "Start Receive ArtNet Packet";
             _receiveStartButton.RemoveFromClassList("selected");
+            ArtNetLogger.DevLogDebug("ArtNet Tester", "Stop Receive ArtNet Packet");
         }
 
         private void AddUniverseInfo(ushort universe)
@@ -136,7 +140,7 @@ namespace ArtNet.Editor
             universeInfo.clickable.clickedWithEventInfo += evt => OnUniverseSelected(universe, evt);
             if (_universeInfos.Count == 0)
             {
-                _selectedUniverseNum = universe;
+                _selectedUniverse = universe;
                 universeInfo.AddToClassList("selected");
             }
 
@@ -144,13 +148,13 @@ namespace ArtNet.Editor
             _universeSelector.Add(universeInfo);
         }
 
-        private void OnUniverseSelected(ushort universeNumber, EventBase evt)
+        private void OnUniverseSelected(ushort universe, EventBase evt)
         {
             if (evt.target is not UniverseInfo universeInfo) return;
             _universeSelector.Q<UniverseInfo>(null, "selected")?.RemoveFromClassList("selected");
             universeInfo.AddToClassList("selected");
-            _selectedUniverseNum = universeNumber;
-            _dmxViewer.value = _dmxData[universeNumber];
+            _selectedUniverse = universe;
+            _dmxViewer.value = _dmxData[universe];
         }
     }
 }

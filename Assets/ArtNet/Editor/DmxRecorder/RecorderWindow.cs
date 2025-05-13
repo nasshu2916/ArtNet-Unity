@@ -1,224 +1,562 @@
-﻿using System;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using ArtNet.Common;
+using ArtNet.Editor.DmxRecorder.Util;
 using UnityEditor;
+using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ArtNet.Editor.DmxRecorder
 {
-    partial class DmxRecordWindow
+    public class RecorderWindow : EditorWindow
     {
-        private static readonly Color RecordingColor = new(0.78f, 0f, 0f, 1f);
-        private static readonly Color PausedColor = new(0.78f, 0.5f, 0f, 1f);
+        #region Contents
 
-        private readonly Recorder _recorder = new();
-
-        private Label _errorMessageLabel;
-        private TextField _outputFileNameField, _outputDirectoryField;
-
-        private Label _outputFilePathLabel, _footerStatusLabel;
-        private Image _outputWarningIcon;
-
-        private Button _selectDirectoryButton;
-        private VisualElement _timeCodeContainer, _errorMessageArea;
-
-        private Label _timeCodeHourLabel, _timeCodeMinuteLabel, _timeCodeSecondLabel, _timeCodeMillisecondLabel;
-
-        private void UpdateRecorder()
+        private static class Contents
         {
-            var timeCode = _recorder.GetRecordingTime();
-            var timeCodeSpan = TimeSpan.FromSeconds(timeCode / 1000f);
-            _timeCodeHourLabel.text = timeCodeSpan.Hours.ToString("00");
-            _timeCodeMinuteLabel.text = timeCodeSpan.Minutes.ToString("00");
-            _timeCodeSecondLabel.text = timeCodeSpan.Seconds.ToString("00");
-            _timeCodeMillisecondLabel.text = Math.Floor(timeCodeSpan.Milliseconds / 10.0f).ToString("00");
+            internal static readonly GUIContent DuplicateLabel = new("Duplicate");
+            internal static readonly GUIContent DeleteLabel = new("Delete");
 
-            var recordCount = _recorder.GetRecordedCount();
-            _footerStatusLabel.text = _recorder.Status switch
-            {
-                RecordingStatus.Recording => $"Recording. {recordCount} packet recorded",
-                RecordingStatus.Paused => $"Paused. {recordCount} packet recorded",
-                _ => ""
-            };
+            internal static string PlayButtonTooltip => "Start recording";
+            internal static string PauseButtonTooltip => "Pause recording";
+            internal static string StopButtonTooltip => "Stop recording";
         }
-        private void InitializeRecorder(VisualElement root)
+        #endregion
+
+        private class RecorderList : ElementItemList<RecorderItem> { }
+
+        [SerializeField] private VisualTreeAsset _visualTree;
+        [SerializeField] private StyleSheet _styleSheet;
+        [SerializeField] private StyleSheet _darkStyleSheet, _lightStyleSheet;
+
+        private static IEnumerable<Type> _cachedRecorderTypes;
+
+        private VisualElement _addNewRecordPanel, _recorderSettingsPanel;
+        private RecorderList _recorderList;
+        private RecorderItem _selectedRecorderItem;
+
+        private RecordController _controller;
+
+        private Label _timeCode;
+        private Button _playButton, _stopButton;
+
+        private bool IsRecording => _controller?.Status == RecordingStatus.Recording;
+
+        [MenuItem(Const.Editor.MenuItemNamePrefix + "DMX Recorder", false, Const.Editor.Priority)]
+        public static void ShowWindow()
         {
-            InitializeControlPanel(root);
-            InitializeRecordingConfig(root);
+            var window = GetWindow<RecorderWindow>();
+            window.titleContent = new GUIContent("DMX Recorder");
         }
 
-        private void InitializeControlPanel(VisualElement root)
+        private void OnEnable()
         {
-            _timeCodeContainer = root.Q<VisualElement>("timeCodeContainer");
-            _timeCodeHourLabel = root.Q<Label>("tcHour");
-            _timeCodeMinuteLabel = root.Q<Label>("tcMinute");
-            _timeCodeSecondLabel = root.Q<Label>("tcSecond");
-            _timeCodeMillisecondLabel = root.Q<Label>("tcMillisecond");
+            _cachedRecorderTypes ??= typeof(RecorderSettings).Assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(RecorderSettings)) && !t.IsAbstract);
 
-            var startButtonImage = new Image { image = _playButtonTexture };
-            var stopButtonImage = new Image
+            CreateView();
+            RegisterCallbacks();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterCallbacks();
+        }
+
+        private void RegisterCallbacks()
+        {
+            Undo.undoRedoPerformed += OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.update += OnUpdate;
+        }
+
+        private void UnregisterCallbacks()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.update -= OnUpdate;
+        }
+
+        private void OnUndoRedoPerformed()
+        {
+            ReloadRecorderSettings();
+            SaveAndRepaint();
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
             {
-                image = _preMatQuadTexture,
-                style = { display = DisplayStyle.None }
+                SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
+                ReloadRecorderSettings();
+                Repaint();
+            }
+        }
+
+        private void OnUpdate()
+        {
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+                    break;
+                case RecordingStatus.Paused:
+                    break;
+                case RecordingStatus.None:
+                    OnUpdateRecordButton();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void OnUpdateRecordButton()
+        {
+            var recorderSettings = _controller.ControllerSettings.RecorderSettings;
+            if (recorderSettings.All(x => !x.Enabled))
+            {
+                SetRecordButtonEnabled(false, "No recorders enabled");
+                return;
+            }
+
+            if (recorderSettings.Any(x => x.Enabled && x.HasErrors()))
+            {
+                SetRecordButtonEnabled(false, "Some recorders have errors");
+                return;
+            }
+
+            SetRecordButtonEnabled(true);
+        }
+
+        private void ReloadRecorderSettings()
+        {
+            if (_controller?.ControllerSettings == null)
+                return;
+
+            var recorderItems = _controller.ControllerSettings.RecorderSettings.Select(CreateRecorderItem).ToArray();
+            foreach (var recorderItem in recorderItems)
+                recorderItem.UpdateState();
+
+            _recorderList.Reload(recorderItems);
+        }
+
+        private void SaveAndRepaint()
+        {
+            if (_controller.ControllerSettings != null)
+                _controller.ControllerSettings.Save();
+
+            Repaint();
+        }
+
+        private void CreateView()
+        {
+            minSize = new Vector2(400, 200);
+            var root = rootVisualElement;
+
+            if (_visualTree == null)
+            {
+                Debug.LogError("VisualTree is null");
+                return;
+            }
+
+            if (_styleSheet == null)
+            {
+                Debug.LogError("StyleSheet is null");
+                return;
+            }
+
+            var skinStyleSheet = EditorGUIUtility.isProSkin ? _darkStyleSheet : _lightStyleSheet;
+            if (skinStyleSheet == null)
+            {
+                Debug.LogError("SkinStyleSheet is null");
+                return;
+            }
+
+            VisualElement visualElement = _visualTree.Instantiate();
+            visualElement.AddToClassList("root");
+            root.Add(visualElement);
+
+            root.styleSheets.Add(skinStyleSheet);
+            root.styleSheets.Add(_styleSheet);
+
+            // TimeCode の作成
+            _timeCode = visualElement.Q<Label>("timeCode");
+            _timeCode.text = TimeCodeText(0);
+
+            _playButton = visualElement.Q<Button>("playButton")!;
+            _playButton.clicked += OnPlayButtonClicked;
+            _playButton.style!.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
+
+            _stopButton = visualElement.Q<Button>("stopButton")!;
+            _stopButton.clicked += OnStopButtonClicked;
+            _stopButton.style!.backgroundImage = (StyleBackground) IconHelper.PreMatQuad;
+            _stopButton.tooltip = Contents.StopButtonTooltip;
+            _stopButton.SetEnabled(false);
+
+            // RecordersPanel の作成
+            var recordersPanel = visualElement.Q<VisualElement>("recordersPanel");
+
+            _addNewRecordPanel = visualElement.Q<Label>("addRecorderLabel");
+            _addNewRecordPanel.RegisterCallback<ClickEvent>(_ => ShowRecorderContextMenu());
+            _recorderList = new RecorderList
+            {
+                name = "recorderList",
+                focusable = true
             };
-            var playButton = root.Q<Button>("playButton");
-            var pauseButton = root.Q<Button>("pauseButton");
 
-            playButton.Add(startButtonImage);
-            playButton.Add(stopButtonImage);
-            playButton.clicked += () =>
+            _recorderList.OnItemContextMenu += OnRecorderContextMenu;
+            _recorderList.OnSelectionChanged += OnRecorderSelectionChanged;
+            _recorderList.OnItemRename += item => item.StartRenaming();
+            _recorderList.OnContextMenu += ShowRecorderContextMenu;
+            recordersPanel.Add(_recorderList);
+
+            _recorderSettingsPanel = visualElement.Q<VisualElement>("recorderSettingsPanel");
+            _recorderSettingsPanel.Add(new IMGUIContainer(RecorderSettingsGUI));
+
+            var footerMessages = visualElement.Q<VisualElement>("footerMessages");
+            footerMessages.Add(new IMGUIContainer(StatusMessagesGUI));
+
+            SetRecordControllerSettings(RecordControllerSettings.GetOrNewGlobalSetting());
+            SetSettingPanelEnabled(!DisableEditRecordSettings());
+        }
+
+        private void StatusMessagesGUI()
+        {
+            var activeRecorders = _controller.ControllerSettings.RecorderSettings.Where(x => x.Enabled).ToArray();
+
+            if (activeRecorders.Length == 0)
             {
-                if (!_recorder.Config.Validate()) return;
-                if (_recorder.Status == RecordingStatus.None)
+                ShowMessageInStatusBar("No active recorder", MessageType.Warning);
+                return;
+            }
+
+            if (activeRecorders.Any(x => x.HasErrors()))
+            {
+                ShowMessageInStatusBar("Some recorders have errors", MessageType.Error);
+                return;
+            }
+
+
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    ShowMessageInStatusBar("Recording", MessageType.None);
+                    break;
+                case RecordingStatus.Paused:
+                    ShowMessageInStatusBar("Paused", MessageType.None);
+                    break;
+                case RecordingStatus.None:
+                    ShowMessageInStatusBar("Ready", MessageType.None);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private bool DisableEditRecordSettings()
+        {
+            return IsRecording;
+        }
+
+        private void SetRecordControllerSettings(RecordControllerSettings settings)
+        {
+            _controller = new RecordController(settings);
+            _controller.OnStartRecording += OnStartRecording;
+            _controller.OnPauseRecording += OnPauseRecording;
+            _controller.OnStopRecording += OnFinishRecording;
+            _controller.OnResumeRecording += OnStartRecording;
+
+            ReloadRecorderSettings();
+        }
+
+        private void RecorderSettingsGUI()
+        {
+            if (_selectedRecorderItem != null)
+            {
+                if (_selectedRecorderItem.State == RecorderItem.RecorderState.Invalid)
                 {
-                    SetEnabledTextField(false);
-                    _recorder.StartRecording();
-
-                    startButtonImage.style.display = DisplayStyle.None;
-                    stopButtonImage.style.display = DisplayStyle.Flex;
-
-                    _timeCodeContainer.style.backgroundColor = RecordingColor;
-                    pauseButton.SetEnabled(true);
+                    EditorGUILayout.LabelField("This Recorder has invalid settings", EditorStyles.boldLabel);
                 }
                 else
                 {
-                    _recorder.StopRecording();
+                    var editor = _selectedRecorderItem.Editor;
 
-                    startButtonImage.style.display = DisplayStyle.Flex;
-                    stopButtonImage.style.display = DisplayStyle.None;
+                    if (editor == null)
+                    {
+                        EditorGUILayout.LabelField("No editor found for this Recorder", EditorStyles.boldLabel);
+                    }
+                    else
+                    {
+                        EditorGUILayout.Separator();
 
-                    _timeCodeContainer.style.backgroundColor = default;
-                    pauseButton.RemoveFromClassList("selected");
-                    pauseButton.SetEnabled(false);
-                    SetEnabledTextField(true);
+                        EditorGUILayout.BeginHorizontal();
+                        var recorderName = editor.target.GetType().Name;
+                        EditorGUILayout.LabelField("Recorder Type", ObjectNames.NicifyVariableName(recorderName));
+
+                        var content = new GUIContent
+                        {
+                            tooltip = "Load or save a preset",
+                            image = IconHelper.PresetIcon
+                        };
+                        if (GUILayout.Button(content, new GUIStyle("iconButton") { fixedWidth = 20f }))
+                        {
+                            var settings = editor.target as RecorderSettings;
+
+                            if (settings != null)
+                            {
+                                var presetReceiver = CreateInstance<PresetRecorder>();
+                                presetReceiver.Init(settings, Repaint);
+
+                                PresetSelector.ShowSelector(settings, null, true, presetReceiver);
+                            }
+                        }
+
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.Separator();
+
+                        EditorGUI.BeginChangeCheck();
+
+                        editor.OnInspectorGUI();
+
+                        if (EditorGUI.EndChangeCheck() || EditorUtility.IsDirty(_selectedRecorderItem.Settings))
+                        {
+                            // data changed
+                            _controller.ControllerSettings.Save();
+                            _selectedRecorderItem.UpdateState();
+                        }
+                    }
                 }
-            };
-
-            pauseButton.SetEnabled(false);
-            pauseButton.Add(new Image()
-            {
-                image = EditorGUIUtility.IconContent("PauseButton@2x").image
-            });
-            pauseButton.clicked += () =>
-            {
-                switch (_recorder.Status)
-                {
-                    case RecordingStatus.Recording:
-                        _recorder.PauseRecording();
-
-                        pauseButton.AddToClassList("selected");
-                        _timeCodeContainer.style.backgroundColor = PausedColor;
-                        break;
-                    case RecordingStatus.Paused:
-                        _recorder.ResumeRecording();
-
-                        pauseButton.RemoveFromClassList("selected");
-                        _timeCodeContainer.style.backgroundColor = RecordingColor;
-                        break;
-                }
-            };
-        }
-
-        private void InitializeRecordingConfig(VisualElement root)
-        {
-            _outputFilePathLabel = root.Q<Label>("outputFileName");
-            _outputWarningIcon = root.Q<Image>("outputWarningIcon");
-
-            // 出力ファイル名の設定
-            _outputFileNameField = root.Q<TextField>("outputFileNameField");
-            _outputFileNameField.value = _recorder.Config.FileName;
-            _outputFileNameField.RegisterValueChangedCallback(evt =>
-            {
-                var fileName = evt.newValue;
-                _recorder.Config.FileName = fileName;
-                UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputFileName"), fileName);
-            });
-
-            // 出力ディレクトリの設定
-            _outputDirectoryField = root.Q<TextField>("outputDirectoryField");
-            _outputDirectoryField.value = _recorder.Config.Directory;
-            _outputDirectoryField.RegisterValueChangedCallback(evt =>
-            {
-                var directory = evt.newValue;
-                _recorder.Config.Directory = directory;
-                UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), directory);
-            });
-            _selectDirectoryButton = root.Q<Button>("selectFolderButton");
-            _selectDirectoryButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("Folder Icon").image
-                }
-            );
-            _selectDirectoryButton.clicked += () =>
-            {
-                var selectedDirectory =
-                    EditorUtility.OpenFolderPanel(title: "Output Folder",
-                        folder: _recorder.Config.Directory,
-                        defaultName: "");
-
-                if (string.IsNullOrEmpty(selectedDirectory)) return;
-
-                _recorder.Config.Directory = selectedDirectory;
-                _outputDirectoryField.value = selectedDirectory;
-                UpdateOutputFilePath();
-                EditorUserSettings.SetConfigValue(EditorSettingKey("OutputDirectory"), selectedDirectory);
-            };
-
-
-            var outputWarningIcon = root.Q<Image>("outputWarningIcon");
-            outputWarningIcon.image = EditorGUIUtility.IconContent("Warning@2x").image;
-            var openOutputFolderButton = root.Q<Button>("openOutputFolderButton");
-            openOutputFolderButton.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("FolderOpened Icon").image
-                }
-            );
-            openOutputFolderButton.clicked += () =>
-            {
-                Process.Start(_recorder.Config.Directory);
-            };
-
-            _errorMessageArea = root.Q<VisualElement>("errorMessageArea");
-            _errorMessageArea.Add(new Image()
-                {
-                    image = EditorGUIUtility.IconContent("console.erroricon@2x").image
-                }
-            );
-            _errorMessageLabel = new Label();
-            _errorMessageArea.Add(_errorMessageLabel);
-
-            UpdateOutputFilePath();
-        }
-
-        private void UpdateOutputFilePath()
-        {
-            var path = _recorder.Config.OutputPath;
-            _outputFilePathLabel.text = path;
-            _outputWarningIcon.style.display = System.IO.File.Exists(path) ? DisplayStyle.Flex : DisplayStyle.None;
-            UpdateErrorMessage();
-        }
-
-        private void UpdateErrorMessage()
-        {
-            var errors = _recorder.Config.ValidateErrors();
-            if (errors.Count > 0)
-            {
-                _errorMessageLabel.text = string.Join("\n", errors);
-                _errorMessageArea.style.visibility = Visibility.Visible;
             }
             else
             {
-                _errorMessageArea.style.visibility = Visibility.Hidden;
+                EditorGUILayout.LabelField("No recorder selected");
             }
         }
 
-        private void SetEnabledTextField(bool enabled)
+        private void ShowRecorderContextMenu()
         {
-            _outputFileNameField.SetEnabled(enabled);
-            _outputDirectoryField.SetEnabled(enabled);
-            _selectDirectoryButton.SetEnabled(enabled);
+            var menu = new GenericMenu();
+            var isDisabled = DisableEditRecordSettings();
+
+            foreach (var type in _cachedRecorderTypes)
+            {
+                var context = new GUIContent(type.Name);
+                if (isDisabled)
+                {
+                    menu.AddDisabledItem(context);
+                }
+                else
+                {
+                    menu.AddItem(context, false, _ => OnAddNewRecorder(type), type);
+                }
+            }
+
+            menu.ShowAsContext();
+        }
+
+        private void OnRecorderContextMenu(RecorderItem recorder)
+        {
+            var menu = new GenericMenu();
+
+            if (DisableEditRecordSettings())
+            {
+                menu.AddDisabledItem(Contents.DuplicateLabel);
+                menu.AddDisabledItem(Contents.DeleteLabel);
+            }
+            else
+            {
+                menu.AddItem(Contents.DuplicateLabel, false,
+                    data =>
+                    {
+                        DuplicateRecorder((RecorderItem) data);
+                    }, recorder);
+
+                menu.AddItem(Contents.DeleteLabel, false,
+                    data =>
+                    {
+                        DeleteRecorder((RecorderItem) data);
+                    }, recorder);
+            }
+
+            menu.ShowAsContext();
+        }
+
+        private RecorderItem CreateRecorderItem(RecorderSettings recorderSettings)
+        {
+            var recorderItem = new RecorderItem(_controller.ControllerSettings, recorderSettings);
+            recorderItem.OnEnableStateChanged += enabled =>
+            {
+                if (enabled)
+                {
+                    _recorderList.Selection = recorderItem;
+                }
+            };
+
+            return recorderItem;
+        }
+
+        private void OnRecorderSelectionChanged()
+        {
+            _selectedRecorderItem = _recorderList.Selection;
+            foreach (var item in _recorderList.Items)
+            {
+                item.SetItemSelected(_selectedRecorderItem == item);
+            }
+
+            Repaint();
+        }
+
+        private void AddRecorder(RecorderSettings recorder, string recorderName, bool enabled)
+        {
+            recorder.name = UniqueRecorderName(recorderName);
+            recorder.Enabled = enabled;
+            _controller.ControllerSettings.AddRecorderSettings(recorder);
+
+            var item = CreateRecorderItem(recorder);
+            _recorderList.Add(item);
+            _recorderList.Selection = item;
+            _recorderList.Focus();
+        }
+
+        private void DuplicateRecorder(RecorderItem item)
+        {
+            var sourceSettings = item.Settings;
+            var duplicatedSettings = Instantiate(sourceSettings);
+            AddRecorder(duplicatedSettings, sourceSettings.name, sourceSettings.Enabled);
+        }
+
+        private void DeleteRecorder(RecorderItem item)
+        {
+            var settings = item.Settings;
+            _controller.ControllerSettings.RemoveRecorderSettings(settings);
+            _recorderList.Remove(item);
+        }
+
+        private void OnAddNewRecorder(Type type)
+        {
+            var recorder = (RecorderSettings) CreateInstance(type);
+            AddRecorder(recorder, ObjectNames.NicifyVariableName(recorder.DefaultName), true);
+        }
+
+        private string UniqueRecorderName(string recorderName)
+        {
+            var existingNames = _controller.ControllerSettings.RecorderSettings.Select(settings => settings.name).ToArray();
+            return ObjectNames.GetUniqueName(existingNames, recorderName);
+        }
+
+        private void OnPlayButtonClicked()
+        {
+            if (_controller == null)
+                return;
+
+            switch (_controller.Status)
+            {
+                case RecordingStatus.Recording:
+                    _controller.PauseRecording();
+                    break;
+                case RecordingStatus.Paused:
+                    _controller.ResumeRecording();
+                    break;
+                case RecordingStatus.None:
+                    _controller.StartRecording();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void OnStopButtonClicked()
+        {
+            if (_controller == null)
+                return;
+
+            if (_controller.Status != RecordingStatus.None)
+                _controller.StopRecording();
+        }
+
+        private void OnStartRecording()
+        {
+            _timeCode.ClearClassList();
+            _timeCode.AddToClassList("recording");
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PauseButton;
+            _playButton.tooltip = Contents.PauseButtonTooltip;
+            _stopButton.SetEnabled(true);
+            SetSettingPanelEnabled(false);
+            _recorderList.Items.ForEach(x => x.SetReadOnly(true));
+        }
+
+        private void OnPauseRecording()
+        {
+            _timeCode.ClearClassList();
+            _timeCode.AddToClassList("paused");
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
+            _stopButton.SetEnabled(true);
+        }
+
+        private void OnFinishRecording()
+        {
+            _timeCode.ClearClassList();
+            _playButton.style.backgroundImage = (StyleBackground) IconHelper.PlayButton;
+            _playButton.tooltip = Contents.PlayButtonTooltip;
+            _stopButton.SetEnabled(false);
+            _timeCode.text = TimeCodeText(_controller.GetRecordingTime());
+            SetSettingPanelEnabled(true);
+            _recorderList.Items.ForEach(x => x.SetReadOnly(false));
+        }
+
+        private void SetRecordButtonEnabled(bool enabled, string tooltip = null)
+        {
+            _playButton.SetEnabled(enabled);
+            _playButton.tooltip = tooltip;
+        }
+
+        private void SetSettingPanelEnabled(bool enabled)
+        {
+            _addNewRecordPanel.SetEnabled(enabled);
+            _recorderSettingsPanel.SetEnabled(enabled);
+        }
+
+        private static void ShowMessageInStatusBar(string msg, MessageType messageType)
+        {
+            var rect = EditorGUILayout.GetControlRect();
+
+            if (messageType != MessageType.None)
+            {
+                var iconRect = rect;
+                iconRect.width = iconRect.height;
+
+                var icon = messageType switch
+                {
+                    MessageType.Error => IconHelper.ErrorIcon,
+                    MessageType.Warning => IconHelper.WarningIcon,
+                    MessageType.Info => IconHelper.InfoIcon,
+                    _ => null
+                };
+
+                GUI.DrawTexture(iconRect, icon);
+                rect.xMin = iconRect.xMax + 5.0f;
+            }
+
+            GUI.Label(rect, msg);
+        }
+
+        private static string TimeCodeText(long time)
+        {
+            var hours = time / 3600000;
+            var minutes = time / 60000;
+            var seconds = time / 1000 % 60;
+            var milliseconds = time % 1000;
+            return $"{MspaceText(hours)}:{MspaceText(minutes)}:{MspaceText(seconds)}:{MspaceText(milliseconds, 3)}";
+        }
+
+        private static string MspaceText(long value, int padding = 2, int mspace = 36)
+        {
+            var text = value.ToString().PadLeft(padding, '0');
+            return $"<mspace={mspace}px>{text}</mspace>";
         }
     }
 }

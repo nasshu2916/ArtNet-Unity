@@ -1,0 +1,67 @@
+@import url("./CommonWindow.uss");
+
+/* Controller */
+
+#timeCode {
+    font-size: 56px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+
+    background-color: var(--unity-colors-default-background);
+}
+
+#timeCode.recording {
+    background-color: #802020;
+}
+
+#timeCode.paused {
+    background-color: #208020;
+}
+
+#controllerButton {
+    flex-direction: row;
+    justify-content: center;
+}
+
+#controllerButton > Button {
+    width: 54px;
+    height: 54px;
+    padding: 4px;
+    margin: 6px;
+}
+
+/* recorders panel */
+
+#recordersPanel {
+    border-right-width: 4px;
+}
+
+.RecorderListHeader {
+    border-bottom-width: 2px;
+}
+
+#recorderList {
+    flex-grow: 1;
+}
+
+RecorderItem {
+    margin-top : 4px;
+    padding: 5px;
+    border-width:1px;
+}
+
+.RecorderItemIcon {
+    width : 14px;
+    height : 14px;
+    margin: 2px 3px 3px 3px;
+}
+
+EditableLabel > Label {
+    margin-top: 1px;
+    overflow: hidden;
+}
+
+#recorderSettingsPanel {
+    padding: 6px 18px;
+    border-bottom-width: 0;
+}

@@ -1,0 +1,29 @@
+{
+    "name": "ArtNet.UnityEditor",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Recorder.Editor",
+        "ArtNet",
+        "ArtNet.Editor",
+        "ArtNet.Common"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "USE_UNITY_RECORDER"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.recorder",
+            "expression": "",
+            "define": "USE_UNITY_RECORDER"
+        }
+    ],
+    "noEngineReferences": false
+}

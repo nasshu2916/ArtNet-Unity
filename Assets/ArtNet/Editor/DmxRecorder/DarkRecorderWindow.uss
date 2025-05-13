@@ -1,0 +1,62 @@
+.Panel {
+    border-color: #292929;
+}
+
+/* recorders panel */
+
+#recordersPanel {
+    background-color: #404040;
+}
+
+.RecorderListHeader {
+    background-color: #2C2C2C;
+    border-color: #404040;
+}
+
+.RecorderListHeader:hover {
+    background-color: #4C4C4C;
+}
+
+#recorderList {
+    background-color: #2F2F2F;
+}
+
+RecorderItem {
+    background-color: #404040;
+    border-color: #2B2B2B;
+}
+
+RecorderItem:hover {
+    background-color: #4A4A4A;
+}
+
+RecorderItem.selected {
+    background-color: #555555;
+    border-color: #A2A2A2;
+}
+
+#recorderList:focus > * > RecorderItem.selected {
+    border-color: #4097C3;
+}
+
+RecorderItem.disabled {
+    background-color: #303030;
+}
+
+RecorderItem.disabled:hover {
+    background-color: #3A3A3A;
+}
+
+RecorderItem.disabled.selected {
+    background-color: #555555;
+}
+
+RecorderItem.selected > EditableLabel > * {
+    color: #FFFFFF;
+}
+
+/* footer */
+
+#footer {
+    background-color: #2F2F2F;
+}
