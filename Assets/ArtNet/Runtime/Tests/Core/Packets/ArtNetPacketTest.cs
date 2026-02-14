@@ -48,6 +48,21 @@ namespace ArtNet.Tests.Core.Packets
             var pollPacket = ArtNetPacket.FromByteArray<PollPacket>(bytes);
             Assert.IsNotNull(pollPacket);
             Assert.AreEqual(pollPacket.GetType(), typeof(PollPacket));
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, // "Art-Net\0"
+                0x00, 0x52, // OpCode(Sync)
+                0x00, 0x0E,
+                0x00, 0x00
+            };
+
+            dmxPacket = ArtNetPacket.FromByteArray<DmxPacket>(bytes);
+            Assert.IsNull(dmxPacket);
+
+            var syncPacket = ArtNetPacket.FromByteArray<SyncPacket>(bytes);
+            Assert.IsNotNull(syncPacket);
+            Assert.AreEqual(syncPacket.GetType(), typeof(SyncPacket));
         }
 
         private static IEnumerable<TestCaseData> InvalidBytesFromByteArrayTestCases
@@ -171,6 +186,18 @@ namespace ArtNet.Tests.Core.Packets
             Assert.IsNotNull(packet);
             Assert.AreEqual(packet.GetType(), typeof(PollPacket));
             Assert.AreEqual(packet.OpCode, Enums.OpCode.Poll);
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                0x00, 0x52,
+                0x00, 0x0E,
+                0x00, 0x00
+            };
+            packet = ArtNetPacket.Create(bytes);
+            Assert.IsNotNull(packet);
+            Assert.AreEqual(packet.GetType(), typeof(SyncPacket));
+            Assert.AreEqual(packet.OpCode, Enums.OpCode.Sync);
 
             bytes = new byte[]
             {

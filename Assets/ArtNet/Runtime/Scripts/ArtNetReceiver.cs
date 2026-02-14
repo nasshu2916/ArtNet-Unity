@@ -9,11 +9,6 @@ using UnityEngine.Events;
 namespace ArtNet
 {
     [Serializable]
-    internal class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
-    {
-    }
-
-    [Serializable]
     internal class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
     {
     }
@@ -23,14 +18,25 @@ namespace ArtNet
     {
     }
 
+    [Serializable]
+    internal class OnReceivedDmxEvent : UnityEvent<ReceivedData<DmxPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedSyncEvent : UnityEvent<ReceivedData<SyncPacket>>
+    {
+    }
+
     public class ArtNetReceiver : MonoBehaviour
     {
         public const int ArtNetPort = 6454;
 
         [SerializeField] private bool _autoStart = true;
-        [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
         [SerializeField] private OnReceivedPollEvent _onReceivedPollEvent;
         [SerializeField] private OnReceivedPollReplyEvent _onReceivedPollReplyEvent;
+        [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
+        [SerializeField] private OnReceivedSyncEvent _onReceivedSyncEvent;
 
         private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
@@ -67,6 +73,9 @@ namespace ArtNet
                     break;
                 case OpCode.PollReply:
                     _onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
+                    break;
+                case OpCode.Sync:
+                    _onReceivedSyncEvent?.Invoke(ReceivedData<SyncPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

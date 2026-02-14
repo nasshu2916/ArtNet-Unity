@@ -104,6 +104,7 @@ namespace ArtNet.Packets
                 OpCode.Poll => FromByteArray<PollPacket>(buffer, false),
                 OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer, false),
                 OpCode.Dmx => FromByteArray<DmxPacket>(buffer, false),
+                OpCode.Sync => FromByteArray<SyncPacket>(buffer, false),
                 _ => throw new ArgumentOutOfRangeException(nameof(opCode), opCode, "OpCode not supported")
             };
         }
