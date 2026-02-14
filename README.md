@@ -40,6 +40,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 - OpPoll
 - OpPollReply
 - OpDmx
+- OpSync
 
 ## Editor Extension
 ### ArtNetTester

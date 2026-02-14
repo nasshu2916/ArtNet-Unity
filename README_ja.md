@@ -37,6 +37,7 @@ https://github.com/nasshu2916/ArtNet-Unity.git?path=/Assets/ArtNet#master
 - OpPoll
 - OpPollReply
 - OpDmx
+- OpSync
 
 ## エディタ拡張
 
