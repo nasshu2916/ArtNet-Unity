@@ -113,6 +113,31 @@ namespace ArtNet.Tests.Core.Packets
             var todRequestPacket = ArtNetPacket.FromByteArray<TodRequestPacket>(bytes);
             Assert.IsNotNull(todRequestPacket);
             Assert.AreEqual(todRequestPacket.GetType(), typeof(TodRequestPacket));
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, // "Art-Net\0"
+                0x00, 0x81, // OpCode(TodData)
+                0x00, 0x0E, // Protocol Version
+                0x01, // RdmVersion
+                0x01, // Port
+                0x01, // BindIndex
+                0x00, // Net
+                0x00, // CommandResponse
+                0x01, // Address
+                0x00, // UidTotalHigh
+                0x01, // UidTotalLow
+                0x00, // BlockCount
+                0x01, // UidCount
+                0x7A, 0x70, 0x00, 0x00, 0x00, 0x01 // UID
+            };
+
+            dmxPacket = ArtNetPacket.FromByteArray<DmxPacket>(bytes);
+            Assert.IsNull(dmxPacket);
+
+            var todDataPacket = ArtNetPacket.FromByteArray<TodDataPacket>(bytes);
+            Assert.IsNotNull(todDataPacket);
+            Assert.AreEqual(todDataPacket.GetType(), typeof(TodDataPacket));
         }
 
         private static IEnumerable<TestCaseData> InvalidBytesFromByteArrayTestCases
@@ -288,6 +313,28 @@ namespace ArtNet.Tests.Core.Packets
             Assert.IsNotNull(packet);
             Assert.AreEqual(packet.GetType(), typeof(TodRequestPacket));
             Assert.AreEqual(packet.OpCode, Enums.OpCode.TodRequest);
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                0x00, 0x81,
+                0x00, 0x0E,
+                0x01,
+                0x01,
+                0x01,
+                0x00,
+                0x00,
+                0x01,
+                0x00,
+                0x01,
+                0x00,
+                0x01,
+                0x7A, 0x70, 0x00, 0x00, 0x00, 0x01
+            };
+            packet = ArtNetPacket.Create(bytes);
+            Assert.IsNotNull(packet);
+            Assert.AreEqual(packet.GetType(), typeof(TodDataPacket));
+            Assert.AreEqual(packet.OpCode, Enums.OpCode.TodData);
 
             bytes = new byte[]
             {

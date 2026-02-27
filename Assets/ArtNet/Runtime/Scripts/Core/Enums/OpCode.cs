@@ -8,6 +8,7 @@ namespace ArtNet.Enums
         Sync = 0x5200,
         Address = 0x6000,
         TodRequest = 0x8000,
+        TodData = 0x8100,
         TimeCode = 0x9700
     }
 }
