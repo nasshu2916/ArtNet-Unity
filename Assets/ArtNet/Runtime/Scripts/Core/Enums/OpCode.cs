@@ -6,6 +6,7 @@ namespace ArtNet.Enums
         PollReply = 0x2100,
         Dmx = 0x5000,
         Sync = 0x5200,
+        Address = 0x6000,
         TimeCode = 0x9700
     }
 }

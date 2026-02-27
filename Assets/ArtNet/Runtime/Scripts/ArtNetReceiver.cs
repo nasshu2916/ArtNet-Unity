@@ -33,6 +33,11 @@ namespace ArtNet
     {
     }
 
+    [Serializable]
+    internal class OnReceivedAddressEvent : UnityEvent<ReceivedData<AddressPacket>>
+    {
+    }
+
     public class ArtNetReceiver : MonoBehaviour
     {
         public const int ArtNetPort = 6454;
@@ -43,6 +48,7 @@ namespace ArtNet
         [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
         [SerializeField] private OnReceivedSyncEvent _onReceivedSyncEvent;
         [SerializeField] private OnReceivedTimeCodeEvent _onReceivedTimeCodeEvent;
+        [SerializeField] private OnReceivedAddressEvent _onReceivedAddressEvent;
 
         private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
@@ -85,6 +91,9 @@ namespace ArtNet
                     break;
                 case OpCode.TimeCode:
                     _onReceivedTimeCodeEvent?.Invoke(ReceivedData<TimeCodePacket>(packet, remoteEp));
+                    break;
+                case OpCode.Address:
+                    _onReceivedAddressEvent?.Invoke(ReceivedData<AddressPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
