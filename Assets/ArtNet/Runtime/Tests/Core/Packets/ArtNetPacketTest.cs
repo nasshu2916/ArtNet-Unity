@@ -98,6 +98,21 @@ namespace ArtNet.Tests.Core.Packets
             var addressPacket = ArtNetPacket.FromByteArray<AddressPacket>(bytes);
             Assert.IsNotNull(addressPacket);
             Assert.AreEqual(addressPacket.GetType(), typeof(AddressPacket));
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, // "Art-Net\0"
+                0x00, 0x80, // OpCode(TodRequest)
+                0x00, 0x0E, // Protocol Version
+            };
+            bytes = bytes.Concat(new byte[37]).ToArray();
+
+            dmxPacket = ArtNetPacket.FromByteArray<DmxPacket>(bytes);
+            Assert.IsNull(dmxPacket);
+
+            var todRequestPacket = ArtNetPacket.FromByteArray<TodRequestPacket>(bytes);
+            Assert.IsNotNull(todRequestPacket);
+            Assert.AreEqual(todRequestPacket.GetType(), typeof(TodRequestPacket));
         }
 
         private static IEnumerable<TestCaseData> InvalidBytesFromByteArrayTestCases
@@ -261,6 +276,18 @@ namespace ArtNet.Tests.Core.Packets
             Assert.IsNotNull(packet);
             Assert.AreEqual(packet.GetType(), typeof(AddressPacket));
             Assert.AreEqual(packet.OpCode, Enums.OpCode.Address);
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                0x00, 0x80,
+                0x00, 0x0E
+            };
+            bytes = bytes.Concat(new byte[37]).ToArray();
+            packet = ArtNetPacket.Create(bytes);
+            Assert.IsNotNull(packet);
+            Assert.AreEqual(packet.GetType(), typeof(TodRequestPacket));
+            Assert.AreEqual(packet.OpCode, Enums.OpCode.TodRequest);
 
             bytes = new byte[]
             {
