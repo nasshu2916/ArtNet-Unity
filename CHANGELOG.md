@@ -1,5 +1,12 @@
 # ArtNet-Unity ChangeLog
 
+## Unreleased
+
+### Added
+
+- ArtTimeCode (OpTimeCode) パケットの受信・デシリアライズ・シリアライズ対応を追加
+- ArtSync(OpSync) パケットの受信・デシリアライズ・シリアライズ対応を追加
+
 ## v0.2.0
 
 ### Added

@@ -63,6 +63,25 @@ namespace ArtNet.Tests.Core.Packets
             var syncPacket = ArtNetPacket.FromByteArray<SyncPacket>(bytes);
             Assert.IsNotNull(syncPacket);
             Assert.AreEqual(syncPacket.GetType(), typeof(SyncPacket));
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, // "Art-Net\0"
+                0x00, 0x97, // OpCode(TimeCode)
+                0x00, 0x0E, // Protocol Version
+                0x18, // Frames
+                0x38, // Seconds
+                0x2A, // Minutes
+                0x0D, // Hours
+                0x01 // Type
+            };
+
+            dmxPacket = ArtNetPacket.FromByteArray<DmxPacket>(bytes);
+            Assert.IsNull(dmxPacket);
+
+            var timeCodePacket = ArtNetPacket.FromByteArray<TimeCodePacket>(bytes);
+            Assert.IsNotNull(timeCodePacket);
+            Assert.AreEqual(timeCodePacket.GetType(), typeof(TimeCodePacket));
         }
 
         private static IEnumerable<TestCaseData> InvalidBytesFromByteArrayTestCases
@@ -198,6 +217,22 @@ namespace ArtNet.Tests.Core.Packets
             Assert.IsNotNull(packet);
             Assert.AreEqual(packet.GetType(), typeof(SyncPacket));
             Assert.AreEqual(packet.OpCode, Enums.OpCode.Sync);
+
+            bytes = new byte[]
+            {
+                0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00,
+                0x00, 0x97,
+                0x00, 0x0E,
+                0x18,
+                0x38,
+                0x2A,
+                0x0D,
+                0x01
+            };
+            packet = ArtNetPacket.Create(bytes);
+            Assert.IsNotNull(packet);
+            Assert.AreEqual(packet.GetType(), typeof(TimeCodePacket));
+            Assert.AreEqual(packet.OpCode, Enums.OpCode.TimeCode);
 
             bytes = new byte[]
             {
