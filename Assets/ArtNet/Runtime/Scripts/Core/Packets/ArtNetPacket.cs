@@ -108,6 +108,7 @@ namespace ArtNet.Packets
                 OpCode.Address => FromByteArray<AddressPacket>(buffer, false),
                 OpCode.TodRequest => FromByteArray<TodRequestPacket>(buffer, false),
                 OpCode.TodData => FromByteArray<TodDataPacket>(buffer, false),
+                OpCode.TodControl => FromByteArray<TodControlPacket>(buffer, false),
                 OpCode.TimeCode => FromByteArray<TimeCodePacket>(buffer, false),
                 _ => throw new ArgumentOutOfRangeException(nameof(opCode), opCode, "OpCode not supported")
             };

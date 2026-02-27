@@ -48,6 +48,11 @@ namespace ArtNet
     {
     }
 
+    [Serializable]
+    internal class OnReceivedTodControlEvent : UnityEvent<ReceivedData<TodControlPacket>>
+    {
+    }
+
     public class ArtNetReceiver : MonoBehaviour
     {
         public const int ArtNetPort = 6454;
@@ -61,6 +66,7 @@ namespace ArtNet
         [SerializeField] private OnReceivedAddressEvent _onReceivedAddressEvent;
         [SerializeField] private OnReceivedTodRequestEvent _onReceivedTodRequestEvent;
         [SerializeField] private OnReceivedTodDataEvent _onReceivedTodDataEvent;
+        [SerializeField] private OnReceivedTodControlEvent _onReceivedTodControlEvent;
 
         private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
@@ -112,6 +118,9 @@ namespace ArtNet
                     break;
                 case OpCode.TodData:
                     _onReceivedTodDataEvent?.Invoke(ReceivedData<TodDataPacket>(packet, remoteEp));
+                    break;
+                case OpCode.TodControl:
+                    _onReceivedTodControlEvent?.Invoke(ReceivedData<TodControlPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
