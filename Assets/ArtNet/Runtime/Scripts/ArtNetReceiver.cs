@@ -94,23 +94,30 @@ namespace ArtNet
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
         {
-            var packet = ArtNetPacket.Create(receiveBuffer);
-            if (packet == null) return;
+            var buffer = receiveBuffer.AsSpan(0, length);
+            if (!ArtNetPacket.TryGetOpCode(buffer, out var opCode)) return;
             LastReceivedAt = DateTime.Now;
 
-            switch (packet.OpCode)
+            switch (opCode)
             {
                 case OpCode.Dmx:
-                    _onReceivedDmxEvent?.Invoke(ReceivedData<DmxPacket>(packet, remoteEp));
+                    if (!DmxPacket.TryParse(buffer, out var dmxPacket)) return;
+                    _onReceivedDmxEvent?.Invoke(new ReceivedData<DmxPacket>(dmxPacket, remoteEp));
                     break;
                 case OpCode.Poll:
-                    _onReceivedPollEvent.Invoke(ReceivedData<PollPacket>(packet, remoteEp));
+                    var pollPacket = ArtNetPacket.FromByteArray<PollPacket>(buffer, false);
+                    if (pollPacket == null) return;
+                    _onReceivedPollEvent.Invoke(new ReceivedData<PollPacket>(pollPacket, remoteEp));
                     break;
                 case OpCode.PollReply:
-                    _onReceivedPollReplyEvent.Invoke(ReceivedData<PollReplyPacket>(packet, remoteEp));
+                    var pollReplyPacket = ArtNetPacket.FromByteArray<PollReplyPacket>(buffer, false);
+                    if (pollReplyPacket == null) return;
+                    _onReceivedPollReplyEvent.Invoke(new ReceivedData<PollReplyPacket>(pollReplyPacket, remoteEp));
                     break;
                 case OpCode.Sync:
-                    _onReceivedSyncEvent?.Invoke(ReceivedData<SyncPacket>(packet, remoteEp));
+                    var syncPacket = ArtNetPacket.FromByteArray<SyncPacket>(buffer, false);
+                    if (syncPacket == null) return;
+                    _onReceivedSyncEvent?.Invoke(new ReceivedData<SyncPacket>(syncPacket, remoteEp));
                     break;
                 case OpCode.TimeCode:
                     _onReceivedTimeCodeEvent?.Invoke(ReceivedData<TimeCodePacket>(packet, remoteEp));
@@ -133,12 +140,6 @@ namespace ArtNet
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        private static ReceivedData<TPacket> ReceivedData<TPacket>(ArtNetPacket netPacket, EndPoint endPoint)
-            where TPacket : ArtNetPacket
-        {
-            return new ReceivedData<TPacket>(netPacket as TPacket, endPoint);
         }
     }
 }
