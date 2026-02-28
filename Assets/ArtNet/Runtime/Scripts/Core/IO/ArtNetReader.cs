@@ -45,6 +45,12 @@ namespace ArtNet.IO
             return value;
         }
 
+        internal void ReadBytesTo(byte[] destination, int length)
+        {
+            _data.Slice(_position, length).CopyTo(destination);
+            _position += length;
+        }
+
         internal string ReadString(int length)
         {
             var value = Encoding.ASCII.GetString(_data.Slice(_position, length));
