@@ -9,6 +9,7 @@ namespace ArtNet
 {
     public class DmxManager : MonoBehaviour
     {
+        [SerializeField] private ArtNetReceiver _artNetReceiver;
         private readonly Queue<ushort> _updatedUniverses = new();
         private readonly HashSet<ushort> _queuedUniverses = new();
         private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
@@ -39,6 +40,13 @@ namespace ArtNet
         public void OnEnable()
         {
             DmxDevices = FindDmxDevices();
+            if (_artNetReceiver == null) _artNetReceiver = FindObjectOfType<ArtNetReceiver>();
+            if (_artNetReceiver != null) _artNetReceiver.OnReceivedDmx += ReceivedDmxPacket;
+        }
+
+        public void OnDisable()
+        {
+            if (_artNetReceiver != null) _artNetReceiver.OnReceivedDmx -= ReceivedDmxPacket;
         }
 
         private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
