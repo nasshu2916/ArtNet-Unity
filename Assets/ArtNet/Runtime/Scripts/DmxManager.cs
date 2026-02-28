@@ -10,6 +10,7 @@ namespace ArtNet
     public class DmxManager : MonoBehaviour
     {
         private readonly Queue<ushort> _updatedUniverses = new();
+        private readonly HashSet<ushort> _queuedUniverses = new();
         private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
 
@@ -20,6 +21,7 @@ namespace ArtNet
                 while (0 < _updatedUniverses.Count)
                 {
                     var universe = _updatedUniverses.Dequeue();
+                    _queuedUniverses.Remove(universe);
                     var dmx = DmxDictionary[universe];
                     DmxDevices.TryGetValue(universe, out var devices);
                     if (devices == null) continue;
@@ -65,7 +67,7 @@ namespace ArtNet
             Buffer.BlockCopy(packet.Dmx, 0, targetBuffer, 0, copyLength);
             lock (_updatedUniverses)
             {
-                if (_updatedUniverses.Contains(universe)) return;
+                if (!_queuedUniverses.Add(universe)) return;
                 _updatedUniverses.Enqueue(universe);
             }
         }
