@@ -105,6 +105,12 @@ namespace ArtNet.Packets
                 OpCode.PollReply => FromByteArray<PollReplyPacket>(buffer, false),
                 OpCode.Dmx => FromByteArray<DmxPacket>(buffer, false),
                 OpCode.Sync => FromByteArray<SyncPacket>(buffer, false),
+                OpCode.Address => FromByteArray<AddressPacket>(buffer, false),
+                OpCode.TodRequest => FromByteArray<TodRequestPacket>(buffer, false),
+                OpCode.TodData => FromByteArray<TodDataPacket>(buffer, false),
+                OpCode.TodControl => FromByteArray<TodControlPacket>(buffer, false),
+                OpCode.Rdm => FromByteArray<RdmPacket>(buffer, false),
+                OpCode.TimeCode => FromByteArray<TimeCodePacket>(buffer, false),
                 _ => throw new ArgumentOutOfRangeException(nameof(opCode), opCode, "OpCode not supported")
             };
         }

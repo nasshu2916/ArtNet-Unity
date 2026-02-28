@@ -28,6 +28,36 @@ namespace ArtNet
     {
     }
 
+    [Serializable]
+    internal class OnReceivedTimeCodeEvent : UnityEvent<ReceivedData<TimeCodePacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedAddressEvent : UnityEvent<ReceivedData<AddressPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedTodRequestEvent : UnityEvent<ReceivedData<TodRequestPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedTodDataEvent : UnityEvent<ReceivedData<TodDataPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedTodControlEvent : UnityEvent<ReceivedData<TodControlPacket>>
+    {
+    }
+
+    [Serializable]
+    internal class OnReceivedRdmEvent : UnityEvent<ReceivedData<RdmPacket>>
+    {
+    }
+
     public class ArtNetReceiver : MonoBehaviour
     {
         public const int ArtNetPort = 6454;
@@ -37,6 +67,12 @@ namespace ArtNet
         [SerializeField] private OnReceivedPollReplyEvent _onReceivedPollReplyEvent;
         [SerializeField] private OnReceivedDmxEvent _onReceivedDmxEvent;
         [SerializeField] private OnReceivedSyncEvent _onReceivedSyncEvent;
+        [SerializeField] private OnReceivedTimeCodeEvent _onReceivedTimeCodeEvent;
+        [SerializeField] private OnReceivedAddressEvent _onReceivedAddressEvent;
+        [SerializeField] private OnReceivedTodRequestEvent _onReceivedTodRequestEvent;
+        [SerializeField] private OnReceivedTodDataEvent _onReceivedTodDataEvent;
+        [SerializeField] private OnReceivedTodControlEvent _onReceivedTodControlEvent;
+        [SerializeField] private OnReceivedRdmEvent _onReceivedRdmEvent;
 
         private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
@@ -76,6 +112,24 @@ namespace ArtNet
                     break;
                 case OpCode.Sync:
                     _onReceivedSyncEvent?.Invoke(ReceivedData<SyncPacket>(packet, remoteEp));
+                    break;
+                case OpCode.TimeCode:
+                    _onReceivedTimeCodeEvent?.Invoke(ReceivedData<TimeCodePacket>(packet, remoteEp));
+                    break;
+                case OpCode.Address:
+                    _onReceivedAddressEvent?.Invoke(ReceivedData<AddressPacket>(packet, remoteEp));
+                    break;
+                case OpCode.TodRequest:
+                    _onReceivedTodRequestEvent?.Invoke(ReceivedData<TodRequestPacket>(packet, remoteEp));
+                    break;
+                case OpCode.TodData:
+                    _onReceivedTodDataEvent?.Invoke(ReceivedData<TodDataPacket>(packet, remoteEp));
+                    break;
+                case OpCode.TodControl:
+                    _onReceivedTodControlEvent?.Invoke(ReceivedData<TodControlPacket>(packet, remoteEp));
+                    break;
+                case OpCode.Rdm:
+                    _onReceivedRdmEvent?.Invoke(ReceivedData<RdmPacket>(packet, remoteEp));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
