@@ -10,7 +10,6 @@ namespace ArtNet
     public class DmxManager : MonoBehaviour
     {
         private readonly Queue<ushort> _updatedUniverses = new();
-        private readonly Dictionary<IDmxDevice, byte[]> _deviceDmxBufferCache = new();
         private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
 
@@ -26,10 +25,10 @@ namespace ArtNet
                     if (devices == null) continue;
                     foreach (var device in devices)
                     {
-                        // 毎フレームの配列生成を避け、デバイスごとに再利用して GC を抑える
-                        var deviceDmx = GetOrCreateDeviceDmxBuffer(device);
-                        Buffer.BlockCopy(dmx, device.StartAddress, deviceDmx, 0, device.ChannelNumber);
-                        device.DmxUpdate(deviceDmx);
+                        var startAddress = (int) device.StartAddress;
+                        var channelCount = (int) device.ChannelNumber;
+                        if (dmx.Length < startAddress + channelCount) continue;
+                        device.DmxUpdate(dmx.AsSpan(startAddress, channelCount));
                     }
                 }
             }
@@ -38,7 +37,6 @@ namespace ArtNet
         public void OnEnable()
         {
             DmxDevices = FindDmxDevices();
-            _deviceDmxBufferCache.Clear();
         }
 
         private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
@@ -72,19 +70,5 @@ namespace ArtNet
             }
         }
 
-        private byte[] GetOrCreateDeviceDmxBuffer(IDmxDevice device)
-        {
-            if (_deviceDmxBufferCache.TryGetValue(device, out var buffer))
-            {
-                // デバイスのチャンネル数が変わった場合は新しいバッファを作る
-                if (buffer != null && buffer.Length == device.ChannelNumber) return buffer;
-                buffer = new byte[device.ChannelNumber];
-                _deviceDmxBufferCache[device] = buffer;
-                return buffer;
-            }
-            var newBuffer = new byte[device.ChannelNumber];
-            _deviceDmxBufferCache[device] = newBuffer;
-            return newBuffer;
-        }
     }
 }
