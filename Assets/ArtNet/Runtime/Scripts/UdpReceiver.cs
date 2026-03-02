@@ -9,12 +9,15 @@ namespace ArtNet
 {
     public sealed class UdpReceiver
     {
+        public const int DefaultReceiveBufferSizeKB = 128; // 128 KB
+
         private Socket _socket;
         private CancellationTokenSource _cancellationTokenSource;
         private Task _task;
         private byte[] _receiveBuffer = new byte[1500];
 
         public int Port { get; }
+        public int ReceiveBufferSizeBytes { get; set; } = DefaultReceiveBufferSizeKB * 1024;
         public bool IsRunning => _task is { IsCanceled: false, IsCompleted: false };
 
         public ReceivedPacketEventHandler OnReceivedPacket = (_, _, _) => { };
@@ -45,6 +48,7 @@ namespace ArtNet
             {
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _socket.ReceiveBufferSize = Math.Max(1024, ReceiveBufferSizeBytes);
                 _socket.Bind(new IPEndPoint(IPAddress.Any, Port));
 
                 _cancellationTokenSource = new CancellationTokenSource();
