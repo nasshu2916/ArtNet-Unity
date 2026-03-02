@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using ArtNet.Common;
 using ArtNet.Enums;
 using ArtNet.IO;
 
@@ -95,9 +94,7 @@ namespace ArtNet.Packets
         /// <returns>An instance of the packet or null if the packet is not valid.</returns>
         public static ArtNetPacket Create(ReadOnlySpan<byte> buffer)
         {
-            var opCode = ArtNetOpCode(buffer);
-            if (opCode == null) return null;
-            if (Enum.IsDefined(typeof(OpCode), opCode) == false) return null;
+            if (!TryGetOpCode(buffer, out var opCode)) return null;
 
             return opCode switch
             {
@@ -113,6 +110,35 @@ namespace ArtNet.Packets
                 OpCode.TimeCode => FromByteArray<TimeCodePacket>(buffer, false),
                 _ => throw new ArgumentOutOfRangeException(nameof(opCode), opCode, "OpCode not supported")
             };
+        }
+
+        public static bool TryGetOpCode(ReadOnlySpan<byte> buffer, out OpCode opCode)
+        {
+            var parsedOpCode = ArtNetOpCode(buffer);
+            if (parsedOpCode == null)
+            {
+                opCode = default;
+                return false;
+            }
+
+            switch (parsedOpCode.Value)
+            {
+                case OpCode.Poll:
+                case OpCode.PollReply:
+                case OpCode.Dmx:
+                case OpCode.Sync:
+                case OpCode.Address:
+                case OpCode.TodRequest:
+                case OpCode.TodData:
+                case OpCode.TodControl:
+                case OpCode.Rdm:
+                case OpCode.TimeCode:
+                    opCode = parsedOpCode.Value;
+                    return true;
+                default:
+                    opCode = default;
+                    return false;
+            }
         }
 
         /// <summary>

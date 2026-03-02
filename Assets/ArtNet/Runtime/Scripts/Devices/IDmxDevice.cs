@@ -1,3 +1,5 @@
+using System;
+
 namespace ArtNet.Devices
 {
     public interface IDmxDevice
@@ -5,6 +7,6 @@ namespace ArtNet.Devices
         byte ChannelNumber { get; }
         ushort Universe { get; }
         ushort StartAddress { get; }
-        void DmxUpdate(byte[] dmx);
+        void DmxUpdate(ReadOnlySpan<byte> dmx);
     }
 }

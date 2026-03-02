@@ -9,7 +9,9 @@ namespace ArtNet
 {
     public class DmxManager : MonoBehaviour
     {
+        [SerializeField] private ArtNetReceiver _artNetReceiver;
         private readonly Queue<ushort> _updatedUniverses = new();
+        private readonly HashSet<ushort> _queuedUniverses = new();
         private Dictionary<ushort, byte[]> DmxDictionary { get; } = new();
         public Dictionary<ushort, IEnumerable<IDmxDevice>> DmxDevices { get; private set; }
 
@@ -20,14 +22,16 @@ namespace ArtNet
                 while (0 < _updatedUniverses.Count)
                 {
                     var universe = _updatedUniverses.Dequeue();
+                    _queuedUniverses.Remove(universe);
                     var dmx = DmxDictionary[universe];
                     DmxDevices.TryGetValue(universe, out var devices);
                     if (devices == null) continue;
                     foreach (var device in devices)
                     {
-                        var deviceDmx = new byte[device.ChannelNumber];
-                        Buffer.BlockCopy(dmx, device.StartAddress, deviceDmx, 0, device.ChannelNumber);
-                        device.DmxUpdate(deviceDmx);
+                        var startAddress = (int) device.StartAddress;
+                        var channelCount = (int) device.ChannelNumber;
+                        if (dmx.Length < startAddress + channelCount) continue;
+                        device.DmxUpdate(dmx.AsSpan(startAddress, channelCount));
                     }
                 }
             }
@@ -36,6 +40,13 @@ namespace ArtNet
         public void OnEnable()
         {
             DmxDevices = FindDmxDevices();
+            if (_artNetReceiver == null) _artNetReceiver = FindObjectOfType<ArtNetReceiver>();
+            if (_artNetReceiver != null) _artNetReceiver.OnReceivedDmx += ReceivedDmxPacket;
+        }
+
+        public void OnDisable()
+        {
+            if (_artNetReceiver != null) _artNetReceiver.OnReceivedDmx -= ReceivedDmxPacket;
         }
 
         private static Dictionary<ushort, IEnumerable<IDmxDevice>> FindDmxDevices()
@@ -58,13 +69,16 @@ namespace ArtNet
         {
             var packet = receivedData.Packet;
             var universe = packet.Universe;
-            if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, packet.Dmx);
-            Buffer.BlockCopy(packet.Dmx, 0, DmxDictionary[universe], 0, 512);
+            if (!DmxDictionary.ContainsKey(universe)) DmxDictionary.Add(universe, new byte[512]);
+            var targetBuffer = DmxDictionary[universe];
+            var copyLength = Math.Min((int) packet.Length, targetBuffer.Length);
+            packet.DmxSpan[..copyLength].CopyTo(targetBuffer);
             lock (_updatedUniverses)
             {
-                if (_updatedUniverses.Contains(universe)) return;
+                if (!_queuedUniverses.Add(universe)) return;
                 _updatedUniverses.Enqueue(universe);
             }
         }
+
     }
 }

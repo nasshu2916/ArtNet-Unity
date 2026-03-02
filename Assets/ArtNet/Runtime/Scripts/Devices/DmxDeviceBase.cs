@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using ArtNet.Common;
 using UnityEngine;
 
@@ -27,7 +26,7 @@ namespace ArtNet.Devices
         }
 
 
-        public void DmxUpdate(byte[] dmx)
+        public void DmxUpdate(ReadOnlySpan<byte> dmx)
         {
             if (dmx.Length < ChannelNumber)
             {
@@ -35,8 +34,8 @@ namespace ArtNet.Devices
                 return;
             }
 
-            if (dmx.SequenceEqual(DmxData)) return;
-            Buffer.BlockCopy(dmx, 0, DmxData, 0, ChannelNumber);
+            if (dmx.SequenceEqual(DmxData.AsSpan(0, ChannelNumber))) return;
+            dmx[..ChannelNumber].CopyTo(DmxData);
 
             UpdateProperties();
         }
