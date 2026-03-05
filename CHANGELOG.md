@@ -11,6 +11,9 @@
 - ArtTodData (OpTodData) パケットの受信・デシリアライズ・シリアライズ対応を追加
 - ArtTodControl (OpTodControl) パケットの受信・デシリアライズ・シリアライズ対応を追加
 - ArtRdm (OpRdm) パケットの受信・デシリアライズ・シリアライズ対応を追加
+- `ArtNetReceiver` に受信処理モード選択機能を追加（`PacketProcessingMode`）
+  - MainThread: `ConcurrentQueue` + `Update()` でメインスレッド処理（デフォルト）
+  - BackgroundThread: 受信スレッドで直接処理（低レイテンシ）
 
 ## v0.2.0
 

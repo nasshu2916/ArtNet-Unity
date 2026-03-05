@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Net;
 using ArtNet.Enums;
 using ArtNet.Packets;
@@ -7,6 +8,25 @@ using UnityEngine.Events;
 
 namespace ArtNet
 {
+    /// <summary>
+    /// Controls how received packets are processed.
+    /// </summary>
+    public enum PacketProcessingMode
+    {
+        /// <summary>
+        /// Packets are queued and processed on the main thread in Update().
+        /// Thread-safe. UnityEvent invocations are guaranteed to run on the main thread.
+        /// </summary>
+        MainThread = 0,
+
+        /// <summary>
+        /// Packets are processed immediately on the UDP receive thread.
+        /// Lower latency, but event handlers must be thread-safe.
+        /// UnityEvent invocations will occur on a background thread.
+        /// </summary>
+        BackgroundThread = 1,
+    }
+
     [Serializable]
     internal class OnReceivedPollEvent : UnityEvent<ReceivedData<PollPacket>>
     {
@@ -65,6 +85,7 @@ namespace ArtNet
 
         [SerializeField] private bool _autoStart = true;
         [SerializeField, Min(MinimumReceiveBufferSizeKb)] private int _receiveBufferSizeKb = DefaultReceiveBufferSizeKb;
+        [SerializeField] private PacketProcessingMode _processingMode = PacketProcessingMode.MainThread;
         [SerializeField] private bool _invokeUnityEventWhenCSharpEventSubscribed;
         [SerializeField] private OnReceivedPollEvent _onReceivedPollEvent;
         [SerializeField] private OnReceivedPollReplyEvent _onReceivedPollReplyEvent;
@@ -76,6 +97,8 @@ namespace ArtNet
         [SerializeField] private OnReceivedTodDataEvent _onReceivedTodDataEvent;
         [SerializeField] private OnReceivedTodControlEvent _onReceivedTodControlEvent;
         [SerializeField] private OnReceivedRdmEvent _onReceivedRdmEvent;
+
+        private readonly ConcurrentQueue<RawPacket> _packetQueue = new();
 
         private UdpReceiver UdpReceiver { get; } = new(ArtNetPort);
         public DateTime LastReceivedAt { get; private set; }
@@ -91,10 +114,20 @@ namespace ArtNet
         public event Action<ReceivedData<TodControlPacket>> OnReceivedTodControl;
         public event Action<ReceivedData<RdmPacket>> OnReceivedRdm;
 
+        public PacketProcessingMode ProcessingMode
+        {
+            get => _processingMode;
+            set
+            {
+                _processingMode = value;
+                ApplyProcessingMode();
+            }
+        }
+
         private void Awake()
         {
             ApplyReceiveBufferSize();
-            UdpReceiver.OnReceivedPacket = OnReceivedPacket;
+            ApplyProcessingMode();
         }
 
         private void OnEnable()
@@ -113,14 +146,46 @@ namespace ArtNet
             ApplyReceiveBufferSize();
         }
 
+        private void Update()
+        {
+            if (_processingMode != PacketProcessingMode.MainThread) return;
+
+            while (_packetQueue.TryDequeue(out var rawPacket))
+            {
+                ProcessPacket(rawPacket.Data, rawPacket.Length, rawPacket.RemoteEndPoint);
+            }
+        }
+
         private void ApplyReceiveBufferSize()
         {
             UdpReceiver.ReceiveBufferSizeBytes = _receiveBufferSizeKb * 1024;
         }
 
-        private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
+        private void ApplyProcessingMode()
         {
-            var buffer = receiveBuffer.AsSpan(0, length);
+            UdpReceiver.OnReceivedPacket = _processingMode switch
+            {
+                PacketProcessingMode.MainThread => EnqueuePacket,
+                PacketProcessingMode.BackgroundThread => OnReceivedPacketDirect,
+                _ => throw new ArgumentOutOfRangeException(nameof(_processingMode), _processingMode, null),
+            };
+        }
+
+        private void EnqueuePacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
+        {
+            var copy = new byte[length];
+            Buffer.BlockCopy(receiveBuffer, 0, copy, 0, length);
+            _packetQueue.Enqueue(new RawPacket(copy, length, remoteEp));
+        }
+
+        private void OnReceivedPacketDirect(byte[] receiveBuffer, int length, EndPoint remoteEp)
+        {
+            ProcessPacket(receiveBuffer, length, remoteEp);
+        }
+
+        private void ProcessPacket(byte[] data, int length, EndPoint remoteEp)
+        {
+            var buffer = data.AsSpan(0, length);
             if (!ArtNetPacket.TryGetOpCode(buffer, out var opCode)) return;
             LastReceivedAt = DateTime.Now;
 
@@ -192,6 +257,23 @@ namespace ArtNet
             if (_invokeUnityEventWhenCSharpEventSubscribed || !hasCSharpHandler)
             {
                 unityHandler?.Invoke(receivedData);
+            }
+        }
+
+        /// <summary>
+        /// Holds a copy of raw UDP packet data for cross-thread transfer.
+        /// </summary>
+        private readonly struct RawPacket
+        {
+            public readonly byte[] Data;
+            public readonly int Length;
+            public readonly EndPoint RemoteEndPoint;
+
+            public RawPacket(byte[] data, int length, EndPoint remoteEndPoint)
+            {
+                Data = data;
+                Length = length;
+                RemoteEndPoint = remoteEndPoint;
             }
         }
     }
