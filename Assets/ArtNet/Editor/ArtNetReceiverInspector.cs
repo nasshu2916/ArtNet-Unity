@@ -58,6 +58,14 @@ namespace ArtNet.Editor
             GUILayout.Label("Receive Settings", EditorStyles.boldLabel);
             var autoStart = serializedObject.FindProperty("_autoStart");
             if (autoStart != null) EditorGUILayout.PropertyField(autoStart, new GUIContent("Auto Start"));
+            var receiveBufferSizeKb = serializedObject.FindProperty("_receiveBufferSizeKb");
+            if (receiveBufferSizeKb != null)
+            {
+                EditorGUILayout.PropertyField(
+                    receiveBufferSizeKb,
+                    new GUIContent("Receive Buffer Size (KB)", "UDP socket receive buffer size in KB")
+                );
+            }
         }
 
         private void DrawHandlers()

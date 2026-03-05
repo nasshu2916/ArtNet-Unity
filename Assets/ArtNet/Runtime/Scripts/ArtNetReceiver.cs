@@ -60,8 +60,11 @@ namespace ArtNet
     public class ArtNetReceiver : MonoBehaviour
     {
         public const int ArtNetPort = 6454;
+        private const int MinimumReceiveBufferSizeKb = 1;
+        private const int DefaultReceiveBufferSizeKb = UdpReceiver.DefaultReceiveBufferSizeKB;
 
         [SerializeField] private bool _autoStart = true;
+        [SerializeField, Min(MinimumReceiveBufferSizeKb)] private int _receiveBufferSizeKb = DefaultReceiveBufferSizeKb;
         [SerializeField] private bool _invokeUnityEventWhenCSharpEventSubscribed;
         [SerializeField] private OnReceivedPollEvent _onReceivedPollEvent;
         [SerializeField] private OnReceivedPollReplyEvent _onReceivedPollReplyEvent;
@@ -90,6 +93,7 @@ namespace ArtNet
 
         private void Awake()
         {
+            ApplyReceiveBufferSize();
             UdpReceiver.OnReceivedPacket = OnReceivedPacket;
         }
 
@@ -101,6 +105,17 @@ namespace ArtNet
         private void OnDisable()
         {
             UdpReceiver.StopReceive();
+        }
+
+        private void OnValidate()
+        {
+            _receiveBufferSizeKb = Mathf.Max(MinimumReceiveBufferSizeKb, _receiveBufferSizeKb);
+            ApplyReceiveBufferSize();
+        }
+
+        private void ApplyReceiveBufferSize()
+        {
+            UdpReceiver.ReceiveBufferSizeBytes = _receiveBufferSizeKb * 1024;
         }
 
         private void OnReceivedPacket(byte[] receiveBuffer, int length, EndPoint remoteEp)
